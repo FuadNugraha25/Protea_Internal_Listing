@@ -14,15 +14,15 @@ function Dashboard() {
   const [selectedLocation, setSelectedLocation] = useState("All");
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [priceRange, setPriceRange] = useState([100_000_000, 20_000_000_000]); // 100 juta to 20 M
+  const [priceRange, setPriceRange] = useState([500_000, 20_000_000_000]); // 100 juta to 20 M
   const [ltMin, setLtMin] = useState(null);
   const [ltMax, setLtMax] = useState(null);
   const [lbMin, setLbMin] = useState(null);
   const [lbMax, setLbMax] = useState(null);
   const [selectedKM, setSelectedKM] = useState("All");
   const [selectedKT, setSelectedKT] = useState("All");
-  const [propertyTypes, setPropertyTypes] = useState(["Rumah", "Tanah", "Apartemen"]);
-  const [transactionTypes, setTransactionTypes] = useState(["Jual", "Sewa"]);
+  const propertyTypes = ["Rumah", "Tanah", "Apartemen"];
+  const transactionTypes = ["Jual", "Sewa"];
   const [selectedTransactionType, setSelectedTransactionType] = useState("All");
   const navigate = useNavigate();
 
@@ -33,17 +33,16 @@ function Dashboard() {
       if (error || !data) {
         setListings([]);
       } else {
-        // Map image_urls to image for compatibility
         const mapped = data.map((item) => ({
           ...item,
           image: item.image_urls,
-          beds: item.kt || item.beds || "-",
-          baths: item.km || item.baths || "-",
-          lt: item.lt || "-",
-          lb: item.lb || "-",
-          type: item.type || "-",
-          status: item.status || "-",
-          location: item.city || item.location || "-",
+          beds: item.kt ?? item.beds ?? null,
+          baths: item.km ?? item.baths ?? null,
+          lt: item.lt ?? null,
+          lb: item.lb ?? null,
+          type: item.type ?? "-",
+          status: item.status ?? "-",
+          location: item.city ?? item.location ?? "-",
           price: item.price || "-",
         }));
         setListings(mapped);
@@ -88,12 +87,32 @@ function Dashboard() {
       (!isNaN(ltNum) && (ltMin === null || ltNum >= ltMin) && (ltMax === null || ltNum <= ltMax));
     // LB filter
     const lbNum = Number(listing.lb);
-    const matchesLB =
-      (!isNaN(lbNum) && (lbMin === null || lbNum >= lbMin) && (lbMax === null || lbNum <= lbMax));
+    const matchesLB = listing.property_type === 'Tanah' ? true : (!isNaN(lbNum) && (lbMin === null || lbNum >= lbMin) && (lbMax === null || lbNum <= lbMax));
     // KM filter
-    const matchesKM = selectedKM === "All" || String(listing.baths) === String(selectedKM);
+    const matchesKM = listing.property_type === 'Tanah' ? true : (selectedKM === "All" || String(listing.baths) === String(selectedKM));
     // KT filter
-    const matchesKT = selectedKT === "All" || String(listing.beds) === String(selectedKT);
+    const matchesKT = listing.property_type === 'Tanah' ? true : (selectedKT === "All" || String(listing.beds) === String(selectedKT));
+    
+    // Debug logging for Tanah properties
+    if (listing.property_type === 'Tanah') {
+      console.log('Tanah property filter check:', {
+        title: listing.title,
+        matchesSearch,
+        matchesType,
+        matchesTransactionType,
+        matchesLocation,
+        price: listing.price,
+        priceNum,
+        matchesPrice,
+        lt: listing.lt,
+        ltNum,
+        matchesLT,
+        matchesLB,
+        matchesKM,
+        matchesKT
+      });
+    }
+    
     return (
       matchesSearch &&
       matchesType &&
@@ -315,30 +334,43 @@ function Dashboard() {
                     <i className="bi bi-geo-alt me-1"></i>
                     {listing.location}
                   </p>
-                  <div className="row text-center mb-3">
-                    <div className="col-3">
-                      <div className="fw-bold">{listing.beds}</div>
-                      <div className="d-flex align-items-center justify-content-center mb-1">
-                        <FaBed className="text-primary me-1" />
+                  {listing.property_type === 'Tanah' ? (
+                    <div className="row text-center mb-3">
+                      <div className="col-12">
+                        <div className="fw-bold">{listing.lt}</div>
+                        <small className="text-muted">Total Luas (m²)</small>
                       </div>
                     </div>
-                    <div className="col-3">
-                      <div className="fw-bold">{listing.baths}</div>
-                      <div className="d-flex align-items-center justify-content-center mb-1">
-                        <FaBath className="text-primary me-1" />
+                  ) : (
+                    <div className="row text-center mb-3">
+                      <div className="col-3">
+                        <div className="fw-bold">{listing.beds}</div>
+                        <div className="d-flex align-items-center justify-content-center mb-1">
+                          <FaBed className="text-primary me-1" />
+                        </div>
+                      </div>
+                      <div className="col-3">
+                        <div className="fw-bold">{listing.baths}</div>
+                        <div className="d-flex align-items-center justify-content-center mb-1">
+                          <FaBath className="text-primary me-1" />
+                        </div>
+                      </div>
+                      <div className="col-3">
+                        <div className="fw-bold">{listing.lt}</div>
+                        <small className="text-muted">LT</small>
+                      </div>
+                      <div className="col-3">
+                        <div className="fw-bold">{listing.lb}</div>
+                        <small className="text-muted">LB</small>
                       </div>
                     </div>
-                    <div className="col-3">
-                      <div className="fw-bold">{listing.lt}</div>
-                      <small className="text-muted">LT</small>
-                    </div>
-                    <div className="col-3">
-                      <div className="fw-bold">{listing.lb}</div>
-                      <small className="text-muted">LB</small>
-                    </div>
-                  </div>
+                  )}
                   <div className="d-flex justify-content-between align-items-center">
-                    <span className="h5 text-primary fw-bold mb-0">{formatIDR(listing.price)}</span>
+                    <span className="h5 text-primary fw-bold mb-0">
+                      {formatIDR(listing.price)}
+                      {listing.property_type === 'Tanah' && <small className="text-muted">/m²</small>}
+                      {listing.transaction_type === 'Sewa' && <small className="text-muted">/Tahun</small>}
+                    </span>
                     <button
                       className="btn btn-outline-primary btn-sm"
                       onClick={() => navigate(`/listing/${listing.id}`)}

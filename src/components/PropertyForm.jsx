@@ -320,22 +320,29 @@ const PropertyForm = ({ user }) => {
             <div className="col">
               <label className="form-label">LT</label>
               <input name="lt" type="number" className="form-control" value={formData.lt} onChange={handleChange} />
+              {formData.property_type === 'Tanah' && (
+                <small className="text-muted">Total Luas</small>
+              )}
             </div>
-            <div className="col">
-              <label className="form-label">LB</label>
-              <input name="lb" type="number" className="form-control" value={formData.lb} onChange={handleChange} />
-            </div>
+            {formData.property_type !== 'Tanah' && (
+              <div className="col">
+                <label className="form-label">LB</label>
+                <input name="lb" type="number" className="form-control" value={formData.lb} onChange={handleChange} />
+              </div>
+            )}
           </div>
-          <div className="row mt-3">
-            <div className="col">
-              <label className="form-label">KT</label>
-              <input name="kt" type="number" className="form-control" value={formData.kt} onChange={handleChange} />
+          {formData.property_type !== 'Tanah' && (
+            <div className="row mt-3">
+              <div className="col">
+                <label className="form-label">KT</label>
+                <input name="kt" type="number" className="form-control" value={formData.kt} onChange={handleChange} />
+              </div>
+              <div className="col">
+                <label className="form-label">KM</label>
+                <input name="km" type="number" className="form-control" value={formData.km} onChange={handleChange} />
+              </div>
             </div>
-            <div className="col">
-              <label className="form-label">KM</label>
-              <input name="km" type="number" className="form-control" value={formData.km} onChange={handleChange} />
-            </div>
-          </div>
+          )}
           <div className="mb-3 mt-3">
             <label className="form-label">City</label>
             <input name="city" className="form-control" value={formData.city} onChange={handleChange} />
@@ -346,7 +353,21 @@ const PropertyForm = ({ user }) => {
           </div>
           <div className="mb-3">
             <label className="form-label">Price</label>
-            <input name="price" type="number" className="form-control" value={formData.price} onChange={handleChange} />
+            <div className="d-flex align-items-center">
+              <input 
+                name="price" 
+                type="number" 
+                className="form-control" 
+                value={formData.price} 
+                onChange={handleChange} 
+              />
+              {formData.property_type === 'Tanah' && (
+                <span className="ms-2 text-muted">/m²</span>
+              )}
+              {formData.transaction_type === 'Sewa' && (
+                <span className="ms-2 text-muted">/Tahun</span>
+              )}
+            </div>
           </div>
           <button className="btn btn-primary w-100 mb-3" disabled={isUploading}>
             {isUploading ? 'Uploading...' : 'Submit'}
