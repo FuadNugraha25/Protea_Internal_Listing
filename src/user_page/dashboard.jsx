@@ -21,6 +21,9 @@ function Dashboard() {
   const [lbMax, setLbMax] = useState(null);
   const [selectedKM, setSelectedKM] = useState("All");
   const [selectedKT, setSelectedKT] = useState("All");
+  const [propertyTypes, setPropertyTypes] = useState(["Rumah", "Tanah", "Apartemen"]);
+  const [transactionTypes, setTransactionTypes] = useState(["Jual", "Sewa"]);
+  const [selectedTransactionType, setSelectedTransactionType] = useState("All");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,6 +50,21 @@ function Dashboard() {
       }
       setLoading(false);
     }
+    // If you want to fetch from Supabase, uncomment below and remove the manual setState above
+    // async function fetchPropertyTypes() {
+    //   const { data, error } = await supabase.from("property_type").select();
+    //   if (!error && data) {
+    //     setPropertyTypes(data.map(pt => pt.property_type));
+    //   }
+    // }
+    // async function fetchTransactionTypes() {
+    //   const { data, error } = await supabase.from("transaction_type").select();
+    //   if (!error && data) {
+    //     setTransactionTypes(data.map(tt => tt.transaction_type));
+    //   }
+    // }
+    // fetchPropertyTypes();
+    // fetchTransactionTypes();
     fetchListings();
   }, []);
 
@@ -57,33 +75,29 @@ function Dashboard() {
     const matchesSearch =
       (listing.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (listing.location || "").toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = selectedType === "All" || listing.type === selectedType;
+    const matchesType = selectedType === "All" || listing.property_type === selectedType;
+    const matchesTransactionType = selectedTransactionType === "All" || listing.transaction_type === selectedTransactionType;
     const matchesLocation = selectedLocation === "All" || listing.location === selectedLocation;
-
     // Price filter
-    const priceNum = Number(listing.price.toString().replace(/[^0-9]/g, ""));
+    const priceNum = Number(listing.price?.toString().replace(/[^0-9]/g, ""));
     const matchesPrice =
       (!isNaN(priceNum) && priceNum >= priceRange[0] && priceNum <= priceRange[1]);
-
     // LT filter
     const ltNum = Number(listing.lt);
     const matchesLT =
       (!isNaN(ltNum) && (ltMin === null || ltNum >= ltMin) && (ltMax === null || ltNum <= ltMax));
-
     // LB filter
     const lbNum = Number(listing.lb);
     const matchesLB =
       (!isNaN(lbNum) && (lbMin === null || lbNum >= lbMin) && (lbMax === null || lbNum <= lbMax));
-
     // KM filter
     const matchesKM = selectedKM === "All" || String(listing.baths) === String(selectedKM);
-
     // KT filter
     const matchesKT = selectedKT === "All" || String(listing.beds) === String(selectedKT);
-
     return (
       matchesSearch &&
       matchesType &&
+      matchesTransactionType &&
       matchesLocation &&
       matchesPrice &&
       matchesLT &&
@@ -134,10 +148,22 @@ function Dashboard() {
                       onChange={(e) => setSelectedType(e.target.value)}
                     >
                       <option value="All">All Types</option>
-                      <option value="House">House</option>
-                      <option value="Apartment">Apartment</option>
-                      <option value="Villa">Villa</option>
-                      <option value="Mansion">Mansion</option>
+                      {propertyTypes.map((type, idx) => (
+                        <option key={idx} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold">Transaction Type</label>
+                    <select
+                      className="form-select"
+                      value={selectedTransactionType}
+                      onChange={(e) => setSelectedTransactionType(e.target.value)}
+                    >
+                      <option value="All">All Transactions</option>
+                      {transactionTypes.map((type, idx) => (
+                        <option key={idx} value={type}>{type}</option>
+                      ))}
                     </select>
                   </div>
                   {/* Price Range Slider */}

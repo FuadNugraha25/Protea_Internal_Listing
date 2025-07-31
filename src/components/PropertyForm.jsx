@@ -15,6 +15,8 @@ const PropertyForm = ({ user }) => {
     city: '',
     township: '',
     price: '',
+    transaction_type: '',
+    property_type: '',
   });
   const [uploadedImage, setUploadedImage] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -175,6 +177,8 @@ const PropertyForm = ({ user }) => {
       city: formData.city,
       township: formData.township,
       price: formData.price || null,
+      transaction_type: formData.transaction_type,
+      property_type: formData.property_type,
     }
   
     console.log('Submitting data:', submission);
@@ -201,6 +205,8 @@ const PropertyForm = ({ user }) => {
         city: '',
         township: '',
         price: '',
+        transaction_type: '',
+        property_type: '',
       })
       setUploadedImage(null);
     }
@@ -223,6 +229,35 @@ const PropertyForm = ({ user }) => {
           <div className="mb-3">
             <label className="form-label">Description</label>
             <textarea name="description" className="form-control" value={formData.description} onChange={handleChange} />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Transaction Type</label>
+            <select
+              name="transaction_type"
+              className="form-select"
+              value={formData.transaction_type}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Pilih Tipe Transaksi</option>
+              <option value="Jual">Jual</option>
+              <option value="Sewa">Sewa</option>
+            </select>
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Property Type</label>
+            <select
+              name="property_type"
+              className="form-select"
+              value={formData.property_type}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Pilih Tipe Properti</option>
+              <option value="Rumah">Rumah</option>
+              <option value="Tanah">Tanah</option>
+              <option value="Apartemen">Apartemen</option>
+            </select>
           </div>
           <div className="mb-3">
             <label className="form-label">Images</label>
