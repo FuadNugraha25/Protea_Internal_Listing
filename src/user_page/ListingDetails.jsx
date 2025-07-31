@@ -46,7 +46,7 @@ export default function ListingDetails() {
     fetchListing();
   }, [id]);
 
-  const allowedUserId = 'ae43f00b-4138-4baa-9bf2-897e5ee7abfe';
+  const allowedUserId = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136'];
 
   const handleShareWhatsApp = async () => {
     setWaLoading(true);

@@ -52,9 +52,9 @@ function App() {
 
 // Admin Page Component
 function AdminPage({ user }) {
-  const allowedUserId = 'ae43f00b-4138-4baa-9bf2-897e5ee7abfe'
+  const allowedUserIds = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136']
   
-  if (user.id !== allowedUserId) {
+  if (!allowedUserIds.includes(user.id)) {
     return <Navigate to="/dashboard" replace />
   }
 
@@ -68,12 +68,12 @@ function AdminPage({ user }) {
 
 // Dashboard Page Component
 function DashboardPage({ user }) {
-  const allowedUserId = 'ae43f00b-4138-4baa-9bf2-897e5ee7abfe'
+  const allowedUserIds = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136']
   
   return (
     <>
       <Navbar 
-        showAdminButton={user.id === allowedUserId} 
+        showAdminButton={allowedUserIds.includes(user.id)} 
       />
       <Dashboard />
     </>
