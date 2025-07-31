@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 
-const Navbar = ({ title = "Admin", showDashboardButton = false, showAdminButton = false }) => {
+const Navbar = ({ showDashboardButton = false, showAdminButton = false }) => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -21,7 +21,9 @@ const Navbar = ({ title = "Admin", showDashboardButton = false, showAdminButton 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark py-2 mb-4" style={{ fontSize: '1rem' }}>
       <div className="container-fluid px-3">
-        <span className="navbar-brand fw-semibold">{title}</span>
+        <span className="navbar-brand fw-semibold d-flex align-items-center">
+          Protea Realty Listings
+        </span>
         <div className="ms-auto d-flex gap-2">
           {showDashboardButton && (
             <button className="btn btn-outline-light btn-sm" onClick={handleDashboardClick}>

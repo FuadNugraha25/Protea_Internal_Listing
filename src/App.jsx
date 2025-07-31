@@ -73,7 +73,6 @@ function DashboardPage({ user }) {
   return (
     <>
       <Navbar 
-        title="Dashboard" 
         showAdminButton={user.id === allowedUserId} 
       />
       <Dashboard />
