@@ -1,5 +1,5 @@
 // src/components/PropertyForm.jsx
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import Alert from '@mui/material/Alert';
 
@@ -23,6 +23,38 @@ const PropertyForm = ({ user }) => {
   const fileInputRef = useRef(null);
   // Add state for alert
   const [alert, setAlert] = useState({ message: '', severity: '' });
+  const [showNotification, setShowNotification] = useState(false);
+
+  useEffect(() => {
+    if (alert.message) {
+      setShowNotification(true);
+      const timer = setTimeout(() => {
+        setShowNotification(false);
+        setTimeout(() => {
+          setAlert({ message: '', severity: '' });
+        }, 300); // Wait for fade out animation
+      }, 3000); // Auto close after 3 seconds
+      return () => clearTimeout(timer);
+    }
+  }, [alert.message]);
+
+  const formatPriceWithCommas = (value) => {
+    // Remove all non-digit characters
+    const numericValue = value.toString().replace(/\D/g, '');
+    // Add commas every 3 digits from the right
+    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  const handlePriceChange = (e) => {
+    const { value } = e.target;
+    // Remove commas and non-digit characters for storage
+    const numericValue = value.replace(/\D/g, '');
+    // Update form data with numeric value
+    setFormData(prev => ({
+      ...prev,
+      price: numericValue
+    }));
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -193,7 +225,7 @@ const PropertyForm = ({ user }) => {
       setAlert({ message: '❌ Error saving data: ' + error.message, severity: 'error' });
     } else {
       console.log('Success! Inserted data:', data);
-      setAlert({ message: '✅ Data submitted successfully!', severity: 'success' });
+      setAlert({ message: 'Data submitted successfully!', severity: 'success' });
       setFormData({
         title: '',
         description: '',
@@ -217,9 +249,31 @@ const PropertyForm = ({ user }) => {
       <div className="col-md-6">
         <h3 className="text-center mb-4">Add Property</h3>
         {alert.message && (
-          <Alert severity={alert.severity} onClose={() => setAlert({ message: '', severity: '' })} sx={{ mb: 2 }}>
-            {alert.message}
-          </Alert>
+          <div 
+            className="position-fixed"
+            style={{
+              bottom: '20px',
+              right: '20px',
+              zIndex: 9999,
+              transition: 'all 0.3s ease-in-out',
+              transform: showNotification ? 'translateY(0)' : 'translateY(100px)',
+              opacity: showNotification ? 1 : 0,
+            }}
+          >
+            <div 
+              className="p-3 rounded shadow-lg"
+              style={{
+                backgroundColor: alert.severity === 'success' ? '#10b981' : '#ef4444',
+                color: 'white',
+                minWidth: '300px',
+                maxWidth: '400px',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}
+            >
+              {alert.message}
+            </div>
+          </div>
         )}
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
@@ -356,10 +410,10 @@ const PropertyForm = ({ user }) => {
             <div className="d-flex align-items-center">
               <input 
                 name="price" 
-                type="number" 
+                type="text" 
                 className="form-control" 
-                value={formData.price} 
-                onChange={handleChange} 
+                value={formatPriceWithCommas(formData.price)} 
+                onChange={handlePriceChange} 
               />
               {formData.property_type === 'Tanah' && (
                 <span className="ms-2 text-muted">/m²</span>

@@ -313,7 +313,24 @@ function Dashboard() {
             <div className="text-center">No properties found.</div>
           ) : filteredListings.map((listing) => (
             <div className="col-lg-4 col-md-6" key={listing.id}>
-              <div className="card h-100 shadow-sm border-0">
+              <div 
+                className="card h-100 border-0" 
+                style={{
+                  // boxShadow: 'rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px',
+                  boxShadow: 'rgba(0, 0, 0, 0.16) 0px 3px 6px -1px, rgba(0, 0, 0, 0.23) 0px 3px 6px',
+                  transition: 'all 0.3s ease-in-out',
+                  cursor: 'pointer'
+                }}
+                onClick={() => navigate(`/listing/${listing.id}`)}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-8px)';
+                  e.currentTarget.style.boxShadow = 'rgba(50, 50, 93, 0.35) 0px 8px 15px -3px, rgba(0, 0, 0, 0.4) 0px 4px 6px -2px';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'rgba(0, 0, 0, 0.16) 0px 3px 6px -1px, rgba(0, 0, 0, 0.23) 0px 3px 6px';
+                }}
+              >
                 <div className="position-relative">
                   <img
                     src={listing.image}
