@@ -105,42 +105,61 @@ export default function ListingDetails() {
          {waError && <span className="text-danger ms-2">{waError}</span>}
        </div>
         <div className="row">
-          <div className="col-md-7">
+          <div className="col-12">
             <img
               src={listing?.image}
               alt={listing?.title}
-              className="img-fluid rounded shadow-sm mb-3"
-              style={{ width: "100%", maxHeight: "500px", objectFit: "cover" }}
+              className="img-fluid rounded shadow-sm mb-4"
+              style={{ width: "100%", height: "auto", maxHeight: "600px", objectFit: "contain" }}
             />
           </div>
-          <div className="col-md-5">
+        </div>
+        
+        <div className="row">
+          <div className="col-12">
             <h2 className="fw-bold mb-2">{listing?.title}</h2>
-            <p className="text-muted mb-2">
+            <p className="text-muted mb-3">
               <i className="bi bi-geo-alt me-1"></i>
               {listing?.location}
             </p>
-            <div className="mb-3">
-              {/* <span className="badge bg-primary me-2">{listing?.type}</span> */}
-              {/* <span className="badge bg-success">{listing?.status}</span> */}
+            <h4 className="text-primary fw-bold mb-4">{formatIDR(listing?.price)}</h4>
+            
+            <div className="row mb-4">
+              <div className="col-md-3 col-6 mb-3">
+                <div className="d-flex align-items-center">
+                  <FaBed className="text-primary me-2" />
+                  <div>
+                    <div className="fw-bold">{listing?.beds}</div>
+                    <small className="text-muted">Kamar Tidur</small>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-3 col-6 mb-3">
+                <div className="d-flex align-items-center">
+                  <FaBath className="text-primary me-2" />
+                  <div>
+                    <div className="fw-bold">{listing?.baths}</div>
+                    <small className="text-muted">Kamar Mandi</small>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-3 col-6 mb-3">
+                <div>
+                  <div className="fw-bold">{listing?.lt} m²</div>
+                  <small className="text-muted">Luas Tanah</small>
+                </div>
+              </div>
+              <div className="col-md-3 col-6 mb-3">
+                <div>
+                  <div className="fw-bold">{listing?.lb} m²</div>
+                  <small className="text-muted">Luas Bangunan</small>
+                </div>
+              </div>
             </div>
-            <h4 className="text-primary fw-bold mb-3">{formatIDR(listing?.price)}</h4>
-            <div className="row mb-3">
-              <div className="col-6 mb-2">
-                <FaBed className="text-primary me-2" /> <b>{listing?.beds}</b> Kamar Tidur
-              </div>
-              <div className="col-6 mb-2">
-                <FaBath className="text-primary me-2" /> <b>{listing?.baths}</b> Kamar Mandi
-              </div>
-              <div className="col-6 mb-2">
-                <b>LT:</b> {listing?.lt} m²
-              </div>
-              <div className="col-6 mb-2">
-                <b>LB:</b> {listing?.lb} m²
-              </div>
-            </div>
+            
             {listing?.description && (
               <div className="mt-4">
-                <h5 className="fw-semibold">Deskripsi</h5>
+                <h5 className="fw-semibold mb-3">Deskripsi</h5>
                 <div className="text-muted" style={{whiteSpace: 'pre-line'}}>{listing.description}</div>
               </div>
             )}

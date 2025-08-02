@@ -14,7 +14,8 @@ function Dashboard() {
   const [selectedLocation, setSelectedLocation] = useState("All");
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [priceRange, setPriceRange] = useState([500_000, 20_000_000_000]); // 100 juta to 20 M
+  const [priceRange, setPriceRange] = useState([0, 20_000_000_000]); // 0 to 20 M
+  const [priceInputs, setPriceInputs] = useState(['0', '20,000,000,000']); // For text inputs
   const [ltMin, setLtMin] = useState(null);
   const [ltMax, setLtMax] = useState(null);
   const [lbMin, setLbMin] = useState(null);
@@ -188,28 +189,81 @@ function Dashboard() {
                   {/* Price Range Slider */}
                   <div className="col-md-4">
                     <label className="form-label fw-semibold">Price (IDR)</label>
-                    <div className="d-flex align-items-center">
+                    <div className="d-flex align-items-center mb-2">
                       <input
                         type="range"
-                        min={100_000_000}
+                        min={0}
                         max={20_000_000_000}
                         step={100_000_000}
                         value={priceRange[0]}
-                        onChange={e => setPriceRange([Number(e.target.value), Math.max(Number(e.target.value), priceRange[1])])}
+                        onChange={e => {
+                          const value = Number(e.target.value);
+                          setPriceRange([value, Math.max(value, priceRange[1])]);
+                          setPriceInputs([value.toLocaleString('id-ID'), priceInputs[1]]);
+                        }}
                         className="form-range me-2"
                       />
                       <input
                         type="range"
-                        min={100_000_000}
+                        min={0}
                         max={20_000_000_000}
                         step={100_000_000}
                         value={priceRange[1]}
-                        onChange={e => setPriceRange([Math.min(Number(e.target.value), priceRange[0]), Number(e.target.value)])}
+                        onChange={e => {
+                          const value = Number(e.target.value);
+                          setPriceRange([Math.min(value, priceRange[0]), value]);
+                          setPriceInputs([priceInputs[0], value.toLocaleString('id-ID')]);
+                        }}
                         className="form-range"
                       />
                     </div>
+                    <div className="d-flex align-items-center">
+                      <input
+                        type="text"
+                        className="form-control me-2"
+                        placeholder="Min Price"
+                        value={priceInputs[0]}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^\d,]/g, '');
+                          setPriceInputs([value, priceInputs[1]]);
+                          
+                          // Convert to number for filtering
+                          const numValue = value.replace(/,/g, '') ? Number(value.replace(/,/g, '')) : 0;
+                          setPriceRange([numValue, Math.max(numValue, priceRange[1])]);
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value.replace(/,/g, '');
+                          const numValue = value ? Number(value) : 0;
+                          const formattedValue = numValue.toLocaleString('id-ID');
+                          setPriceInputs([formattedValue, priceInputs[1]]);
+                          setPriceRange([numValue, Math.max(numValue, priceRange[1])]);
+                        }}
+                      />
+                      <span className="mx-2">-</span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Max Price"
+                        value={priceInputs[1]}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/[^\d,]/g, '');
+                          setPriceInputs([priceInputs[0], value]);
+                          
+                          // Convert to number for filtering
+                          const numValue = value.replace(/,/g, '') ? Number(value.replace(/,/g, '')) : 20_000_000_000;
+                          setPriceRange([Math.min(numValue, priceRange[0]), numValue]);
+                        }}
+                        onBlur={(e) => {
+                          const value = e.target.value.replace(/,/g, '');
+                          const numValue = value ? Number(value) : 20_000_000_000;
+                          const formattedValue = numValue.toLocaleString('id-ID');
+                          setPriceInputs([priceInputs[0], formattedValue]);
+                          setPriceRange([Math.min(numValue, priceRange[0]), numValue]);
+                        }}
+                      />
+                    </div>
                     <div>
-                      <small>
+                      <small className="text-muted">
                         {formatIDR(priceRange[0])} - {formatIDR(priceRange[1])}
                       </small>
                     </div>
