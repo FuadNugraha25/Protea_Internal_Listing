@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { supabase } from './supabaseClient'
 import CustomLogin from './components/CustomLogin'
 import PropertyForm from './components/PropertyForm'
+import EditPropertyForm from './components/EditPropertyForm'
 import Navbar from './components/Navbar'
 import Dashboard from './user_page/dashboard'
 import ListingDetails from './user_page/ListingDetails';
@@ -44,6 +45,7 @@ function App() {
         <Route path="/admin" element={<AdminPage user={user} />} />
         <Route path="/dashboard" element={<DashboardPage user={user} />} />
         <Route path="/listing/:id" element={<ListingDetails />} />
+        <Route path="/edit-listing/:id" element={<EditPropertyForm />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>

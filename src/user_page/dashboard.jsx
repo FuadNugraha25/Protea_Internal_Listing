@@ -21,7 +21,7 @@ function Dashboard() {
   const [lbMax, setLbMax] = useState(null);
   const [selectedKM, setSelectedKM] = useState("All");
   const [selectedKT, setSelectedKT] = useState("All");
-  const propertyTypes = ["Rumah", "Tanah", "Apartemen"];
+  const propertyTypes = ["Rumah", "Kavling", "Apartemen"];
   const transactionTypes = ["Jual", "Sewa"];
   const [selectedTransactionType, setSelectedTransactionType] = useState("All");
   const navigate = useNavigate();
@@ -87,15 +87,15 @@ function Dashboard() {
       (!isNaN(ltNum) && (ltMin === null || ltNum >= ltMin) && (ltMax === null || ltNum <= ltMax));
     // LB filter
     const lbNum = Number(listing.lb);
-    const matchesLB = listing.property_type === 'Tanah' ? true : (!isNaN(lbNum) && (lbMin === null || lbNum >= lbMin) && (lbMax === null || lbNum <= lbMax));
+    const matchesLB = listing.property_type === 'Kavling' ? true : (!isNaN(lbNum) && (lbMin === null || lbNum >= lbMin) && (lbMax === null || lbNum <= lbMax));
     // KM filter
-    const matchesKM = listing.property_type === 'Tanah' ? true : (selectedKM === "All" || String(listing.baths) === String(selectedKM));
+    const matchesKM = listing.property_type === 'Kavling' ? true : (selectedKM === "All" || String(listing.baths) === String(selectedKM));
     // KT filter
-    const matchesKT = listing.property_type === 'Tanah' ? true : (selectedKT === "All" || String(listing.beds) === String(selectedKT));
+    const matchesKT = listing.property_type === 'Kavling' ? true : (selectedKT === "All" || String(listing.beds) === String(selectedKT));
     
-    // Debug logging for Tanah properties
-    if (listing.property_type === 'Tanah') {
-      console.log('Tanah property filter check:', {
+    // Debug logging for Kavling properties
+    if (listing.property_type === 'Kavling') {
+      console.log('Kavling property filter check:', {
         title: listing.title,
         matchesSearch,
         matchesType,
@@ -351,7 +351,7 @@ function Dashboard() {
                     <i className="bi bi-geo-alt me-1"></i>
                     {listing.location}
                   </p>
-                  {listing.property_type === 'Tanah' ? (
+                  {listing.property_type === 'Kavling' ? (
                     <div className="row text-center mb-3">
                       <div className="col-12">
                         <div className="fw-bold">{listing.lt}</div>
@@ -385,7 +385,7 @@ function Dashboard() {
                   <div className="d-flex justify-content-between align-items-center">
                     <span className="h5 text-primary fw-bold mb-0">
                       {formatIDR(listing.price)}
-                      {listing.property_type === 'Tanah' && <small className="text-muted">/m²</small>}
+                      {listing.property_type === 'Kavling' && <small className="text-muted">/m²</small>}
                       {listing.transaction_type === 'Sewa' && <small className="text-muted">/Tahun</small>}
                     </span>
                     <button

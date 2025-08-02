@@ -309,7 +309,7 @@ const PropertyForm = ({ user }) => {
             >
               <option value="">Pilih Tipe Properti</option>
               <option value="Rumah">Rumah</option>
-              <option value="Tanah">Tanah</option>
+              <option value="Kavling">Kavling</option>
               <option value="Apartemen">Apartemen</option>
             </select>
           </div>
@@ -374,18 +374,18 @@ const PropertyForm = ({ user }) => {
             <div className="col">
               <label className="form-label">LT</label>
               <input name="lt" type="number" className="form-control" value={formData.lt} onChange={handleChange} />
-              {formData.property_type === 'Tanah' && (
+              {formData.property_type === 'Kavling' && (
                 <small className="text-muted">Total Luas</small>
               )}
             </div>
-            {formData.property_type !== 'Tanah' && (
+            {formData.property_type !== 'Kavling' && (
               <div className="col">
                 <label className="form-label">LB</label>
                 <input name="lb" type="number" className="form-control" value={formData.lb} onChange={handleChange} />
               </div>
             )}
           </div>
-          {formData.property_type !== 'Tanah' && (
+          {formData.property_type !== 'Kavling' && (
             <div className="row mt-3">
               <div className="col">
                 <label className="form-label">KT</label>
@@ -415,7 +415,7 @@ const PropertyForm = ({ user }) => {
                 value={formatPriceWithCommas(formData.price)} 
                 onChange={handlePriceChange} 
               />
-              {formData.property_type === 'Tanah' && (
+              {formData.property_type === 'Kavling' && (
                 <span className="ms-2 text-muted">/m²</span>
               )}
               {formData.transaction_type === 'Sewa' && (
