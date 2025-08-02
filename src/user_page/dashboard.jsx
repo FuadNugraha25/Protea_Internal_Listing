@@ -25,7 +25,36 @@ function Dashboard() {
   const propertyTypes = ["Rumah", "Kavling", "Apartemen"];
   const transactionTypes = ["Jual", "Sewa"];
   const [selectedTransactionType, setSelectedTransactionType] = useState("All");
+  const [appliedFilters, setAppliedFilters] = useState({
+    searchTerm: "",
+    selectedType: "All",
+    selectedLocation: "All",
+    priceRange: [0, 20_000_000_000],
+    ltMin: null,
+    ltMax: null,
+    lbMin: null,
+    lbMax: null,
+    selectedKM: "All",
+    selectedKT: "All",
+    selectedTransactionType: "All"
+  });
   const navigate = useNavigate();
+
+  const applyFilters = () => {
+    setAppliedFilters({
+      searchTerm,
+      selectedType,
+      selectedLocation,
+      priceRange,
+      ltMin,
+      ltMax,
+      lbMin,
+      lbMax,
+      selectedKM,
+      selectedKT,
+      selectedTransactionType
+    });
+  };
 
   useEffect(() => {
     async function fetchListings() {
@@ -73,26 +102,26 @@ function Dashboard() {
 
   const filteredListings = listings.filter(listing => {
     const matchesSearch =
-      (listing.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (listing.location || "").toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = selectedType === "All" || listing.property_type === selectedType;
-    const matchesTransactionType = selectedTransactionType === "All" || listing.transaction_type === selectedTransactionType;
-    const matchesLocation = selectedLocation === "All" || listing.location === selectedLocation;
+      (listing.title || "").toLowerCase().includes(appliedFilters.searchTerm.toLowerCase()) ||
+      (listing.location || "").toLowerCase().includes(appliedFilters.searchTerm.toLowerCase());
+    const matchesType = appliedFilters.selectedType === "All" || listing.property_type === appliedFilters.selectedType;
+    const matchesTransactionType = appliedFilters.selectedTransactionType === "All" || listing.transaction_type === appliedFilters.selectedTransactionType;
+    const matchesLocation = appliedFilters.selectedLocation === "All" || listing.location === appliedFilters.selectedLocation;
     // Price filter
     const priceNum = Number(listing.price?.toString().replace(/[^0-9]/g, ""));
     const matchesPrice =
-      (!isNaN(priceNum) && priceNum >= priceRange[0] && priceNum <= priceRange[1]);
+      (!isNaN(priceNum) && priceNum >= appliedFilters.priceRange[0] && priceNum <= appliedFilters.priceRange[1]);
     // LT filter
     const ltNum = Number(listing.lt);
     const matchesLT =
-      (!isNaN(ltNum) && (ltMin === null || ltNum >= ltMin) && (ltMax === null || ltNum <= ltMax));
+      (!isNaN(ltNum) && (appliedFilters.ltMin === null || ltNum >= appliedFilters.ltMin) && (appliedFilters.ltMax === null || ltNum <= appliedFilters.ltMax));
     // LB filter
     const lbNum = Number(listing.lb);
-    const matchesLB = listing.property_type === 'Kavling' ? true : (!isNaN(lbNum) && (lbMin === null || lbNum >= lbMin) && (lbMax === null || lbNum <= lbMax));
+    const matchesLB = listing.property_type === 'Kavling' ? true : (!isNaN(lbNum) && (appliedFilters.lbMin === null || lbNum >= appliedFilters.lbMin) && (appliedFilters.lbMax === null || lbNum <= appliedFilters.lbMax));
     // KM filter
-    const matchesKM = listing.property_type === 'Kavling' ? true : (selectedKM === "All" || String(listing.baths) === String(selectedKM));
+    const matchesKM = listing.property_type === 'Kavling' ? true : (appliedFilters.selectedKM === "All" || String(listing.baths) === String(appliedFilters.selectedKM));
     // KT filter
-    const matchesKT = listing.property_type === 'Kavling' ? true : (selectedKT === "All" || String(listing.beds) === String(selectedKT));
+    const matchesKT = listing.property_type === 'Kavling' ? true : (appliedFilters.selectedKT === "All" || String(listing.beds) === String(appliedFilters.selectedKT));
     
     // Debug logging for Kavling properties
     if (listing.property_type === 'Kavling') {
@@ -345,6 +374,19 @@ function Dashboard() {
                         <option key={n} value={n}>{n}</option>
                       ))}
                     </select>
+                  </div>
+                </div>
+                
+                {/* Apply Filter Button */}
+                <div className="row mt-3">
+                  <div className="col-12">
+                    <button 
+                      className="btn btn-primary px-4 py-2"
+                      onClick={applyFilters}
+                    >
+                      <i className="bi bi-funnel me-2"></i>
+                      Apply Filters
+                    </button>
                   </div>
                 </div>
               </div>
