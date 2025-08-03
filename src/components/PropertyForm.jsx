@@ -13,7 +13,7 @@ const PropertyForm = ({ user }) => {
     kt: '',
     km: '',
     city: '',
-    township: '',
+    province: '',
     price: '',
     transaction_type: '',
     property_type: '',
@@ -380,7 +380,7 @@ Property data: ${aiPrompt}`
       kt: convertToNumberOrNull(formData.kt),
       km: convertToNumberOrNull(formData.km),
       city: formData.city,
-      township: formData.township,
+      province: formData.province,
       price: convertPriceToStringOrNull(formData.price),
       transaction_type: formData.transaction_type,
       property_type: formData.property_type,
@@ -412,7 +412,7 @@ Property data: ${aiPrompt}`
         kt: '',
         km: '',
         city: '',
-        township: '',
+        province: '',
         price: '',
         transaction_type: '',
         property_type: '',
@@ -453,15 +453,6 @@ Property data: ${aiPrompt}`
           </div>
         )}
         <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label">Title</label>
-            <input name="title" className="form-control" value={formData.title} onChange={handleChange} />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Description</label>
-            <textarea name="description" className="form-control" value={formData.description} onChange={handleChange} />
-          </div>
-          
           {/* AI Assistant Section */}
           <div className="mb-4">
             <div className="card border-primary">
@@ -535,6 +526,14 @@ Property data: ${aiPrompt}`
                 )}
               </div>
             </div>
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Title</label>
+            <input name="title" className="form-control" value={formData.title} onChange={handleChange} />
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Description</label>
+            <textarea name="description" className="form-control" value={formData.description} onChange={handleChange} />
           </div>
           <div className="mb-3">
             <label className="form-label">Transaction Type</label>
@@ -654,8 +653,8 @@ Property data: ${aiPrompt}`
             <input name="city" className="form-control" value={formData.city} onChange={handleChange} />
           </div>
           <div className="mb-3">
-            <label className="form-label">Township</label>
-            <input name="township" className="form-control" value={formData.township} onChange={handleChange} />
+            <label className="form-label">Province</label>
+            <input name="province" className="form-control" value={formData.province} onChange={handleChange} />
           </div>
           <div className="mb-3">
             <label className="form-label">Price</label>
@@ -708,7 +707,7 @@ Property data: ${aiPrompt}`
                 description: 'Test description',
                 image_urls: '',
                 city: 'Test City',
-                township: 'Test Township'
+                province: 'Test Province'
               };
               console.log('Test data:', testData);
               const { data, error } = await supabase.from('listings').insert(testData).select();

@@ -21,7 +21,7 @@ const EditPropertyForm = () => {
     kt: '',
     km: '',
     city: '',
-    township: '',
+    province: '',
     price: '',
     transaction_type: '',
     property_type: '',
@@ -65,7 +65,7 @@ const EditPropertyForm = () => {
         kt: data.kt || '',
         km: data.km || '',
         city: data.city || '',
-        township: data.township || '',
+        province: data.province || '',
         price: data.price || '',
         transaction_type: data.transaction_type || '',
         property_type: data.property_type || '',
@@ -127,7 +127,7 @@ const EditPropertyForm = () => {
         kt: formData.kt || null,
         km: formData.km || null,
         city: formData.city,
-        township: formData.township,
+        province: formData.province,
         price: formData.price || null,
         transaction_type: formData.transaction_type,
         property_type: formData.property_type,
@@ -335,11 +335,11 @@ const EditPropertyForm = () => {
                     </div>
                     
                     <div className="col-md-6 mb-3">
-                      <label className="form-label">Township</label>
+                      <label className="form-label">Province</label>
                       <input 
-                        name="township" 
+                        name="province" 
                         className="form-control" 
-                        value={formData.township} 
+                        value={formData.province} 
                         onChange={handleChange}
                       />
                     </div>
@@ -399,4 +399,4 @@ const EditPropertyForm = () => {
   );
 };
 
-export default EditPropertyForm; 
+export default EditPropertyForm;
