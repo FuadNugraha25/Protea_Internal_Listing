@@ -216,6 +216,8 @@ LB (Luas Bangunan): [extract building area in m²]
 KT (Kamar Tidur): [extract number of bedrooms, if format is "X+Y" then add them together]
 KM (Kamar Mandi): [extract number of bathrooms, if format is "X+Y" then add them together]
 Price: [extract price in Indonesian Rupiah]
+Property Type: [determine if this is "Rumah" or "Kavling"]
+Transaction Type: [determine if this is "Jual" or "Sewa"]
 
 Format your response exactly like this:
 LT: [number] m²
@@ -223,9 +225,23 @@ LB: [number] m²
 KT: [total number]
 KM: [total number]
 Price: Rp [amount]
+Property Type: [Rumah or Kavling]
+Transaction Type: [Jual or Sewa]
 
-IMPORTANT: For KT and KM, if you see format like "5+1" or "3+1", add the numbers together. 
-Example: "5+1" should become "6", "3+1" should become "4".
+IMPORTANT RULES:
+1. For KT and KM, if you see format like "5+1" or "3+1", add the numbers together. 
+   Example: "5+1" should become "6", "3+1" should become "4".
+
+2. For Property Type detection:
+   - If the data mentions bedrooms (KT), bathrooms (KM), kitchen (dapur), garage (garasi), carport, or building area (LB), classify as "Rumah"
+   - If the data only mentions land area (LT) and mentions "tanah", "kavling", "investasi", "dibangun", or lacks building details, classify as "Kavling"
+   - If data has both LT and LB with building details, it's "Rumah"
+   - If data only has LT and mentions "tanah" or "kavling", it's "Kavling"
+
+3. For Transaction Type detection:
+   - If the data mentions "harga sewa", "sewa", "/tahun", "/bulan", "per tahun", "per bulan", classify as "Sewa"
+   - If the data mentions "harga jual", "jual", "dijual", "for sale", or no rental keywords, classify as "Jual"
+   - Default to "Jual" if no clear rental indicators are found
 
 If any information is not available, write "Not specified" for that field.
 
@@ -273,7 +289,7 @@ Property data: ${aiPrompt}`
       
       lines.forEach(line => {
         const [key, value] = line.split(':').map(s => s.trim());
-        if (key && value) {
+        if (key && value && value !== 'Not specified') {
           switch (key) {
             case 'LT':
               extractedData.lt = value.replace(' m²', '');
@@ -302,6 +318,12 @@ Property data: ${aiPrompt}`
             case 'Price':
               extractedData.price = value.replace('Rp ', '').replace(/\./g, '');
               break;
+            case 'Property Type':
+              extractedData.property_type = value;
+              break;
+            case 'Transaction Type':
+              extractedData.transaction_type = value;
+              break;
           }
         }
       });
@@ -322,6 +344,30 @@ Property data: ${aiPrompt}`
     // Generate a random UUID for the listing ID (primary key)
     const listingId = crypto.randomUUID();
     
+    // Helper function to convert string to number or null
+    const convertToNumberOrNull = (value) => {
+      if (!value || value === '' || value === 'Not specified') return null;
+      const num = parseInt(value);
+      return isNaN(num) ? null : num;
+    };
+
+    // Helper function to convert price string to number or null
+    const convertPriceToNumberOrNull = (value) => {
+      if (!value || value === '' || value === 'Not specified') return null;
+      // Remove all non-digit characters and convert to number
+      const cleanValue = value.toString().replace(/[^\d]/g, '');
+      const num = parseInt(cleanValue);
+      return isNaN(num) ? null : num;
+    };
+
+    // Helper function to convert price string to string (for large numbers)
+    const convertPriceToStringOrNull = (value) => {
+      if (!value || value === '' || value === 'Not specified') return null;
+      // Remove all non-digit characters and return as string
+      const cleanValue = value.toString().replace(/[^\d]/g, '');
+      return cleanValue === '' ? null : cleanValue;
+    };
+
     // Only include fields that exist in the database table
     const submission = {
       id: listingId,  // This is the primary key for the listing
@@ -329,19 +375,23 @@ Property data: ${aiPrompt}`
       title: formData.title,
       description: formData.description,
       image_urls: formData.image_urls,
-      lt: formData.lt || null,
-      lb: formData.lb || null,
-      kt: formData.kt || null,
-      km: formData.km || null,
+      lt: convertToNumberOrNull(formData.lt),
+      lb: convertToNumberOrNull(formData.lb),
+      kt: convertToNumberOrNull(formData.kt),
+      km: convertToNumberOrNull(formData.km),
       city: formData.city,
       township: formData.township,
-      price: formData.price || null,
+      price: convertPriceToStringOrNull(formData.price),
       transaction_type: formData.transaction_type,
       property_type: formData.property_type,
     }
   
     console.log('Submitting data:', submission);
     console.log('Original formData:', formData);
+    console.log('Price conversion:', {
+      original: formData.price,
+      converted: convertPriceToNumberOrNull(formData.price)
+    });
   
     const { data, error } = await supabase.from('listings').insert(submission).select()
   

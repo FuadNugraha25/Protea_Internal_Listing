@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { FaBed, FaBath } from "react-icons/fa";
 import Navbar from "../components/Navbar";
-import { useState as useReactState } from "react";
+
 
 function formatIDR(price) {
   if (!price || isNaN(Number(price))) return '-';
@@ -15,8 +15,8 @@ export default function ListingDetails() {
   const navigate = useNavigate();
   const [listing, setListing] = useState(null);
   const [user, setUser] = useState(null);
-  const [waLoading, setWaLoading] = useReactState(false);
-  const [waError, setWaError] = useReactState(null);
+  const [copyLoading, setCopyLoading] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
@@ -48,32 +48,18 @@ export default function ListingDetails() {
 
   const allowedUserId = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136'];
 
-  const handleShareWhatsApp = async () => {
-    setWaLoading(true);
-    setWaError(null);
+  const handleCopyLink = async () => {
+    setCopyLoading(true);
+    setCopySuccess(false);
     try {
       const fullUrl = window.location.origin + `/listing/${id}`;
-      // Use tinyurl API to shorten
-      const res = await fetch(`https://api.tinyurl.com/create`, {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer 8f1b2e2e2e2e4b8b8b8b8b8b8b8b8b8b' // You must replace with your TinyURL API token
-        },
-        body: JSON.stringify({
-          url: fullUrl,
-          domain: 'tinyurl.com'
-        })
-      });
-      const data = await res.json();
-      const shortUrl = data.data?.tiny_url || fullUrl;
-      const text = encodeURIComponent(`Cek properti ini: ${shortUrl}`);
-      window.open(`https://wa.me/?text=${text}`, '_blank');
-    } catch {
-      setWaError('Gagal membuat link pendek.');
+      await navigator.clipboard.writeText(fullUrl);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy link:', error);
     }
-    setWaLoading(false);
+    setCopyLoading(false);
   };
 
   return (
@@ -94,15 +80,15 @@ export default function ListingDetails() {
               Edit Property
             </button>
           )}
-         <button className="btn btn-success d-inline-flex align-items-center" onClick={handleShareWhatsApp} disabled={waLoading}>
+         <button className="btn btn-success d-inline-flex align-items-center" onClick={handleCopyLink} disabled={copyLoading}>
            <span className="me-2" style={{fontSize: '1.2em'}}>
-             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-whatsapp" viewBox="0 0 16 16">
-               <path d="M13.601 2.326A7.956 7.956 0 0 0 8.002 0C3.582 0 .002 3.582.002 8c0 1.409.37 2.773 1.07 3.97L.057 16l4.13-1.08A7.963 7.963 0 0 0 8.002 16c4.418 0 8-3.582 8-8 0-1.97-.684-3.81-1.934-5.2zm-5.6 12.6c-1.2 0-2.38-.32-3.4-.92l-.24-.14-2.45.64.66-2.38-.16-.25A6.92 6.92 0 0 1 1.002 8c0-3.86 3.14-7 7-7 1.87 0 3.63.73 4.95 2.05A6.96 6.96 0 0 1 15.002 8c0 3.86-3.14 7-7 7zm3.62-5.47c-.2-.1-1.18-.58-1.36-.65-.18-.07-.31-.1-.44.1-.13.19-.5.65-.62.78-.11.13-.23.15-.43.05-.2-.1-.84-.31-1.6-.99-.59-.53-.99-1.18-1.11-1.38-.12-.2-.01-.3.09-.39.09-.09.2-.23.3-.34.1-.12.13-.2.2-.33.07-.13.04-.25-.02-.35-.06-.1-.44-1.07-.6-1.47-.16-.39-.32-.34-.44-.35-.11-.01-.24-.01-.37-.01-.13 0-.34.05-.52.25-.18.2-.7.68-.7 1.65 0 .97.72 1.91.82 2.05.1.13 1.42 2.17 3.45 2.96.48.17.85.27 1.14.34.48.1.92.09 1.27.06.39-.04 1.18-.48 1.35-.94.17-.46.17-.85.12-.94-.05-.09-.18-.13-.38-.23z"/>
+             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-link-45deg" viewBox="0 0 16 16">
+               <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+               <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
              </svg>
            </span>
-           {waLoading ? 'Membuat Link...' : 'Kirim ke WhatsApp'}
+           {copyLoading ? 'Copying...' : copySuccess ? 'Link Copied!' : 'Copy Link'}
          </button>
-         {waError && <span className="text-danger ms-2">{waError}</span>}
        </div>
         <div className="row">
           <div className="col-12">
