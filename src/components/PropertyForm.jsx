@@ -12,8 +12,9 @@ const PropertyForm = ({ user }) => {
     lb: '',
     kt: '',
     km: '',
-    city: '',
     province: '',
+    city: '',
+    district: '',
     price: '',
     transaction_type: '',
     property_type: '',
@@ -334,7 +335,7 @@ Property data: ${aiPrompt}`
         ...extractedData
       }));
       
-      setAlert({ message: '✅ AI extracted data applied to form fields!', severity: 'success' });
+      setAlert({ message: '✅ AaaaI extracted data applied to form fields!', severity: 'success' });
     }
   };
 
@@ -379,8 +380,9 @@ Property data: ${aiPrompt}`
       lb: convertToNumberOrNull(formData.lb),
       kt: convertToNumberOrNull(formData.kt),
       km: convertToNumberOrNull(formData.km),
-      city: formData.city,
       province: formData.province,
+      city: formData.city,
+      district: formData.district,
       price: convertPriceToStringOrNull(formData.price),
       transaction_type: formData.transaction_type,
       property_type: formData.property_type,
@@ -411,8 +413,9 @@ Property data: ${aiPrompt}`
         lb: '',
         kt: '',
         km: '',
-        city: '',
         province: '',
+        city: '',
+        district: '',
         price: '',
         transaction_type: '',
         property_type: '',
@@ -649,12 +652,16 @@ Property data: ${aiPrompt}`
             </div>
           )}
           <div className="mb-3 mt-3">
+            <label className="form-label">Province</label>
+            <input name="province" className="form-control" value={formData.province} onChange={handleChange} />
+          </div>
+          <div className="mb-3">
             <label className="form-label">City</label>
             <input name="city" className="form-control" value={formData.city} onChange={handleChange} />
           </div>
           <div className="mb-3">
-            <label className="form-label">Province</label>
-            <input name="province" className="form-control" value={formData.province} onChange={handleChange} />
+            <label className="form-label">District</label>
+            <input name="district" className="form-control" value={formData.district} onChange={handleChange} />
           </div>
           <div className="mb-3">
             <label className="form-label">Price</label>

@@ -20,8 +20,9 @@ const EditPropertyForm = () => {
     lb: '',
     kt: '',
     km: '',
-    city: '',
     province: '',
+    city: '',
+    district: '',
     price: '',
     transaction_type: '',
     property_type: '',
@@ -64,8 +65,9 @@ const EditPropertyForm = () => {
         lb: data.lb || '',
         kt: data.kt || '',
         km: data.km || '',
-        city: data.city || '',
         province: data.province || '',
+        city: data.city || '',
+        district: data.district || '',
         price: data.price || '',
         transaction_type: data.transaction_type || '',
         property_type: data.property_type || '',
@@ -126,8 +128,9 @@ const EditPropertyForm = () => {
         lb: formData.lb || null,
         kt: formData.kt || null,
         km: formData.km || null,
-        city: formData.city,
         province: formData.province,
+        city: formData.city,
+        district: formData.district,
         price: formData.price || null,
         transaction_type: formData.transaction_type,
         property_type: formData.property_type,
@@ -323,7 +326,17 @@ const EditPropertyForm = () => {
                   )}
                   
                   <div className="row">
-                    <div className="col-md-6 mb-3">
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Province</label>
+                      <input 
+                        name="province" 
+                        className="form-control" 
+                        value={formData.province} 
+                        onChange={handleChange}
+                      />
+                    </div>
+                    
+                    <div className="col-md-4 mb-3">
                       <label className="form-label">City</label>
                       <input 
                         name="city" 
@@ -334,12 +347,12 @@ const EditPropertyForm = () => {
                       />
                     </div>
                     
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label">Province</label>
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">District</label>
                       <input 
-                        name="province" 
+                        name="district" 
                         className="form-control" 
-                        value={formData.province} 
+                        value={formData.district} 
                         onChange={handleChange}
                       />
                     </div>
