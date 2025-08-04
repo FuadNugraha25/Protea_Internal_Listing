@@ -128,7 +128,23 @@ const PropertyForm = ({ user }) => {
 
   const uploadImageToSupabase = async (file) => {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
+    
+    // Create filename from title, clean it up for file system compatibility
+    let fileName;
+    if (formData.title && formData.title.trim()) {
+      // Clean the title: remove special characters, replace spaces with underscores
+      const cleanTitle = formData.title
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+        .replace(/\s+/g, '_') // Replace spaces with underscores
+        .substring(0, 50); // Limit length to 50 characters
+      fileName = `${cleanTitle}.${fileExt}`;
+    } else {
+      // Fallback to random name if no title
+      fileName = `${Math.random()}.${fileExt}`;
+    }
+    
     const filePath = `${fileName}`;
 
     const { error: uploadError } = await supabase.storage
