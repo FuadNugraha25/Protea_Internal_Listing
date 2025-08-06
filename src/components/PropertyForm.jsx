@@ -2,6 +2,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import Alert from '@mui/material/Alert';
+import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
 
 const PropertyForm = ({ user }) => {
   const [formData, setFormData] = useState({
@@ -28,6 +31,8 @@ const PropertyForm = ({ user }) => {
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
+  // Add state for settings modal
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     if (alert.message) {
@@ -128,23 +133,7 @@ const PropertyForm = ({ user }) => {
 
   const uploadImageToSupabase = async (file) => {
     const fileExt = file.name.split('.').pop();
-    
-    // Create filename from title, clean it up for file system compatibility
-    let fileName;
-    if (formData.title && formData.title.trim()) {
-      // Clean the title: remove special characters, replace spaces with underscores
-      const cleanTitle = formData.title
-        .trim()
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, '') // Remove special characters
-        .replace(/\s+/g, '_') // Replace spaces with underscores
-        .substring(0, 50); // Limit length to 50 characters
-      fileName = `${cleanTitle}.${fileExt}`;
-    } else {
-      // Fallback to random name if no title
-      fileName = `${Math.random()}.${fileExt}`;
-    }
-    
+    const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;
 
     const { error: uploadError } = await supabase.storage
@@ -440,10 +429,24 @@ Property data: ${aiPrompt}`
     }
   }
 
+  const navigate = useNavigate();
+
   return (
     <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-      <div className="col-md-6">
+      <div className="col-md-6 position-relative">
+        {/* Settings Button */}
+        <button
+          type="button"
+          className="btn btn-outline-secondary position-absolute"
+          style={{ top: '0', right: '0', zIndex: 1000 }}
+          onClick={() => navigate('/settings')}
+          title="Settings"
+        >
+          <FontAwesomeIcon icon={faGear} />
+        </button>
+        
         <h3 className="text-center mb-4">Add Property</h3>
+        
         {alert.message && (
           <div 
             className="position-fixed"
@@ -471,6 +474,7 @@ Property data: ${aiPrompt}`
             </div>
           </div>
         )}
+        
         <form onSubmit={handleSubmit}>
           {/* AI Assistant Section */}
           <div className="mb-4">

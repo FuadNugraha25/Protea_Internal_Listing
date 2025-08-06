@@ -12,6 +12,8 @@ function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("All");
   const [selectedLocation, setSelectedLocation] = useState("All");
+  const [selectedProvince, setSelectedProvince] = useState("All");
+  const [selectedDistrict, setSelectedDistrict] = useState("All");
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [priceRange, setPriceRange] = useState([0, 20_000_000_000]); // 0 to 20 M
@@ -29,6 +31,8 @@ function Dashboard() {
     searchTerm: "",
     selectedType: "All",
     selectedLocation: "All",
+    selectedProvince: "All",
+    selectedDistrict: "All",
     priceRange: [0, 20_000_000_000],
     ltMin: null,
     ltMax: null,
@@ -45,6 +49,8 @@ function Dashboard() {
       searchTerm,
       selectedType,
       selectedLocation,
+      selectedProvince,
+      selectedDistrict,
       priceRange,
       ltMin,
       ltMax,
@@ -73,6 +79,8 @@ function Dashboard() {
           type: item.type ?? "-",
           status: item.status ?? "-",
           location: item.city ?? item.location ?? "-",
+          province: item.province ?? "-",
+          district: item.district ?? "-",
           price: item.price || "-",
         }));
         setListings(mapped);
@@ -99,6 +107,8 @@ function Dashboard() {
 
   // Extract unique locations from the data
   const uniqueLocations = [...new Set(listings.map(listing => listing.location))];
+  const uniqueProvinces = [...new Set(listings.map(listing => listing.province))];
+  const uniqueDistricts = [...new Set(listings.map(listing => listing.district))];
 
   const filteredListings = listings.filter(listing => {
     const matchesSearch =
@@ -107,6 +117,8 @@ function Dashboard() {
     const matchesType = appliedFilters.selectedType === "All" || listing.property_type === appliedFilters.selectedType;
     const matchesTransactionType = appliedFilters.selectedTransactionType === "All" || listing.transaction_type === appliedFilters.selectedTransactionType;
     const matchesLocation = appliedFilters.selectedLocation === "All" || listing.location === appliedFilters.selectedLocation;
+    const matchesProvince = appliedFilters.selectedProvince === "All" || listing.province === appliedFilters.selectedProvince;
+    const matchesDistrict = appliedFilters.selectedDistrict === "All" || listing.district === appliedFilters.selectedDistrict;
     // Price filter
     const priceNum = Number(listing.price?.toString().replace(/[^0-9]/g, ""));
     const matchesPrice =
@@ -148,6 +160,8 @@ function Dashboard() {
       matchesType &&
       matchesTransactionType &&
       matchesLocation &&
+      matchesProvince &&
+      matchesDistrict &&
       matchesPrice &&
       matchesLT &&
       matchesLB &&
@@ -165,31 +179,9 @@ function Dashboard() {
             <h3 className="fw-bold mb-3">Property Listings</h3>
             <div className="card shadow-sm">
               <div className="card-body">
-                <div className="row g-3">
-                  <div className="col-md-4">
-                    <label className="form-label fw-semibold">Search</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search by property name..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
+                {/* Basic Filters */}
+                <div className="row g-3 mb-4">
                   <div className="col-md-2">
-                    <label className="form-label fw-semibold">Location</label>
-                    <select
-                      className="form-select"
-                      value={selectedLocation}
-                      onChange={(e) => setSelectedLocation(e.target.value)}
-                    >
-                      <option value="All">All Locations</option>
-                      {uniqueLocations.map((location, index) => (
-                        <option key={index} value={location}>{location}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="col-md-3">
                     <label className="form-label fw-semibold">Property Type</label>
                     <select
                       className="form-select"
@@ -202,50 +194,21 @@ function Dashboard() {
                       ))}
                     </select>
                   </div>
-                  <div className="col-md-3">
-                    <label className="form-label fw-semibold">Transaction Type</label>
+                  <div className="col-md-2">
+                    <label className="form-label fw-semibold">Transaction</label>
                     <select
                       className="form-select"
                       value={selectedTransactionType}
                       onChange={(e) => setSelectedTransactionType(e.target.value)}
                     >
-                      <option value="All">All Transactions</option>
+                      <option value="All">All</option>
                       {transactionTypes.map((type, idx) => (
                         <option key={idx} value={type}>{type}</option>
                       ))}
                     </select>
                   </div>
-                  {/* Price Range Slider */}
-                  <div className="col-md-4">
-                    <label className="form-label fw-semibold">Price (IDR)</label>
-                    <div className="d-flex align-items-center mb-2">
-                      <input
-                        type="range"
-                        min={0}
-                        max={20_000_000_000}
-                        step={100_000_000}
-                        value={priceRange[0]}
-                        onChange={e => {
-                          const value = Number(e.target.value);
-                          setPriceRange([value, Math.max(value, priceRange[1])]);
-                          setPriceInputs([value.toLocaleString('id-ID'), priceInputs[1]]);
-                        }}
-                        className="form-range me-2"
-                      />
-                      <input
-                        type="range"
-                        min={0}
-                        max={20_000_000_000}
-                        step={100_000_000}
-                        value={priceRange[1]}
-                        onChange={e => {
-                          const value = Number(e.target.value);
-                          setPriceRange([Math.min(value, priceRange[0]), value]);
-                          setPriceInputs([priceInputs[0], value.toLocaleString('id-ID')]);
-                        }}
-                        className="form-range"
-                      />
-                    </div>
+                  <div className="col-md-8">
+                    <label className="form-label fw-semibold">Price Range</label>
                     <div className="d-flex align-items-center">
                       <input
                         type="text"
@@ -255,8 +218,6 @@ function Dashboard() {
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^\d,]/g, '');
                           setPriceInputs([value, priceInputs[1]]);
-                          
-                          // Convert to number for filtering
                           const numValue = value.replace(/,/g, '') ? Number(value.replace(/,/g, '')) : 0;
                           setPriceRange([numValue, Math.max(numValue, priceRange[1])]);
                         }}
@@ -268,7 +229,7 @@ function Dashboard() {
                           setPriceRange([numValue, Math.max(numValue, priceRange[1])]);
                         }}
                       />
-                      <span className="mx-2">-</span>
+                      <span className="mx-2">to</span>
                       <input
                         type="text"
                         className="form-control"
@@ -277,8 +238,6 @@ function Dashboard() {
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^\d,]/g, '');
                           setPriceInputs([priceInputs[0], value]);
-                          
-                          // Convert to number for filtering
                           const numValue = value.replace(/,/g, '') ? Number(value.replace(/,/g, '')) : 20_000_000_000;
                           setPriceRange([Math.min(numValue, priceRange[0]), numValue]);
                         }}
@@ -291,15 +250,65 @@ function Dashboard() {
                         }}
                       />
                     </div>
-                    <div>
                       <small className="text-muted">
                         {formatIDR(priceRange[0])} - {formatIDR(priceRange[1])}
                       </small>
                     </div>
                   </div>
-                  {/* LT Textboxes */}
+
+                {/* Location Filters */}
+                <div className="row g-3 mb-4">
+                  <div className="col-12">
+                    <h6 className="text-muted mb-3">Location Filters</h6>
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold">Province</label>
+                    <select
+                      className="form-select"
+                      value={selectedProvince}
+                      onChange={(e) => setSelectedProvince(e.target.value)}
+                    >
+                      <option value="All">All Provinces</option>
+                      {uniqueProvinces.map((province, index) => (
+                        <option key={index} value={province}>{province}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold">City</label>
+                    <select
+                      className="form-select"
+                      value={selectedLocation}
+                      onChange={(e) => setSelectedLocation(e.target.value)}
+                    >
+                      <option value="All">All Cities</option>
+                      {uniqueLocations.map((location, index) => (
+                        <option key={index} value={location}>{location}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold">District</label>
+                    <select
+                      className="form-select"
+                      value={selectedDistrict}
+                      onChange={(e) => setSelectedDistrict(e.target.value)}
+                    >
+                      <option value="All">All Districts</option>
+                      {uniqueDistricts.map((district, index) => (
+                        <option key={index} value={district}>{district}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Property Details Filters */}
+                <div className="row g-3">
+                  <div className="col-12">
+                    <h6 className="text-muted mb-3">Property Details</h6>
+                  </div>
                   <div className="col-md-2">
-                    <label className="form-label fw-semibold">LT (m²)</label>
+                    <label className="form-label fw-semibold">Land Area (m²)</label>
                     <div className="d-flex align-items-center">
                       <input
                         type="number"
@@ -307,7 +316,7 @@ function Dashboard() {
                         max={1000}
                         value={ltMin === null ? '' : ltMin}
                         onChange={e => setLtMin(e.target.value === '' ? null : Number(e.target.value))}
-                        className="form-control me-2"
+                        className="form-control me-1"
                         placeholder="Min"
                       />
                       <span className="mx-1">-</span>
@@ -322,9 +331,8 @@ function Dashboard() {
                       />
                     </div>
                   </div>
-                  {/* LB Textboxes */}
                   <div className="col-md-2">
-                    <label className="form-label fw-semibold">LB (m²)</label>
+                    <label className="form-label fw-semibold">Building Area (m²)</label>
                     <div className="d-flex align-items-center">
                       <input
                         type="number"
@@ -332,7 +340,7 @@ function Dashboard() {
                         max={1000}
                         value={lbMin === null ? '' : lbMin}
                         onChange={e => setLbMin(e.target.value === '' ? null : Number(e.target.value))}
-                        className="form-control me-2"
+                        className="form-control me-1"
                         placeholder="Min"
                       />
                       <span className="mx-1">-</span>
@@ -347,13 +355,12 @@ function Dashboard() {
                       />
                     </div>
                   </div>
-                  {/* KM Dropdown */}
                   <div className="col-md-2">
-                    <label className="form-label fw-semibold">KM (Baths)</label>
+                    <label className="form-label fw-semibold">Bedrooms</label>
                     <select
                       className="form-select"
-                      value={selectedKM}
-                      onChange={e => setSelectedKM(e.target.value)}
+                      value={selectedKT}
+                      onChange={e => setSelectedKT(e.target.value)}
                     >
                       <option value="All">All</option>
                       {[1,2,3,4,5,6,7,8,9,10].map(n => (
@@ -361,13 +368,12 @@ function Dashboard() {
                       ))}
                     </select>
                   </div>
-                  {/* KT Dropdown */}
                   <div className="col-md-2">
-                    <label className="form-label fw-semibold">KT (Beds)</label>
+                    <label className="form-label fw-semibold">Bathrooms</label>
                     <select
                       className="form-select"
-                      value={selectedKT}
-                      onChange={e => setSelectedKT(e.target.value)}
+                      value={selectedKM}
+                      onChange={e => setSelectedKM(e.target.value)}
                     >
                       <option value="All">All</option>
                       {[1,2,3,4,5,6,7,8,9,10].map(n => (
@@ -391,6 +397,19 @@ function Dashboard() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Search Section */}
+        <div className="row mb-4">
+          <div className="col-md-8 mx-auto">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
           </div>
         </div>
 
