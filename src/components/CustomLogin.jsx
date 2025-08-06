@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 // import { useNavigate } from 'react-router-dom'
 
@@ -7,6 +7,16 @@ export default function CustomLogin() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    // Add login-page class to body when component mounts
+    document.body.classList.add('login-page');
+    
+    // Remove login-page class when component unmounts
+    return () => {
+      document.body.classList.remove('login-page');
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

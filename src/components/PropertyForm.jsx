@@ -33,6 +33,9 @@ const PropertyForm = ({ user }) => {
   const [aiLoading, setAiLoading] = useState(false);
   // Add state for settings modal
   const [showSettings, setShowSettings] = useState(false);
+  // Add state for existing location data
+  const [existingListings, setExistingListings] = useState([]);
+  const [locationLoading, setLocationLoading] = useState(true);
 
   useEffect(() => {
     if (alert.message) {
@@ -46,6 +49,31 @@ const PropertyForm = ({ user }) => {
       return () => clearTimeout(timer);
     }
   }, [alert.message]);
+
+  // Fetch existing listings for dropdown data
+  useEffect(() => {
+    async function fetchExistingListings() {
+      setLocationLoading(true);
+      try {
+        const { data, error } = await supabase.from("listings").select('province, city, district');
+        if (error) {
+          console.error('Error fetching existing listings:', error);
+        } else {
+          setExistingListings(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching existing listings:', error);
+      } finally {
+        setLocationLoading(false);
+      }
+    }
+    fetchExistingListings();
+  }, []);
+
+  // Extract unique values for dropdowns
+  const uniqueProvinces = [...new Set(existingListings.map(listing => listing.province).filter(Boolean))].sort();
+  const uniqueCities = [...new Set(existingListings.map(listing => listing.city).filter(Boolean))].sort();
+  const uniqueDistricts = [...new Set(existingListings.map(listing => listing.district).filter(Boolean))].sort();
 
   const formatPriceWithCommas = (value) => {
     // Remove all non-digit characters
@@ -673,15 +701,84 @@ Property data: ${aiPrompt}`
           )}
           <div className="mb-3 mt-3">
             <label className="form-label">Province</label>
-            <input name="province" className="form-control" value={formData.province} onChange={handleChange} />
+            <div className="input-group">
+              <select
+                name="province"
+                className="form-select"
+                value={formData.province}
+                onChange={handleChange}
+                style={{ borderRight: 'none' }}
+              >
+                <option value="">Select Province</option>
+                {uniqueProvinces.map((province, index) => (
+                  <option key={index} value={province}>{province}</option>
+                ))}
+              </select>
+              <input
+                type="text"
+                name="province"
+                className="form-control"
+                placeholder="Or type new province"
+                value={formData.province}
+                onChange={handleChange}
+                style={{ borderLeft: 'none' }}
+              />
+            </div>
+            {locationLoading && <small className="text-muted">Loading provinces...</small>}
           </div>
           <div className="mb-3">
             <label className="form-label">City</label>
-            <input name="city" className="form-control" value={formData.city} onChange={handleChange} />
+            <div className="input-group">
+              <select
+                name="city"
+                className="form-select"
+                value={formData.city}
+                onChange={handleChange}
+                style={{ borderRight: 'none' }}
+              >
+                <option value="">Select City</option>
+                {uniqueCities.map((city, index) => (
+                  <option key={index} value={city}>{city}</option>
+                ))}
+              </select>
+              <input
+                type="text"
+                name="city"
+                className="form-control"
+                placeholder="Or type new city"
+                value={formData.city}
+                onChange={handleChange}
+                style={{ borderLeft: 'none' }}
+              />
+            </div>
+            {locationLoading && <small className="text-muted">Loading cities...</small>}
           </div>
           <div className="mb-3">
             <label className="form-label">District</label>
-            <input name="district" className="form-control" value={formData.district} onChange={handleChange} />
+            <div className="input-group">
+              <select
+                name="district"
+                className="form-select"
+                value={formData.district}
+                onChange={handleChange}
+                style={{ borderRight: 'none' }}
+              >
+                <option value="">Select District</option>
+                {uniqueDistricts.map((district, index) => (
+                  <option key={index} value={district}>{district}</option>
+                ))}
+              </select>
+              <input
+                type="text"
+                name="district"
+                className="form-control"
+                placeholder="Or type new district"
+                value={formData.district}
+                onChange={handleChange}
+                style={{ borderLeft: 'none' }}
+              />
+            </div>
+            {locationLoading && <small className="text-muted">Loading districts...</small>}
           </div>
           <div className="mb-3">
             <label className="form-label">Price</label>

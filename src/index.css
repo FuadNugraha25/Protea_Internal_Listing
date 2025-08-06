@@ -1,0 +1,23 @@
+body {
+  padding-top: 80px;
+}
+
+body.login-page {
+  padding-top: 0;
+}
+
+/* Glassmorphism style for navbar */
+.glass-navbar-btn {
+  background: #444;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: background 0.2s;
+}
+.glass-navbar-btn:hover, .glass-navbar-btn:focus {
+  background: #666;
+  color: #fff;
+}
+
+.main-content {
+  margin-top: 1000px;
+}

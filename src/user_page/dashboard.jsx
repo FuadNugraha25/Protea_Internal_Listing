@@ -62,6 +62,40 @@ function Dashboard() {
     });
   };
 
+  const resetFilters = () => {
+    setSearchTerm("");
+    setSelectedType("All");
+    setSelectedLocation("All");
+    setSelectedProvince("All");
+    setSelectedDistrict("All");
+    setPriceRange([0, 20_000_000_000]);
+    setPriceInputs(['0', '20,000,000,000']);
+    setLtMin(null);
+    setLtMax(null);
+    setLbMin(null);
+    setLbMax(null);
+    setSelectedKM("All");
+    setSelectedKT("All");
+    setSelectedTransactionType("All");
+    
+    // Also reset the applied filters
+    setAppliedFilters({
+      searchTerm: "",
+      selectedType: "All",
+      selectedLocation: "All",
+      selectedProvince: "All",
+      selectedDistrict: "All",
+      priceRange: [0, 20_000_000_000],
+      ltMin: null,
+      ltMax: null,
+      lbMin: null,
+      lbMax: null,
+      selectedKM: "All",
+      selectedKT: "All",
+      selectedTransactionType: "All"
+    });
+  };
+
   useEffect(() => {
     async function fetchListings() {
       setLoading(true);
@@ -111,6 +145,7 @@ function Dashboard() {
   const uniqueDistricts = [...new Set(listings.map(listing => listing.district))];
 
   const filteredListings = listings.filter(listing => {
+    if ((listing.title || "").trim() === "DELETED") return false;
     const matchesSearch =
       (listing.title || "").toLowerCase().includes(appliedFilters.searchTerm.toLowerCase()) ||
       (listing.location || "").toLowerCase().includes(appliedFilters.searchTerm.toLowerCase());
@@ -383,15 +418,22 @@ function Dashboard() {
                   </div>
                 </div>
                 
-                {/* Apply Filter Button */}
+                {/* Filter Action Buttons */}
                 <div className="row mt-3">
-                  <div className="col-12">
+                  <div className="col-12 d-flex gap-2">
                     <button 
                       className="btn btn-primary px-4 py-2"
                       onClick={applyFilters}
                     >
                       <i className="bi bi-funnel me-2"></i>
                       Apply Filters
+                    </button>
+                    <button 
+                      className="btn btn-outline-secondary px-4 py-2"
+                      onClick={resetFilters}
+                    >
+                      <i className="bi bi-arrow-clockwise me-2"></i>
+                      Reset Filters
                     </button>
                   </div>
                 </div>

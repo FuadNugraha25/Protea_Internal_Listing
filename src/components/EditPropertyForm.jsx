@@ -160,7 +160,6 @@ const EditPropertyForm = () => {
   if (loading) {
     return (
       <>
-        <Navbar title="Edit Property" showAdminButton={user && allowedUserId.includes(user.id)} />
         <div className="container mt-4 d-flex justify-content-center">
           <div className="spinner-border" role="status">
             <span className="visually-hidden">Loading...</span>
