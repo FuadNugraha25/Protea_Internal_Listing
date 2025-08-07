@@ -1,5 +1,5 @@
 // src/components/EditPropertyForm.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import Navbar from './Navbar';
@@ -12,6 +12,10 @@ const EditPropertyForm = () => {
   const [user, setUser] = useState(null);
   const [alert, setAlert] = useState({ message: '', severity: '' });
   const [showNotification, setShowNotification] = useState(false);
+  
+  // Add state for existing location data
+  const [existingListings, setExistingListings] = useState([]);
+  const [locationLoading, setLocationLoading] = useState(true);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -42,6 +46,31 @@ const EditPropertyForm = () => {
       fetchListingData();
     });
   }, [id, navigate]);
+
+  // Fetch existing listings for dropdown data
+  useEffect(() => {
+    async function fetchExistingListings() {
+      setLocationLoading(true);
+      try {
+        const { data, error } = await supabase.from("listings").select('province, city, district');
+        if (error) {
+          console.error('Error fetching existing listings:', error);
+        } else {
+          setExistingListings(data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching existing listings:', error);
+      } finally {
+        setLocationLoading(false);
+      }
+    }
+    fetchExistingListings();
+  }, []);
+
+  // Extract unique values for dropdowns
+  const uniqueProvinces = [...new Set(existingListings.map(listing => listing.province).filter(Boolean))].sort();
+  const uniqueCities = [...new Set(existingListings.map(listing => listing.city).filter(Boolean))].sort();
+  const uniqueDistricts = [...new Set(existingListings.map(listing => listing.district).filter(Boolean))].sort();
 
   const fetchListingData = async () => {
     try {
@@ -157,6 +186,16 @@ const EditPropertyForm = () => {
     }
   };
 
+  const descriptionRef = useRef(null);
+
+  // Auto-expand description textarea on mount and when description changes
+  useEffect(() => {
+    if (descriptionRef.current) {
+      descriptionRef.current.style.height = 'auto';
+      descriptionRef.current.style.height = descriptionRef.current.scrollHeight + 'px';
+    }
+  }, [formData.description]);
+
   if (loading) {
     return (
       <>
@@ -208,8 +247,8 @@ const EditPropertyForm = () => {
         )}
 
         <div className="row justify-content-center">
-          <div className="col-md-8">
-            <div className="card">
+          <div className="col-12 d-flex justify-content-center">
+            <div className="card w-100" style={{ maxWidth: '1000px' }}>
               <div className="card-header">
                 <h3 className="mb-0">Edit Property</h3>
               </div>
@@ -228,14 +267,21 @@ const EditPropertyForm = () => {
                   
                   <div className="mb-3">
                     <label className="form-label">Description</label>
-                    <textarea 
-                      name="description" 
-                      className="form-control" 
-                      value={formData.description} 
-                      onChange={handleChange}
-                      rows="4"
-                    />
-                  </div>
+                  <textarea
+                    ref={descriptionRef}
+                    name="description"
+                    className="form-control"
+                    value={formData.description}
+                    onChange={e => {
+                      handleChange(e);
+                      // Auto-resize
+                      e.target.style.height = 'auto';
+                      e.target.style.height = e.target.scrollHeight + 'px';
+                    }}
+                    style={{ overflow: 'hidden', resize: 'none', minHeight: '80px' }}
+                    placeholder="Enter property description"
+                  />
+                </div>
                   
                   <div className="row">
                     <div className="col-md-6 mb-3">
@@ -327,33 +373,87 @@ const EditPropertyForm = () => {
                   <div className="row">
                     <div className="col-md-4 mb-3">
                       <label className="form-label">Province</label>
-                      <input 
-                        name="province" 
-                        className="form-control" 
-                        value={formData.province} 
-                        onChange={handleChange}
-                      />
+                      <div className="input-group">
+                        <select
+                          name="province"
+                          className="form-select"
+                          value={formData.province}
+                          onChange={handleChange}
+                          style={{ borderRight: 'none' }}
+                        >
+                          <option value="">Select Province</option>
+                          {uniqueProvinces.map((province, index) => (
+                            <option key={index} value={province}>{province}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          name="province"
+                          className="form-control"
+                          placeholder="Or type new province"
+                          value={formData.province}
+                          onChange={handleChange}
+                          style={{ borderLeft: 'none' }}
+                        />
+                      </div>
+                      {locationLoading && <small className="text-muted">Loading provinces...</small>}
                     </div>
                     
                     <div className="col-md-4 mb-3">
                       <label className="form-label">City</label>
-                      <input 
-                        name="city" 
-                        className="form-control" 
-                        value={formData.city} 
-                        onChange={handleChange}
-                        required
-                      />
+                      <div className="input-group">
+                        <select
+                          name="city"
+                          className="form-select"
+                          value={formData.city}
+                          onChange={handleChange}
+                          style={{ borderRight: 'none' }}
+                        >
+                          <option value="">Select City</option>
+                          {uniqueCities.map((city, index) => (
+                            <option key={index} value={city}>{city}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          name="city"
+                          className="form-control"
+                          placeholder="Or type new city"
+                          value={formData.city}
+                          onChange={handleChange}
+                          style={{ borderLeft: 'none' }}
+                          required
+                        />
+                      </div>
+                      {locationLoading && <small className="text-muted">Loading cities...</small>}
                     </div>
                     
                     <div className="col-md-4 mb-3">
                       <label className="form-label">District</label>
-                      <input 
-                        name="district" 
-                        className="form-control" 
-                        value={formData.district} 
-                        onChange={handleChange}
-                      />
+                      <div className="input-group">
+                        <select
+                          name="district"
+                          className="form-select"
+                          value={formData.district}
+                          onChange={handleChange}
+                          style={{ borderRight: 'none' }}
+                        >
+                          <option value="">Select District</option>
+                          {uniqueDistricts.map((district, index) => (
+                            <option key={index} value={district}>{district}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          name="district"
+                          className="form-control"
+                          placeholder="Or type new district"
+                          value={formData.district}
+                          onChange={handleChange}
+                          style={{ borderLeft: 'none' }}
+                        />
+                      </div>
+                      {locationLoading && <small className="text-muted">Loading districts...</small>}
                     </div>
                   </div>
                   

@@ -7,7 +7,6 @@ import EditPropertyForm from './components/EditPropertyForm'
 import Navbar from './components/Navbar'
 import Dashboard from './user_page/dashboard'
 import ListingDetails from './user_page/ListingDetails';
-import SettingsPage from './components/SettingsPage';
 
 function App() {
   const [user, setUser] = useState(null)
@@ -47,7 +46,6 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage user={user} />} />
         <Route path="/listing/:id" element={<ListingDetails />} />
         <Route path="/edit-listing/:id" element={<EditPropertyForm />} />
-        <Route path="/settings" element={<SettingsPage user={user} />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>

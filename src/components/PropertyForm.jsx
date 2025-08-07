@@ -3,8 +3,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import Alert from '@mui/material/Alert';
 import { useNavigate } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
 
 const PropertyForm = ({ user }) => {
   const [formData, setFormData] = useState({
@@ -31,8 +29,6 @@ const PropertyForm = ({ user }) => {
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
-  // Add state for settings modal
-  const [showSettings, setShowSettings] = useState(false);
   // Add state for existing location data
   const [existingListings, setExistingListings] = useState([]);
   const [locationLoading, setLocationLoading] = useState(true);
@@ -74,6 +70,53 @@ const PropertyForm = ({ user }) => {
   const uniqueProvinces = [...new Set(existingListings.map(listing => listing.province).filter(Boolean))].sort();
   const uniqueCities = [...new Set(existingListings.map(listing => listing.city).filter(Boolean))].sort();
   const uniqueDistricts = [...new Set(existingListings.map(listing => listing.district).filter(Boolean))].sort();
+
+  // Machine learning function to predict province and city based on district
+  const predictLocationFromDistrict = (district) => {
+    if (!district || !existingListings.length) return { province: '', city: '' };
+
+    // Find all listings with this district (case-insensitive partial match)
+    const matchingListings = existingListings.filter(listing => 
+      listing.district && 
+      listing.district.toLowerCase().includes(district.toLowerCase())
+    );
+
+    if (matchingListings.length === 0) {
+      console.log(`No matches found for district: "${district}"`);
+      return { province: '', city: '' };
+    }
+
+    console.log(`Found ${matchingListings.length} matches for district: "${district}"`);
+    console.log('Matching listings:', matchingListings.map(l => ({ district: l.district, province: l.province, city: l.city })));
+
+    // Count occurrences of province and city combinations
+    const locationCounts = {};
+    matchingListings.forEach(listing => {
+      if (listing.province && listing.city) {
+        const key = `${listing.province}|${listing.city}`;
+        locationCounts[key] = (locationCounts[key] || 0) + 1;
+      }
+    });
+
+    // Find the most common combination
+    let mostCommonKey = '';
+    let maxCount = 0;
+    Object.entries(locationCounts).forEach(([key, count]) => {
+      if (count > maxCount) {
+        maxCount = count;
+        mostCommonKey = key;
+      }
+    });
+
+    if (mostCommonKey) {
+      const [province, city] = mostCommonKey.split('|');
+      console.log(`Predicted location: ${province}, ${city} (${maxCount} occurrences)`);
+      return { province, city };
+    }
+
+    console.log('No valid province/city combinations found');
+    return { province: '', city: '' };
+  };
 
   const formatPriceWithCommas = (value) => {
     // Remove all non-digit characters
@@ -156,6 +199,40 @@ const PropertyForm = ({ user }) => {
         updatedForm.price = priceNum;
       }
     }
+
+    // Machine learning: Auto-fill province and city based on district
+    if (name === 'district' && value.trim()) {
+      const predictedLocation = predictLocationFromDistrict(value);
+      if (predictedLocation.province && predictedLocation.city) {
+        updatedForm.province = predictedLocation.province;
+        updatedForm.city = predictedLocation.city;
+        
+        // Count total matches to calculate confidence
+        const matchingListings = existingListings.filter(listing => 
+          listing.district && 
+          listing.district.toLowerCase().includes(value.toLowerCase())
+        );
+        
+        // Count the most common combination
+        const locationCounts = {};
+        matchingListings.forEach(listing => {
+          if (listing.province && listing.city) {
+            const key = `${listing.province}|${listing.city}`;
+            locationCounts[key] = (locationCounts[key] || 0) + 1;
+          }
+        });
+        
+        const maxCount = Math.max(...Object.values(locationCounts));
+        const confidence = Math.round((maxCount / matchingListings.length) * 100);
+        
+        // Show success notification with confidence
+        setAlert({ 
+          message: `✅ Auto-filled: ${predictedLocation.province}, ${predictedLocation.city} (${confidence}% confidence based on ${matchingListings.length} previous entries)`, 
+          severity: 'success' 
+        });
+      }
+    }
+
     setFormData(updatedForm);
   };
 
@@ -462,16 +539,6 @@ Property data: ${aiPrompt}`
   return (
     <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
       <div className="col-md-6 position-relative">
-        {/* Settings Button */}
-        <button
-          type="button"
-          className="btn btn-outline-secondary position-absolute"
-          style={{ top: '0', right: '0', zIndex: 1000 }}
-          onClick={() => navigate('/settings')}
-          title="Settings"
-        >
-          <FontAwesomeIcon icon={faGear} />
-        </button>
         
         <h3 className="text-center mb-4">Add Property</h3>
         
@@ -779,6 +846,10 @@ Property data: ${aiPrompt}`
               />
             </div>
             {locationLoading && <small className="text-muted">Loading districts...</small>}
+            <small className="text-info">
+              <i className="bi bi-lightbulb me-1"></i>
+              Tip: Start typing a district name to auto-fill province and city based on previous data
+            </small>
           </div>
           <div className="mb-3">
             <label className="form-label">Price</label>
