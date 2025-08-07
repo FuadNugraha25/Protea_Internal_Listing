@@ -651,7 +651,22 @@ Property data: ${aiPrompt}`
           </div>
           <div className="mb-3">
             <label className="form-label">Description</label>
-            <textarea name="description" className="form-control" value={formData.description} onChange={handleChange} />
+            <textarea 
+              name="description" 
+              className="form-control" 
+              value={formData.description} 
+              onChange={handleChange}
+              style={{
+                resize: 'none',
+                overflow: 'hidden',
+                minHeight: '100px'
+              }}
+              onInput={(e) => {
+                // Auto-resize the textarea
+                e.target.style.height = 'auto';
+                e.target.style.height = e.target.scrollHeight + 'px';
+              }}
+            />
           </div>
           <div className="mb-3">
             <label className="form-label">Transaction Type</label>
