@@ -27,6 +27,9 @@ function Dashboard() {
   const propertyTypes = ["Rumah", "Kavling", "Apartemen"];
   const transactionTypes = ["Jual", "Sewa"];
   const [selectedTransactionType, setSelectedTransactionType] = useState("All");
+  // Pagination state (max 30 cards per page)
+  const ITEMS_PER_PAGE = 30;
+  const [currentPage, setCurrentPage] = useState(1);
   const [appliedFilters, setAppliedFilters] = useState({
     searchTerm: "",
     selectedType: "All",
@@ -42,7 +45,15 @@ function Dashboard() {
     selectedKT: "All",
     selectedTransactionType: "All"
   });
+
+  // (Pagination calculations moved below, after filteredListings is defined)
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const navigate = useNavigate();
+  
+  // Reset to first page whenever filters are applied/changed
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [appliedFilters]);
 
   const applyFilters = () => {
     setAppliedFilters({
@@ -205,50 +216,72 @@ function Dashboard() {
     );
   });
 
+  // Pagination calculations (must be after filteredListings is defined)
+  const totalPages = Math.ceil(filteredListings.length / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedListings = filteredListings.slice(startIndex, endIndex);
+
+  // Clamp current page if results shrink
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [totalPages, currentPage]);
+
   return (
     <div>
       {/* Filter Section */}
       <div className="container mt-4 mb-5">
         <div className="row mb-4">
           <div className="col">
-            <h3 className="fw-bold mb-3">Property Listings</h3>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h3 className="fw-bold mb-0">Daftar Properti</h3>
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => setFiltersOpen(prev => !prev)}
+              >
+                {filtersOpen ? 'Sembunyikan Filter' : 'Tampilkan Filter'}
+              </button>
+            </div>
+            {filtersOpen && (
             <div className="card shadow-sm">
               <div className="card-body">
                 {/* Basic Filters */}
                 <div className="row g-3 mb-4">
                   <div className="col-md-2">
-                    <label className="form-label fw-semibold">Property Type</label>
+                    <label className="form-label fw-semibold">Tipe Properti</label>
                     <select
                       className="form-select"
                       value={selectedType}
                       onChange={(e) => setSelectedType(e.target.value)}
                     >
-                      <option value="All">All Types</option>
+                      <option value="All">Semua Tipe</option>
                       {propertyTypes.map((type, idx) => (
                         <option key={idx} value={type}>{type}</option>
                       ))}
                     </select>
                   </div>
                   <div className="col-md-2">
-                    <label className="form-label fw-semibold">Transaction</label>
+                    <label className="form-label fw-semibold">Transaksi</label>
                     <select
                       className="form-select"
                       value={selectedTransactionType}
                       onChange={(e) => setSelectedTransactionType(e.target.value)}
                     >
-                      <option value="All">All</option>
+                      <option value="All">Semua</option>
                       {transactionTypes.map((type, idx) => (
                         <option key={idx} value={type}>{type}</option>
                       ))}
                     </select>
                   </div>
                   <div className="col-md-8">
-                    <label className="form-label fw-semibold">Price Range</label>
+                    <label className="form-label fw-semibold">Rentang Harga</label>
                     <div className="d-flex align-items-center">
                       <input
                         type="text"
                         className="form-control me-2"
-                        placeholder="Min Price"
+                        placeholder="Harga Minimum"
                         value={priceInputs[0]}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^\d,]/g, '');
@@ -264,11 +297,11 @@ function Dashboard() {
                           setPriceRange([numValue, Math.max(numValue, priceRange[1])]);
                         }}
                       />
-                      <span className="mx-2">to</span>
+                      <span className="mx-2">hingga</span>
                       <input
                         type="text"
                         className="form-control"
-                        placeholder="Max Price"
+                        placeholder="Harga Maksimum"
                         value={priceInputs[1]}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^\d,]/g, '');
@@ -294,42 +327,42 @@ function Dashboard() {
                 {/* Location Filters */}
                 <div className="row g-3 mb-4">
                   <div className="col-12">
-                    <h6 className="text-muted mb-3">Location Filters</h6>
+                    <h6 className="text-muted mb-3">Filter Lokasi</h6>
                   </div>
                   <div className="col-md-3">
-                    <label className="form-label fw-semibold">Province</label>
+                    <label className="form-label fw-semibold">Provinsi</label>
                     <select
                       className="form-select"
                       value={selectedProvince}
                       onChange={(e) => setSelectedProvince(e.target.value)}
                     >
-                      <option value="All">All Provinces</option>
+                      <option value="All">Semua Provinsi</option>
                       {uniqueProvinces.map((province, index) => (
                         <option key={index} value={province}>{province}</option>
                       ))}
                     </select>
                   </div>
                   <div className="col-md-3">
-                    <label className="form-label fw-semibold">City</label>
+                    <label className="form-label fw-semibold">Kota</label>
                     <select
                       className="form-select"
                       value={selectedLocation}
                       onChange={(e) => setSelectedLocation(e.target.value)}
                     >
-                      <option value="All">All Cities</option>
+                      <option value="All">Semua Kota</option>
                       {uniqueLocations.map((location, index) => (
                         <option key={index} value={location}>{location}</option>
                       ))}
                     </select>
                   </div>
                   <div className="col-md-3">
-                    <label className="form-label fw-semibold">District</label>
+                    <label className="form-label fw-semibold">Kecamatan</label>
                     <select
                       className="form-select"
                       value={selectedDistrict}
                       onChange={(e) => setSelectedDistrict(e.target.value)}
                     >
-                      <option value="All">All Districts</option>
+                      <option value="All">Semua Kecamatan</option>
                       {uniqueDistricts.map((district, index) => (
                         <option key={index} value={district}>{district}</option>
                       ))}
@@ -340,10 +373,10 @@ function Dashboard() {
                 {/* Property Details Filters */}
                 <div className="row g-3">
                   <div className="col-12">
-                    <h6 className="text-muted mb-3">Property Details</h6>
+                    <h6 className="text-muted mb-3">Detail Properti</h6>
                   </div>
                   <div className="col-md-2">
-                    <label className="form-label fw-semibold">Land Area (m²)</label>
+                    <label className="form-label fw-semibold">Luas Tanah (m²)</label>
                     <div className="d-flex align-items-center">
                       <input
                         type="number"
@@ -352,7 +385,7 @@ function Dashboard() {
                         value={ltMin === null ? '' : ltMin}
                         onChange={e => setLtMin(e.target.value === '' ? null : Number(e.target.value))}
                         className="form-control me-1"
-                        placeholder="Min"
+                        placeholder="Minimum"
                       />
                       <span className="mx-1">-</span>
                       <input
@@ -362,12 +395,12 @@ function Dashboard() {
                         value={ltMax === null ? '' : ltMax}
                         onChange={e => setLtMax(e.target.value === '' ? null : Number(e.target.value))}
                         className="form-control"
-                        placeholder="Max"
+                        placeholder="Maksimum"
                       />
                     </div>
                   </div>
                   <div className="col-md-2">
-                    <label className="form-label fw-semibold">Building Area (m²)</label>
+                    <label className="form-label fw-semibold">Luas Bangunan (m²)</label>
                     <div className="d-flex align-items-center">
                       <input
                         type="number"
@@ -376,7 +409,7 @@ function Dashboard() {
                         value={lbMin === null ? '' : lbMin}
                         onChange={e => setLbMin(e.target.value === '' ? null : Number(e.target.value))}
                         className="form-control me-1"
-                        placeholder="Min"
+                        placeholder="Minimum"
                       />
                       <span className="mx-1">-</span>
                       <input
@@ -386,31 +419,31 @@ function Dashboard() {
                         value={lbMax === null ? '' : lbMax}
                         onChange={e => setLbMax(e.target.value === '' ? null : Number(e.target.value))}
                         className="form-control"
-                        placeholder="Max"
+                        placeholder="Maksimum"
                       />
                     </div>
                   </div>
                   <div className="col-md-2">
-                    <label className="form-label fw-semibold">Bedrooms</label>
+                    <label className="form-label fw-semibold">Kamar Tidur</label>
                     <select
                       className="form-select"
                       value={selectedKT}
                       onChange={e => setSelectedKT(e.target.value)}
                     >
-                      <option value="All">All</option>
+                      <option value="All">Semua</option>
                       {[1,2,3,4,5,6,7,8,9,10].map(n => (
                         <option key={n} value={n}>{n}</option>
                       ))}
                     </select>
                   </div>
                   <div className="col-md-2">
-                    <label className="form-label fw-semibold">Bathrooms</label>
+                    <label className="form-label fw-semibold">Kamar Mandi</label>
                     <select
                       className="form-select"
                       value={selectedKM}
                       onChange={e => setSelectedKM(e.target.value)}
                     >
-                      <option value="All">All</option>
+                      <option value="All">Semua</option>
                       {[1,2,3,4,5,6,7,8,9,10].map(n => (
                         <option key={n} value={n}>{n}</option>
                       ))}
@@ -426,19 +459,20 @@ function Dashboard() {
                       onClick={applyFilters}
                     >
                       <i className="bi bi-funnel me-2"></i>
-                      Apply Filters
+                      Terapkan Filter
                     </button>
                     <button 
                       className="btn btn-outline-secondary px-4 py-2"
                       onClick={resetFilters}
                     >
                       <i className="bi bi-arrow-clockwise me-2"></i>
-                      Reset Filters
+                      Atur Ulang Filter
                     </button>
                   </div>
                 </div>
               </div>
             </div>
+            )}
           </div>
         </div>
 
@@ -468,7 +502,7 @@ function Dashboard() {
             <div className="text-center">Loading...</div>
           ) : filteredListings.length === 0 ? (
             <div className="text-center">No properties found.</div>
-          ) : filteredListings.map((listing) => (
+          ) : paginatedListings.map((listing) => (
             <div className="col-lg-4 col-md-6" key={listing.id}>
               <div 
                 className="card h-100 border-0" 
@@ -557,6 +591,28 @@ function Dashboard() {
             </div>
           ))}
         </div>
+        {/* Pagination Controls */}
+        {!loading && filteredListings.length > ITEMS_PER_PAGE && (
+          <div className="row mt-4">
+            <div className="col d-flex justify-content-center align-items-center gap-2">
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                Prev
+              </button>
+              <span className="text-muted">Page {currentPage} of {totalPages}</span>
+              <button
+                className="btn btn-outline-secondary"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

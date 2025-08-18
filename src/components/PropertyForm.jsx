@@ -537,10 +537,16 @@ Property data: ${aiPrompt}`
   const navigate = useNavigate();
 
   return (
-    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-      <div className="col-md-6 position-relative">
+    <div className="container d-flex justify-content-center align-items-start py-5" style={{ minHeight: '100vh' }}>
+      <div className="col-lg-8 col-xl-7 position-relative">
         
-        <h3 className="text-center mb-4">Add Property</h3>
+        <div className="text-center mb-4">
+          <h2 className="fw-bold mb-1">
+            <i className="bi bi-building text-primary me-2"></i>
+            Tambah Properti
+          </h2>
+          <p className="text-muted mb-0">Tambah lokasi dengan detail properti</p>
+        </div>
         
         {alert.message && (
           <div 
@@ -570,34 +576,35 @@ Property data: ${aiPrompt}`
           </div>
         )}
         
-        <form onSubmit={handleSubmit}>
-          {/* AI Assistant Section */}
-          <div className="mb-4">
-            <div className="card border-primary">
-              <div className="card-header bg-primary text-white">
+        <form onSubmit={handleSubmit} className="card shadow-sm border-0 rounded-4 overflow-hidden" style={{ boxShadow: 'rgba(60, 64, 67, 0.4) 0px 2px 4px 0px, rgba(60, 64, 67, 0.25) 0px 8px 16px 2px, rgba(60, 64, 67, 0.15) 0px 16px 28px 4px', backgroundColor: '#ffffff' }}>
+          <div className="card-body p-4 p-md-5">
+            {/* AI Assistant Section */}
+            <div className="mb-4">
+            <div className="card border-0 shadow-sm rounded-3">
+              <div className="card-header bg-primary bg-gradient text-white">
                 <h6 className="mb-0">
                   <i className="bi bi-robot me-2"></i>
-                  AI Assistant
+                  Spesifikasi Otomatis  
                 </h6>
               </div>
               <div className="card-body">
                 <div className="mb-3">
-                  <label className="form-label fw-semibold">Ask AI for help:</label>
+                  <label className="form-label fw-semibold">Masukan spesifikasi property :</label>
                   <div className="input-group">
                     <textarea
                       className="form-control"
-                      placeholder="Paste property data here to extract LT, LB, KT, KM, and Price automatically"
+                      placeholder="Masukan data property disini seperti Luas Tanah, Luas Bangunan, Kamar Tidur, dan yang lainnya"
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
                       rows="2"
-                      style={{ resize: 'vertical', minHeight: '60px' }}
+                      style={{ resize: 'vertical', minHeight: '60px', borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
                     />
                     <button
                       type="button"
-                      className="btn btn-primary"
+                      className="btn btn-primary btn-sm px-4"
                       onClick={callGeminiAI}
                       disabled={aiLoading}
-                      style={{ minWidth: '100px' }}
+                      style={{ minWidth: '120px' }}
                     >
                       {aiLoading ? (
                         <>
@@ -607,7 +614,7 @@ Property data: ${aiPrompt}`
                       ) : (
                         <>
                           <i className="bi bi-magic me-2"></i>
-                          Ask AI
+                          Tanya AI
                         </>
                       )}
                     </button>
@@ -616,8 +623,8 @@ Property data: ${aiPrompt}`
                 
                 {aiResponse && (
                   <div className="mb-3">
-                    <label className="form-label fw-semibold">AI Response:</label>
-                    <div className="border rounded p-3 bg-light">
+                    <label className="form-label fw-semibold">Jawaban AI:</label>
+                    <div className="border rounded-3 p-3 bg-light">
                       <div 
                         className="mb-3"
                         style={{
@@ -633,24 +640,25 @@ Property data: ${aiPrompt}`
                       </div>
                       <button
                         type="button"
-                        className="btn btn-success btn-sm"
+                        className="btn btn-success btn-sm rounded-3"
                         onClick={useAIResponse}
                       >
                         <i className="bi bi-check-circle me-2"></i>
-                        Use This Response
+                        Gunakan respon ini
                       </button>
                     </div>
                   </div>
                 )}
               </div>
             </div>
-          </div>
+            </div>
+          <hr className="text-muted"/>
           <div className="mb-3">
-            <label className="form-label">Title</label>
+            <label className="form-label">Judul</label>
             <input name="title" className="form-control" value={formData.title} onChange={handleChange} />
           </div>
           <div className="mb-3">
-            <label className="form-label">Description</label>
+            <label className="form-label">Deskripsi</label>
             <textarea 
               name="description" 
               className="form-control" 
@@ -669,7 +677,7 @@ Property data: ${aiPrompt}`
             />
           </div>
           <div className="mb-3">
-            <label className="form-label">Transaction Type</label>
+            <label className="form-label">Tipe Transaksi</label>
             <select
               name="transaction_type"
               className="form-select"
@@ -683,7 +691,7 @@ Property data: ${aiPrompt}`
             </select>
           </div>
           <div className="mb-3">
-            <label className="form-label">Property Type</label>
+            <label className="form-label">Tipe Properti</label>
             <select
               name="property_type"
               className="form-select"
@@ -698,15 +706,16 @@ Property data: ${aiPrompt}`
             </select>
           </div>
           <div className="mb-3">
-            <label className="form-label">Images</label>
+            <label className="form-label">Gambar</label>
             <div 
-              className="border border-dashed border-2 p-4 text-center"
+              className="border border-dashed border-2 p-4 text-center rounded-4 bg-light"
               style={{ 
                 borderStyle: 'dashed', 
-                borderColor: '#ccc',
-                backgroundColor: '#f8f9fa',
+                borderColor: '#cfd8dc',
+                backgroundColor: '#f8fbff',
                 cursor: 'pointer',
-                minHeight: '120px'
+                minHeight: '140px',
+                transition: 'background-color 0.2s ease'
               }}
               onClick={() => fileInputRef.current?.click()}
               onPaste={handlePaste}
@@ -725,9 +734,9 @@ Property data: ${aiPrompt}`
                 </div>
               ) : (
                 <div>
-                  <i className="bi bi-cloud-upload fs-1 text-muted"></i>
-                  <p className="mt-2 mb-0">Click to upload image or paste from clipboard</p>
-                  <small className="text-muted">Supports: JPG, PNG, GIF</small>
+                  <i className="bi bi-cloud-arrow-up fs-1 text-primary"></i>
+                  <p className="mt-2 mb-0 fw-semibold">Click to upload or paste from clipboard</p>
+                  <small className="text-muted">Supported: JPG, PNG, GIF</small>
                 </div>
               )}
             </div>
@@ -739,16 +748,16 @@ Property data: ${aiPrompt}`
                   <img 
                     src={uploadedImage} 
                     alt="Uploaded"
-                    className="img-fluid"
+                    className="img-fluid rounded-3 shadow-sm"
                     style={{ width: '100%', height: 'auto', objectFit: 'contain', maxHeight: '400px' }}
                   />
                   <button
                     type="button"
-                    className="btn btn-danger btn-sm position-absolute"
+                    className="btn btn-danger btn-sm rounded-circle position-absolute shadow"
                     style={{ top: '5px', right: '5px' }}
                     onClick={removeImage}
                   >
-                    ×
+                    <i className="bi bi-x-lg"></i>
                   </button>
                 </div>
               </div>
@@ -782,7 +791,7 @@ Property data: ${aiPrompt}`
             </div>
           )}
           <div className="mb-3 mt-3">
-            <label className="form-label">Province</label>
+            <label className="form-label">Provinsi</label>
             <div className="input-group">
               <select
                 name="province"
@@ -791,7 +800,7 @@ Property data: ${aiPrompt}`
                 onChange={handleChange}
                 style={{ borderRight: 'none' }}
               >
-                <option value="">Select Province</option>
+                <option value="">Pilih Provinsi</option>
                 {uniqueProvinces.map((province, index) => (
                   <option key={index} value={province}>{province}</option>
                 ))}
@@ -806,10 +815,10 @@ Property data: ${aiPrompt}`
                 style={{ borderLeft: 'none' }}
               />
             </div>
-            {locationLoading && <small className="text-muted">Loading provinces...</small>}
+            {locationLoading && <small className="text-muted">Loading provinsi...</small>}
           </div>
           <div className="mb-3">
-            <label className="form-label">City</label>
+            <label className="form-label">Kota</label>
             <div className="input-group">
               <select
                 name="city"
@@ -818,7 +827,7 @@ Property data: ${aiPrompt}`
                 onChange={handleChange}
                 style={{ borderRight: 'none' }}
               >
-                <option value="">Select City</option>
+                <option value="">Pilih Kota</option>
                 {uniqueCities.map((city, index) => (
                   <option key={index} value={city}>{city}</option>
                 ))}
@@ -833,10 +842,10 @@ Property data: ${aiPrompt}`
                 style={{ borderLeft: 'none' }}
               />
             </div>
-            {locationLoading && <small className="text-muted">Loading cities...</small>}
+            {locationLoading && <small className="text-muted">Loading kota...</small>}
           </div>
           <div className="mb-3">
-            <label className="form-label">District</label>
+            <label className="form-label">Kecamatan</label>
             <div className="input-group">
               <select
                 name="district"
@@ -845,7 +854,7 @@ Property data: ${aiPrompt}`
                 onChange={handleChange}
                 style={{ borderRight: 'none' }}
               >
-                <option value="">Select District</option>
+                <option value="">Pilih Kecamatan</option>
                 {uniqueDistricts.map((district, index) => (
                   <option key={index} value={district}>{district}</option>
                 ))}
@@ -860,14 +869,14 @@ Property data: ${aiPrompt}`
                 style={{ borderLeft: 'none' }}
               />
             </div>
-            {locationLoading && <small className="text-muted">Loading districts...</small>}
+            {locationLoading && <small className="text-muted">Loading kecamatan...</small>}
             <small className="text-info">
               <i className="bi bi-lightbulb me-1"></i>
-              Tip: Start typing a district name to auto-fill province and city based on previous data
+              Tip: Masukan kecamatan berdasarkan data yang sudah pernah di masukan sebelumnya
             </small>
           </div>
           <div className="mb-3">
-            <label className="form-label">Price</label>
+            <label className="form-label">Harga</label>
             <div className="d-flex align-items-center">
               <input 
                 name="price" 
@@ -884,9 +893,10 @@ Property data: ${aiPrompt}`
               )}
             </div>
           </div>
-          <button className="btn btn-primary w-100 mb-3" disabled={isUploading}>
+          <button className="btn btn-primary btn-lg w-100 rounded-3 shadow-sm" disabled={isUploading}>
             {isUploading ? 'Uploading...' : 'Submit'}
           </button>
+          </div>
           {/* <button 
             type="button" 
             className="btn btn-secondary w-100 mb-3" 
