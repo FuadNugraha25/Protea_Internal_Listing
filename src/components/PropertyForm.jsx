@@ -2,7 +2,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import Alert from '@mui/material/Alert';
-import { useNavigate } from 'react-router-dom';
 
 const PropertyForm = ({ user }) => {
   const [formData, setFormData] = useState({
@@ -13,9 +12,8 @@ const PropertyForm = ({ user }) => {
     lb: '',
     kt: '',
     km: '',
-    province: '',
     city: '',
-    district: '',
+    province: '',
     price: '',
     transaction_type: '',
     property_type: '',
@@ -29,9 +27,6 @@ const PropertyForm = ({ user }) => {
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
-  // Add state for existing location data
-  const [existingListings, setExistingListings] = useState([]);
-  const [locationLoading, setLocationLoading] = useState(true);
 
   useEffect(() => {
     if (alert.message) {
@@ -45,78 +40,6 @@ const PropertyForm = ({ user }) => {
       return () => clearTimeout(timer);
     }
   }, [alert.message]);
-
-  // Fetch existing listings for dropdown data
-  useEffect(() => {
-    async function fetchExistingListings() {
-      setLocationLoading(true);
-      try {
-        const { data, error } = await supabase.from("listings").select('province, city, district');
-        if (error) {
-          console.error('Error fetching existing listings:', error);
-        } else {
-          setExistingListings(data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching existing listings:', error);
-      } finally {
-        setLocationLoading(false);
-      }
-    }
-    fetchExistingListings();
-  }, []);
-
-  // Extract unique values for dropdowns
-  const uniqueProvinces = [...new Set(existingListings.map(listing => listing.province).filter(Boolean))].sort();
-  const uniqueCities = [...new Set(existingListings.map(listing => listing.city).filter(Boolean))].sort();
-  const uniqueDistricts = [...new Set(existingListings.map(listing => listing.district).filter(Boolean))].sort();
-
-  // Machine learning function to predict province and city based on district
-  const predictLocationFromDistrict = (district) => {
-    if (!district || !existingListings.length) return { province: '', city: '' };
-
-    // Find all listings with this district (case-insensitive partial match)
-    const matchingListings = existingListings.filter(listing => 
-      listing.district && 
-      listing.district.toLowerCase().includes(district.toLowerCase())
-    );
-
-    if (matchingListings.length === 0) {
-      console.log(`No matches found for district: "${district}"`);
-      return { province: '', city: '' };
-    }
-
-    console.log(`Found ${matchingListings.length} matches for district: "${district}"`);
-    console.log('Matching listings:', matchingListings.map(l => ({ district: l.district, province: l.province, city: l.city })));
-
-    // Count occurrences of province and city combinations
-    const locationCounts = {};
-    matchingListings.forEach(listing => {
-      if (listing.province && listing.city) {
-        const key = `${listing.province}|${listing.city}`;
-        locationCounts[key] = (locationCounts[key] || 0) + 1;
-      }
-    });
-
-    // Find the most common combination
-    let mostCommonKey = '';
-    let maxCount = 0;
-    Object.entries(locationCounts).forEach(([key, count]) => {
-      if (count > maxCount) {
-        maxCount = count;
-        mostCommonKey = key;
-      }
-    });
-
-    if (mostCommonKey) {
-      const [province, city] = mostCommonKey.split('|');
-      console.log(`Predicted location: ${province}, ${city} (${maxCount} occurrences)`);
-      return { province, city };
-    }
-
-    console.log('No valid province/city combinations found');
-    return { province: '', city: '' };
-  };
 
   const formatPriceWithCommas = (value) => {
     // Remove all non-digit characters
@@ -199,40 +122,6 @@ const PropertyForm = ({ user }) => {
         updatedForm.price = priceNum;
       }
     }
-
-    // Machine learning: Auto-fill province and city based on district
-    if (name === 'district' && value.trim()) {
-      const predictedLocation = predictLocationFromDistrict(value);
-      if (predictedLocation.province && predictedLocation.city) {
-        updatedForm.province = predictedLocation.province;
-        updatedForm.city = predictedLocation.city;
-        
-        // Count total matches to calculate confidence
-        const matchingListings = existingListings.filter(listing => 
-          listing.district && 
-          listing.district.toLowerCase().includes(value.toLowerCase())
-        );
-        
-        // Count the most common combination
-        const locationCounts = {};
-        matchingListings.forEach(listing => {
-          if (listing.province && listing.city) {
-            const key = `${listing.province}|${listing.city}`;
-            locationCounts[key] = (locationCounts[key] || 0) + 1;
-          }
-        });
-        
-        const maxCount = Math.max(...Object.values(locationCounts));
-        const confidence = Math.round((maxCount / matchingListings.length) * 100);
-        
-        // Show success notification with confidence
-        setAlert({ 
-          message: `✅ Auto-filled: ${predictedLocation.province}, ${predictedLocation.city} (${confidence}% confidence based on ${matchingListings.length} previous entries)`, 
-          severity: 'success' 
-        });
-      }
-    }
-
     setFormData(updatedForm);
   };
 
@@ -445,7 +334,7 @@ Property data: ${aiPrompt}`
         ...extractedData
       }));
       
-      setAlert({ message: '✅ AaaaI extracted data applied to form fields!', severity: 'success' });
+      setAlert({ message: '✅ AI extracted data applied to form fields!', severity: 'success' });
     }
   };
 
@@ -490,9 +379,8 @@ Property data: ${aiPrompt}`
       lb: convertToNumberOrNull(formData.lb),
       kt: convertToNumberOrNull(formData.kt),
       km: convertToNumberOrNull(formData.km),
-      province: formData.province,
       city: formData.city,
-      district: formData.district,
+      province: formData.province,
       price: convertPriceToStringOrNull(formData.price),
       transaction_type: formData.transaction_type,
       property_type: formData.property_type,
@@ -523,9 +411,8 @@ Property data: ${aiPrompt}`
         lb: '',
         kt: '',
         km: '',
-        province: '',
         city: '',
-        district: '',
+        province: '',
         price: '',
         transaction_type: '',
         property_type: '',
@@ -534,20 +421,10 @@ Property data: ${aiPrompt}`
     }
   }
 
-  const navigate = useNavigate();
-
   return (
-    <div className="container d-flex justify-content-center align-items-start py-5" style={{ minHeight: '100vh' }}>
-      <div className="col-lg-8 col-xl-7 position-relative">
-        
-        <div className="text-center mb-4">
-          <h2 className="fw-bold mb-1">
-            <i className="bi bi-building text-primary me-2"></i>
-            Tambah Properti
-          </h2>
-          <p className="text-muted mb-0">Tambah lokasi dengan detail properti</p>
-        </div>
-        
+    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+      <div className="col-md-6">
+        <h3 className="text-center mb-4">Add Property</h3>
         {alert.message && (
           <div 
             className="position-fixed"
@@ -575,36 +452,34 @@ Property data: ${aiPrompt}`
             </div>
           </div>
         )}
-        
-        <form onSubmit={handleSubmit} className="card shadow-sm border-0 rounded-4 overflow-hidden" style={{ boxShadow: 'rgba(60, 64, 67, 0.4) 0px 2px 4px 0px, rgba(60, 64, 67, 0.25) 0px 8px 16px 2px, rgba(60, 64, 67, 0.15) 0px 16px 28px 4px', backgroundColor: '#ffffff' }}>
-          <div className="card-body p-4 p-md-5">
-            {/* AI Assistant Section */}
-            <div className="mb-4">
-            <div className="card border-0 shadow-sm rounded-3">
-              <div className="card-header bg-primary bg-gradient text-white">
+        <form onSubmit={handleSubmit}>
+          {/* AI Assistant Section */}
+          <div className="mb-4">
+            <div className="card border-primary">
+              <div className="card-header bg-primary text-white">
                 <h6 className="mb-0">
                   <i className="bi bi-robot me-2"></i>
-                  Spesifikasi Otomatis  
+                  AI Assistant
                 </h6>
               </div>
               <div className="card-body">
                 <div className="mb-3">
-                  <label className="form-label fw-semibold">Masukan spesifikasi property :</label>
+                  <label className="form-label fw-semibold">Ask AI for help:</label>
                   <div className="input-group">
                     <textarea
                       className="form-control"
-                      placeholder="Masukan data property disini seperti Luas Tanah, Luas Bangunan, Kamar Tidur, dan yang lainnya"
+                      placeholder="Paste property data here to extract LT, LB, KT, KM, and Price automatically"
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
                       rows="2"
-                      style={{ resize: 'vertical', minHeight: '60px', borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+                      style={{ resize: 'vertical', minHeight: '60px' }}
                     />
                     <button
                       type="button"
-                      className="btn btn-primary btn-sm px-4"
+                      className="btn btn-primary"
                       onClick={callGeminiAI}
                       disabled={aiLoading}
-                      style={{ minWidth: '120px' }}
+                      style={{ minWidth: '100px' }}
                     >
                       {aiLoading ? (
                         <>
@@ -614,7 +489,7 @@ Property data: ${aiPrompt}`
                       ) : (
                         <>
                           <i className="bi bi-magic me-2"></i>
-                          Tanya AI
+                          Ask AI
                         </>
                       )}
                     </button>
@@ -623,8 +498,8 @@ Property data: ${aiPrompt}`
                 
                 {aiResponse && (
                   <div className="mb-3">
-                    <label className="form-label fw-semibold">Jawaban AI:</label>
-                    <div className="border rounded-3 p-3 bg-light">
+                    <label className="form-label fw-semibold">AI Response:</label>
+                    <div className="border rounded p-3 bg-light">
                       <div 
                         className="mb-3"
                         style={{
@@ -640,44 +515,28 @@ Property data: ${aiPrompt}`
                       </div>
                       <button
                         type="button"
-                        className="btn btn-success btn-sm rounded-3"
+                        className="btn btn-success btn-sm"
                         onClick={useAIResponse}
                       >
                         <i className="bi bi-check-circle me-2"></i>
-                        Gunakan respon ini
+                        Use This Response
                       </button>
                     </div>
                   </div>
                 )}
               </div>
             </div>
-            </div>
-          <hr className="text-muted"/>
+          </div>
           <div className="mb-3">
-            <label className="form-label">Judul</label>
+            <label className="form-label">Title</label>
             <input name="title" className="form-control" value={formData.title} onChange={handleChange} />
           </div>
           <div className="mb-3">
-            <label className="form-label">Deskripsi</label>
-            <textarea 
-              name="description" 
-              className="form-control" 
-              value={formData.description} 
-              onChange={handleChange}
-              style={{
-                resize: 'none',
-                overflow: 'hidden',
-                minHeight: '100px'
-              }}
-              onInput={(e) => {
-                // Auto-resize the textarea
-                e.target.style.height = 'auto';
-                e.target.style.height = e.target.scrollHeight + 'px';
-              }}
-            />
+            <label className="form-label">Description</label>
+            <textarea name="description" className="form-control" value={formData.description} onChange={handleChange} />
           </div>
           <div className="mb-3">
-            <label className="form-label">Tipe Transaksi</label>
+            <label className="form-label">Transaction Type</label>
             <select
               name="transaction_type"
               className="form-select"
@@ -691,7 +550,7 @@ Property data: ${aiPrompt}`
             </select>
           </div>
           <div className="mb-3">
-            <label className="form-label">Tipe Properti</label>
+            <label className="form-label">Property Type</label>
             <select
               name="property_type"
               className="form-select"
@@ -706,16 +565,15 @@ Property data: ${aiPrompt}`
             </select>
           </div>
           <div className="mb-3">
-            <label className="form-label">Gambar</label>
+            <label className="form-label">Images</label>
             <div 
-              className="border border-dashed border-2 p-4 text-center rounded-4 bg-light"
+              className="border border-dashed border-2 p-4 text-center"
               style={{ 
                 borderStyle: 'dashed', 
-                borderColor: '#cfd8dc',
-                backgroundColor: '#f8fbff',
+                borderColor: '#ccc',
+                backgroundColor: '#f8f9fa',
                 cursor: 'pointer',
-                minHeight: '140px',
-                transition: 'background-color 0.2s ease'
+                minHeight: '120px'
               }}
               onClick={() => fileInputRef.current?.click()}
               onPaste={handlePaste}
@@ -734,9 +592,9 @@ Property data: ${aiPrompt}`
                 </div>
               ) : (
                 <div>
-                  <i className="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                  <p className="mt-2 mb-0 fw-semibold">Click to upload or paste from clipboard</p>
-                  <small className="text-muted">Supported: JPG, PNG, GIF</small>
+                  <i className="bi bi-cloud-upload fs-1 text-muted"></i>
+                  <p className="mt-2 mb-0">Click to upload image or paste from clipboard</p>
+                  <small className="text-muted">Supports: JPG, PNG, GIF</small>
                 </div>
               )}
             </div>
@@ -748,16 +606,16 @@ Property data: ${aiPrompt}`
                   <img 
                     src={uploadedImage} 
                     alt="Uploaded"
-                    className="img-fluid rounded-3 shadow-sm"
+                    className="img-fluid"
                     style={{ width: '100%', height: 'auto', objectFit: 'contain', maxHeight: '400px' }}
                   />
                   <button
                     type="button"
-                    className="btn btn-danger btn-sm rounded-circle position-absolute shadow"
+                    className="btn btn-danger btn-sm position-absolute"
                     style={{ top: '5px', right: '5px' }}
                     onClick={removeImage}
                   >
-                    <i className="bi bi-x-lg"></i>
+                    ×
                   </button>
                 </div>
               </div>
@@ -791,92 +649,15 @@ Property data: ${aiPrompt}`
             </div>
           )}
           <div className="mb-3 mt-3">
-            <label className="form-label">Provinsi</label>
-            <div className="input-group">
-              <select
-                name="province"
-                className="form-select"
-                value={formData.province}
-                onChange={handleChange}
-                style={{ borderRight: 'none' }}
-              >
-                <option value="">Pilih Provinsi</option>
-                {uniqueProvinces.map((province, index) => (
-                  <option key={index} value={province}>{province}</option>
-                ))}
-              </select>
-              <input
-                type="text"
-                name="province"
-                className="form-control"
-                placeholder="Or type new province"
-                value={formData.province}
-                onChange={handleChange}
-                style={{ borderLeft: 'none' }}
-              />
-            </div>
-            {locationLoading && <small className="text-muted">Loading provinsi...</small>}
+            <label className="form-label">City</label>
+            <input name="city" className="form-control" value={formData.city} onChange={handleChange} />
           </div>
           <div className="mb-3">
-            <label className="form-label">Kota</label>
-            <div className="input-group">
-              <select
-                name="city"
-                className="form-select"
-                value={formData.city}
-                onChange={handleChange}
-                style={{ borderRight: 'none' }}
-              >
-                <option value="">Pilih Kota</option>
-                {uniqueCities.map((city, index) => (
-                  <option key={index} value={city}>{city}</option>
-                ))}
-              </select>
-              <input
-                type="text"
-                name="city"
-                className="form-control"
-                placeholder="Or type new city"
-                value={formData.city}
-                onChange={handleChange}
-                style={{ borderLeft: 'none' }}
-              />
-            </div>
-            {locationLoading && <small className="text-muted">Loading kota...</small>}
+            <label className="form-label">Province</label>
+            <input name="province" className="form-control" value={formData.province} onChange={handleChange} />
           </div>
           <div className="mb-3">
-            <label className="form-label">Kecamatan</label>
-            <div className="input-group">
-              <select
-                name="district"
-                className="form-select"
-                value={formData.district}
-                onChange={handleChange}
-                style={{ borderRight: 'none' }}
-              >
-                <option value="">Pilih Kecamatan</option>
-                {uniqueDistricts.map((district, index) => (
-                  <option key={index} value={district}>{district}</option>
-                ))}
-              </select>
-              <input
-                type="text"
-                name="district"
-                className="form-control"
-                placeholder="Or type new district"
-                value={formData.district}
-                onChange={handleChange}
-                style={{ borderLeft: 'none' }}
-              />
-            </div>
-            {locationLoading && <small className="text-muted">Loading kecamatan...</small>}
-            <small className="text-info">
-              <i className="bi bi-lightbulb me-1"></i>
-              Tip: Masukan kecamatan berdasarkan data yang sudah pernah di masukan sebelumnya
-            </small>
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Harga</label>
+            <label className="form-label">Price</label>
             <div className="d-flex align-items-center">
               <input 
                 name="price" 
@@ -893,10 +674,9 @@ Property data: ${aiPrompt}`
               )}
             </div>
           </div>
-          <button className="btn btn-primary btn-lg w-100 rounded-3 shadow-sm" disabled={isUploading}>
+          <button className="btn btn-primary w-100 mb-3" disabled={isUploading}>
             {isUploading ? 'Uploading...' : 'Submit'}
           </button>
-          </div>
           {/* <button 
             type="button" 
             className="btn btn-secondary w-100 mb-3" 
@@ -971,3 +751,4 @@ Property data: ${aiPrompt}`
 };
 
 export default PropertyForm;
+
