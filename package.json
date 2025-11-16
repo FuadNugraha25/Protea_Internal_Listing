@@ -21,6 +21,7 @@
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.52.1",
     "bootstrap": "^5.3.7",
+    "browser-image-compression": "^2.0.2",
     "foundation-sites": "^6.9.0",
     "primeicons": "^7.0.0",
     "primereact": "^10.9.7",
