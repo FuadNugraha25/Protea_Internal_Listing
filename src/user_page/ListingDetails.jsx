@@ -1,8 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
-import { FaBed, FaBath } from "react-icons/fa";
+import { FaBed, FaBath, FaRulerCombined, FaHome } from "react-icons/fa";
 import Navbar from "../components/Navbar";
+import FoundationWrapper from "../components/FoundationWrapper";
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
+import { Toast } from 'primereact/toast';
 
 
 function formatIDR(price) {
@@ -15,11 +19,9 @@ export default function ListingDetails() {
   const navigate = useNavigate();
   const [listing, setListing] = useState(null);
   const [user, setUser] = useState(null);
-  const [copyLoading, setCopyLoading] = useState(false);
-  const [copySuccess, setCopySuccess] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const toast = useRef(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
@@ -51,30 +53,14 @@ export default function ListingDetails() {
 
   const allowedUserId = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136'];
 
-  const handleCopyLink = async () => {
-    setCopyLoading(true);
-    setCopySuccess(false);
-    try {
-      const fullUrl = window.location.origin + `/listing/${id}`;
-      await navigator.clipboard.writeText(fullUrl);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } catch (error) {
-      console.error('Failed to copy link:', error);
-    }
-    setCopyLoading(false);
-  };
-
   const handleDelete = () => {
     setShowDeleteConfirm(true);
   };
 
   const confirmDelete = async () => {
     try {
-      // Delete image from storage if it exists
       if (listing?.image_urls) {
         try {
-          // Extract the file path from the URL
           const imageUrl = listing.image_urls;
           const pathMatch = imageUrl.match(/house-photos\/([^?]+)/);
           if (pathMatch) {
@@ -83,31 +69,44 @@ export default function ListingDetails() {
           }
         } catch (imageError) {
           console.error('Error deleting image:', imageError);
-          // Continue with deletion even if image deletion fails
         }
       }
 
-      // Delete the record from database
       const { error } = await supabase.from("listings").delete().eq("id", id);
       
       if (error) {
         console.error('Error deleting listing:', error);
-        alert('Failed to delete listing. Please try again.');
+        toast.current.show({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to delete listing. Please try again.',
+          life: 3000
+        });
         setShowDeleteConfirm(false);
         return;
       }
 
-      // Update local state
       setIsDeleted(true);
       setShowDeleteConfirm(false);
-      setShowSuccess(true);
+      
+      toast.current.show({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Listing deleted successfully!',
+        life: 3000
+      });
+      
       setTimeout(() => {
-        setShowSuccess(false);
         navigate('/dashboard');
       }, 1500);
     } catch (error) {
       console.error('Error during deletion:', error);
-      alert('An error occurred while deleting the listing. Please try again.');
+      toast.current.show({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'An error occurred while deleting the listing. Please try again.',
+        life: 3000
+      });
       setShowDeleteConfirm(false);
     }
   };
@@ -118,351 +117,371 @@ export default function ListingDetails() {
 
   return (
     <>
-      <Navbar title="Dashboard" showAdminButton={user && user.id === allowedUserId} />
-      <div className="container mb-5" style={{ paddingTop: '6rem', marginTop: '1rem' }}>
-        <div className="d-flex mb-3 justify-content-between align-items-center">
-          {/* Left group: Back, Copy Link */}
-          <div className="d-flex gap-2 align-items-center">
-            <button className="btn btn-secondary d-inline-flex align-items-center" onClick={() => navigate('/dashboard')}>
-              <span className="me-2" style={{fontSize: '1.2em'}}>&larr;</span> Back
-            </button>
-            <button className="btn btn-success d-inline-flex align-items-center" onClick={handleCopyLink} disabled={copyLoading}>
-              <span className="me-2" style={{fontSize: '1.2em'}}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-link-45deg" viewBox="0 0 16 16">
-                  <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
-                  <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
-                </svg>
-              </span>
-              {copyLoading ? 'Copying...' : copySuccess ? 'Link Copied!' : 'Copy Link'}
-            </button>
-          </div>
-          {/* Right group: Edit, Delete (only for allowed users) */}
+      <Toast ref={toast} />
+      <Navbar 
+        title="Dashboard" 
+        showAdminButton={user && allowedUserId.includes(user.id)}
+        showTestingButton={user && allowedUserId.includes(user.id)}
+        showTambahListingButton={user && !allowedUserId.includes(user.id)}
+        user={user}
+      />
+      <FoundationWrapper style={{ paddingTop: '6rem', minHeight: '100vh', background: '#f8f9fa' }}>
+        <div className="grid-container" style={{ maxWidth: '1400px' }}>
+          
+          {/* Action Bar */}
           {user && allowedUserId.includes(user.id) && (
-            <div className="d-flex gap-2 align-items-center">
-              <button className="btn btn-warning d-inline-flex align-items-center" onClick={() => navigate(`/edit-listing/${id}`)}>
-                <span className="me-2" style={{fontSize: '1.2em'}}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-pencil" viewBox="0 0 16 16">
-                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
-                </svg>
-                </span>
-                Edit Property
-              </button>
-              <button className="btn btn-danger d-inline-flex align-items-center" onClick={handleDelete}>
-                <span className="me-2" style={{fontSize: '1.2em'}}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-trash" viewBox="0 0 16 16">
-                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 1 0v6a.5.5 0 0 1-1 0V6z"/>
-                    <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
-                </svg>
-                </span>
-                Delete
-              </button>
+            <div className="grid-x grid-margin-x" style={{ marginBottom: '1.5rem' }}>
+              <div className="cell">
+                <div className="card" style={{ border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: '10px' }}>
+                  <div className="card-section" style={{ padding: '0.875rem 1.25rem', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.625rem' }}>
+                    <button 
+                      className="button" 
+                      onClick={() => navigate(`/edit-listing/${id}`)}
+                      style={{ 
+                        borderRadius: '6px',
+                        padding: '0.5rem 1rem',
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        background: '#ffae00',
+                        color: '#0a0a0a',
+                        border: 'none',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button 
+                      className="button alert" 
+                      onClick={handleDelete}
+                      style={{ 
+                        borderRadius: '6px',
+                        padding: '0.5rem 1rem',
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      🗑️ Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
+
+          {/* Main Content Grid */}
+          <div className="grid-x grid-margin-x grid-margin-y">
+            
+            {/* Left Column - Image */}
+            <div className="cell small-12 large-8">
+              <div className="card" style={{ border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px', overflow: 'hidden' }}>
+                <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#e6e6e6', overflow: 'hidden' }}>
+                  <img
+                    src={listing?.image}
+                    alt={listing?.title}
+                    style={{ 
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      objectPosition: 'center'
+                    }}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #767676; font-size: 0.9rem;">No Image Available</div>';
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Key Info */}
+            <div className="cell small-12 large-4">
+              <div className="card" style={{ border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px', height: '100%' }}>
+                <div className="card-section" style={{ padding: '1.25rem' }}>
+                  {/* Title */}
+                  <h1 style={{ 
+                    fontSize: '1.5rem', 
+                    fontWeight: 700, 
+                    color: '#0a0a0a',
+                    lineHeight: 1.3,
+                    marginBottom: '0.75rem',
+                    letterSpacing: '-0.01em'
+                  }}>
+                    {isDeleted ? "DELETED" : listing?.title}
+                  </h1>
+                  
+                  {/* Location */}
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.375rem',
+                    marginBottom: '1rem',
+                    color: '#767676',
+                    fontSize: '0.875rem'
+                  }}>
+                    <span style={{ fontSize: '0.9rem' }}>📍</span>
+                    <span>{listing?.location}</span>
+                  </div>
+                  
+                  {/* Price */}
+                  <div style={{ 
+                    padding: '1rem',
+                    background: 'linear-gradient(135deg, #1779ba 0%, #14679e 100%)',
+                    borderRadius: '10px',
+                    marginBottom: '1.25rem',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{ 
+                      fontSize: '0.75rem', 
+                      color: 'rgba(255,255,255,0.9)', 
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      marginBottom: '0.375rem',
+                      fontWeight: 600
+                    }}>
+                      Price
+                    </div>
+                    <div style={{ 
+                      fontSize: '1.5rem', 
+                      fontWeight: 700, 
+                      color: '#fefefe',
+                      lineHeight: 1.2
+                    }}>
+                      {formatIDR(listing?.price)}
+                    </div>
+                  </div>
+
+                  {/* Property Type Badge */}
+                  {listing?.property_type && (
+                    <div style={{ 
+                      display: 'inline-block',
+                      padding: '0.375rem 0.75rem',
+                      background: '#e6e6e6',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      color: '#0a0a0a',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em'
+                    }}>
+                      {listing.property_type}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Property Details Cards */}
+          <div className="grid-x grid-margin-x grid-margin-y" style={{ marginTop: '1.5rem' }}>
+            <div className="cell small-12">
+              <div className="card" style={{ border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px' }}>
+                <div className="card-divider" style={{ 
+                  background: 'linear-gradient(135deg, #1779ba 0%, #14679e 100%)',
+                  color: '#fefefe',
+                  padding: '0.875rem 1.25rem',
+                  borderRadius: '12px 12px 0 0'
+                }}>
+                  <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 700 }}>Property Details</h3>
+                </div>
+                <div className="card-section" style={{ padding: '1.25rem' }}>
+                  <div className="grid-x grid-margin-x grid-margin-y">
+                    <div className="cell small-6 medium-3">
+                      <div className="card" style={{ 
+                        border: '1px solid #e6e6e6',
+                        borderRadius: '10px',
+                        textAlign: 'center',
+                        padding: '1rem',
+                        background: '#fefefe',
+                        transition: 'all 0.2s ease'
+                      }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-3px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                          e.currentTarget.style.borderColor = '#1779ba';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
+                          e.currentTarget.style.borderColor = '#e6e6e6';
+                        }}
+                      >
+                        <FaBed style={{ fontSize: '1.5rem', color: '#1779ba', marginBottom: '0.5rem' }} />
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0a0a0a', marginBottom: '0.375rem' }}>
+                          {listing?.beds}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#767676', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                          Bedrooms
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="cell small-6 medium-3">
+                      <div className="card" style={{ 
+                        border: '1px solid #e6e6e6',
+                        borderRadius: '10px',
+                        textAlign: 'center',
+                        padding: '1rem',
+                        background: '#fefefe',
+                        transition: 'all 0.2s ease'
+                      }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-3px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                          e.currentTarget.style.borderColor = '#1779ba';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
+                          e.currentTarget.style.borderColor = '#e6e6e6';
+                        }}
+                      >
+                        <FaBath style={{ fontSize: '1.5rem', color: '#1779ba', marginBottom: '0.5rem' }} />
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0a0a0a', marginBottom: '0.375rem' }}>
+                          {listing?.baths}
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#767676', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                          Bathrooms
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="cell small-6 medium-3">
+                      <div className="card" style={{ 
+                        border: '1px solid #e6e6e6',
+                        borderRadius: '10px',
+                        textAlign: 'center',
+                        padding: '1rem',
+                        background: '#fefefe',
+                        transition: 'all 0.2s ease'
+                      }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-3px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                          e.currentTarget.style.borderColor = '#1779ba';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
+                          e.currentTarget.style.borderColor = '#e6e6e6';
+                        }}
+                      >
+                        <FaRulerCombined style={{ fontSize: '1.5rem', color: '#1779ba', marginBottom: '0.5rem' }} />
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0a0a0a', marginBottom: '0.375rem' }}>
+                          {listing?.lt} m²
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#767676', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                          Land Area
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="cell small-6 medium-3">
+                      <div className="card" style={{ 
+                        border: '1px solid #e6e6e6',
+                        borderRadius: '10px',
+                        textAlign: 'center',
+                        padding: '1rem',
+                        background: '#fefefe',
+                        transition: 'all 0.2s ease'
+                      }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = 'translateY(-3px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                          e.currentTarget.style.borderColor = '#1779ba';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
+                          e.currentTarget.style.borderColor = '#e6e6e6';
+                        }}
+                      >
+                        <FaHome style={{ fontSize: '1.5rem', color: '#1779ba', marginBottom: '0.5rem' }} />
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0a0a0a', marginBottom: '0.375rem' }}>
+                          {listing?.lb} m²
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: '#767676', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                          Building Area
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Description Section */}
+          {listing?.description && (
+            <div className="grid-x grid-margin-x" style={{ marginTop: '1.5rem' }}>
+              <div className="cell small-12">
+                <div className="card" style={{ border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px' }}>
+                  <div className="card-divider" style={{ 
+                    background: 'linear-gradient(135deg, #1779ba 0%, #14679e 100%)',
+                    color: '#fefefe',
+                    padding: '0.875rem 1.25rem',
+                    borderRadius: '12px 12px 0 0'
+                  }}>
+                    <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 700 }}>Description</h3>
+                  </div>
+                  <div className="card-section" style={{ padding: '1.25rem' }}>
+                    <div style={{
+                      whiteSpace: 'pre-line',
+                      fontSize: '0.9375rem',
+                      fontWeight: 400,
+                      color: '#4a4a4a',
+                      lineHeight: 1.7,
+                      letterSpacing: '0.01em'
+                    }}>
+                      {listing.description}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
-        <div className="row">
-          <div className="col-12">
-            <img
-              src={listing?.image}
-              alt={listing?.title}
-              className="img-fluid rounded shadow-sm mb-4"
-              style={{ width: "100%", height: "auto", maxHeight: "600px", objectFit: "contain" }}
+      </FoundationWrapper>
+
+      {/* Delete Confirmation Dialog - PrimeReact */}
+      <Dialog
+        visible={showDeleteConfirm}
+        onHide={cancelDelete}
+        header="Confirm Delete"
+        modal
+        style={{ width: '450px' }}
+        footer={
+          <div>
+            <Button
+              label="Cancel"
+              icon="pi pi-times"
+              onClick={cancelDelete}
+              className="p-button-text"
+            />
+            <Button
+              label="Delete"
+              icon="pi pi-trash"
+              onClick={confirmDelete}
+              className="p-button-danger"
+              autoFocus
             />
           </div>
-        </div>
-        
-        <div className="row">
-          <div className="col-12">
-            {/* Main Title - Largest, Boldest, Darkest */}
-            <h1 
-              className="fw-bold mb-3" 
-              style={{
-                fontSize: '2.5rem',
-                fontWeight: 700,
-                color: '#212529',
-                lineHeight: 1.2,
-                letterSpacing: '-0.02em'
-              }}
-            >
-              {isDeleted ? "DELETED" : listing?.title}
-            </h1>
-            
-            {/* Location - Subheading with medium size and muted color */}
-            <p 
-              className="mb-4" 
-              style={{
-                fontSize: '1.1rem',
-                fontWeight: 500,
-                color: '#6c757d',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              <i className="bi bi-geo-alt" style={{ fontSize: '1.2rem' }}></i>
-              {listing?.location}
-            </p>
-            
-            {/* Price - Large, Bold, Primary Color */}
-            <h2 
-              className="fw-bold mb-5" 
-              style={{
-                fontSize: '2rem',
-                fontWeight: 700,
-                color: '#0d6efd',
-                lineHeight: 1.3
-              }}
-            >
-              {formatIDR(listing?.price)}
-            </h2>
-            
-            {/* Property Details Section */}
-            <div className="mb-5">
-              <h3 
-                className="fw-semibold mb-4" 
-                style={{
-                  fontSize: '1.5rem',
-                  fontWeight: 600,
-                  color: '#212529',
-                  borderBottom: '2px solid #e9ecef',
-                  paddingBottom: '0.75rem'
-                }}
-              >
-                Property Details
-              </h3>
-              <div className="row">
-                <div className="col-md-3 col-6 mb-4">
-                  <div className="d-flex align-items-center">
-                    <FaBed 
-                      className="text-primary me-3" 
-                      style={{ fontSize: '1.5rem', flexShrink: 0 }}
-                    />
-                    <div>
-                      <div 
-                        className="fw-bold" 
-                        style={{
-                          fontSize: '1.5rem',
-                          fontWeight: 700,
-                          color: '#212529',
-                          lineHeight: 1.2,
-                          marginBottom: '0.25rem'
-                        }}
-                      >
-                        {listing?.beds}
-                      </div>
-                      <small 
-                        className="text-muted" 
-                        style={{
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
-                          color: '#6c757d',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em'
-                        }}
-                      >
-                        Kamar Tidur
-                      </small>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-3 col-6 mb-4">
-                  <div className="d-flex align-items-center">
-                    <FaBath 
-                      className="text-primary me-3" 
-                      style={{ fontSize: '1.5rem', flexShrink: 0 }}
-                    />
-                    <div>
-                      <div 
-                        className="fw-bold" 
-                        style={{
-                          fontSize: '1.5rem',
-                          fontWeight: 700,
-                          color: '#212529',
-                          lineHeight: 1.2,
-                          marginBottom: '0.25rem'
-                        }}
-                      >
-                        {listing?.baths}
-                      </div>
-                      <small 
-                        className="text-muted" 
-                        style={{
-                          fontSize: '0.875rem',
-                          fontWeight: 500,
-                          color: '#6c757d',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em'
-                        }}
-                      >
-                        Kamar Mandi
-                      </small>
-                    </div>
-                  </div>
-                </div>
-                <div className="col-md-3 col-6 mb-4">
-                  <div>
-                    <div 
-                      className="fw-bold" 
-                      style={{
-                        fontSize: '1.5rem',
-                        fontWeight: 700,
-                        color: '#212529',
-                        lineHeight: 1.2,
-                        marginBottom: '0.25rem'
-                      }}
-                    >
-                      {listing?.lt} m²
-                    </div>
-                    <small 
-                      className="text-muted" 
-                      style={{
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                        color: '#6c757d',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em'
-                      }}
-                    >
-                      Luas Tanah
-                    </small>
-                  </div>
-                </div>
-                <div className="col-md-3 col-6 mb-4">
-                  <div>
-                    <div 
-                      className="fw-bold" 
-                      style={{
-                        fontSize: '1.5rem',
-                        fontWeight: 700,
-                        color: '#212529',
-                        lineHeight: 1.2,
-                        marginBottom: '0.25rem'
-                      }}
-                    >
-                      {listing?.lb} m²
-                    </div>
-                    <small 
-                      className="text-muted" 
-                      style={{
-                        fontSize: '0.875rem',
-                        fontWeight: 500,
-                        color: '#6c757d',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em'
-                      }}
-                    >
-                      Luas Bangunan
-                    </small>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Description Section */}
-            {listing?.description && (
-              <div className="mt-5">
-                <h3 
-                  className="fw-semibold mb-3" 
-                  style={{
-                    fontSize: '1.5rem',
-                    fontWeight: 600,
-                    color: '#212529',
-                    borderBottom: '2px solid #e9ecef',
-                    paddingBottom: '0.75rem'
-                  }}
-                >
-                  Deskripsi
-                </h3>
-                <div 
-                  className="text-muted" 
-                  style={{
-                    whiteSpace: 'pre-line',
-                    fontSize: '1rem',
-                    fontWeight: 400,
-                    color: '#495057',
-                    lineHeight: 1.7,
-                    maxWidth: '900px'
-                  }}
-                >
-                  {listing.description}
-                </div>
-              </div>
-            )}
+        }
+      >
+        <div className="confirmation-content" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <i className="pi pi-exclamation-triangle" style={{ fontSize: '2rem', color: '#ef4444' }} />
+            <span style={{ fontSize: '1.1rem', fontWeight: 500 }}>Are you sure you want to delete this property?</span>
           </div>
+          <p style={{ color: '#6c757d', margin: 0, paddingLeft: '3rem' }}>
+            This action will permanently delete the property and cannot be undone.
+          </p>
         </div>
-      </div>
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <>
-          {/* Backdrop */}
-          <div 
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100vw',
-              height: '100vh',
-              backgroundColor: 'rgba(0, 0, 0, 0.5)',
-              zIndex: 1040,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-            onClick={cancelDelete}
-          >
-            {/* Modal Content */}
-            <div 
-              className="card"
-              style={{
-                minWidth: '400px',
-                maxWidth: '500px',
-                zIndex: 1041
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="card-header d-flex justify-content-between align-items-center">
-                <h5 className="mb-0">Confirm Delete</h5>
-                <button 
-                  type="button" 
-                  className="btn-close" 
-                  onClick={cancelDelete}
-                  style={{cursor: 'pointer'}}
-                ></button>
-              </div>
-              <div className="card-body">
-                <p>Are you sure you want to delete this property?</p>
-                <p className="text-muted mb-0">This action will permanently delete the property and cannot be undone.</p>
-              </div>
-              <div className="card-footer d-flex justify-content-end gap-2">
-                <button type="button" className="btn btn-secondary" onClick={cancelDelete}>
-                  Cancel
-                </button>
-                <button type="button" className="btn btn-danger" onClick={confirmDelete}>
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-      {showSuccess && (
-        <div style={{
-          position: 'fixed',
-          top: 20,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 2000,
-          background: '#d4edda',
-          color: '#155724',
-          border: '1px solid #c3e6cb',
-          borderRadius: 6,
-          padding: '12px 32px',
-          fontWeight: 500,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-        }}>
-          Listing deleted successfully!
-        </div>
-      )}
+      </Dialog>
     </>
   );
 }

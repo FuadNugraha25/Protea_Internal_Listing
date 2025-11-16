@@ -1,0 +1,166 @@
+/* 
+ * Foundation for Sites - Scoped CSS
+ * This file provides scoped Foundation styles to avoid conflicts with Bootstrap
+ * Use Foundation components within elements that have the 'foundation-scope' class
+ * 
+ * IMPORTANT: This is a simplified scoped version. For full Foundation features,
+ * you may need to import specific Foundation modules or use Foundation's JavaScript.
+ */
+
+/* Foundation Grid System (scoped to .foundation-scope) */
+
+.foundation-scope .grid-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Foundation button styles (scoped) */
+.foundation-scope .button {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 0 1rem 0;
+  padding: 0.85em 1em;
+  border: 1px solid transparent;
+  border-radius: 0;
+  transition: background-color 0.25s ease-out, color 0.25s ease-out;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1;
+  text-align: center;
+  cursor: pointer;
+  background-color: #1779ba;
+  color: #fefefe;
+}
+
+.foundation-scope .button:hover,
+.foundation-scope .button:focus {
+  background-color: #14679e;
+  color: #fefefe;
+}
+
+.foundation-scope .button.secondary {
+  background-color: #767676;
+  color: #fefefe;
+}
+
+.foundation-scope .button.secondary:hover,
+.foundation-scope .button.secondary:focus {
+  background-color: #5e5e5e;
+  color: #fefefe;
+}
+
+.foundation-scope .button.success {
+  background-color: #3adb76;
+  color: #0a0a0a;
+}
+
+.foundation-scope .button.alert {
+  background-color: #cc4b37;
+  color: #fefefe;
+}
+
+/* Foundation card styles (scoped) */
+.foundation-scope .card {
+  border: 1px solid #e6e6e6;
+  border-radius: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  background: #fefefe;
+}
+
+.foundation-scope .card-divider {
+  background-color: #e6e6e6;
+  padding: 1rem;
+  font-weight: bold;
+}
+
+.foundation-scope .card-section {
+  padding: 1rem;
+}
+
+/* Foundation callout styles (scoped) */
+.foundation-scope .callout {
+  margin: 0 0 1rem 0;
+  padding: 1rem;
+  border: 1px solid rgba(10, 10, 10, 0.25);
+  border-radius: 0;
+  position: relative;
+  background-color: #fefefe;
+  color: #0a0a0a;
+}
+
+.foundation-scope .callout.primary {
+  background-color: #def0fc;
+  color: #0a0a0a;
+}
+
+.foundation-scope .callout.success {
+  background-color: #e8f5e9;
+  color: #0a0a0a;
+}
+
+.foundation-scope .callout.warning {
+  background-color: #fff3e0;
+  color: #0a0a0a;
+}
+
+.foundation-scope .callout.alert {
+  background-color: #fce4ec;
+  color: #0a0a0a;
+}
+
+/* Foundation reveal/modal styles (scoped) */
+.foundation-scope .reveal {
+  border: none;
+  border-radius: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  padding: 1rem;
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 0;
+  margin-bottom: 0;
+  position: relative;
+  background-color: #fefefe;
+}
+
+/* Foundation form styles (scoped) */
+.foundation-scope input[type="text"],
+.foundation-scope input[type="password"],
+.foundation-scope input[type="date"],
+.foundation-scope input[type="datetime"],
+.foundation-scope input[type="datetime-local"],
+.foundation-scope input[type="month"],
+.foundation-scope input[type="time"],
+.foundation-scope input[type="week"],
+.foundation-scope input[type="number"],
+.foundation-scope input[type="email"],
+.foundation-scope input[type="url"],
+.foundation-scope input[type="tel"],
+.foundation-scope input[type="color"],
+.foundation-scope textarea,
+.foundation-scope select {
+  width: 100%;
+  margin: 0 0 1rem 0;
+  padding: 0.5rem;
+  border: 1px solid #cacaca;
+  border-radius: 0;
+  background-color: #fefefe;
+  box-shadow: inset 0 1px 2px rgba(10, 10, 10, 0.1);
+  font-family: inherit;
+  font-size: 1rem;
+  color: #0a0a0a;
+  transition: box-shadow 0.5s, border-color 0.25s ease-in-out;
+}
+
+.foundation-scope input:focus,
+.foundation-scope textarea:focus,
+.foundation-scope select:focus {
+  outline: none;
+  border: 1px solid #8a8a8a;
+  background-color: #fefefe;
+  box-shadow: 0 0 5px #cacaca;
+  transition: box-shadow 0.5s, border-color 0.25s ease-in-out;
+}
+

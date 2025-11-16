@@ -8,7 +8,12 @@ function formatIDR(price) {
   return 'IDR ' + Number(price).toLocaleString('id-ID');
 }
 
-function Dashboard() {
+// Helper function to get display name from owner field
+function getOwnerName(owner) {
+  return owner || 'Unknown Owner';
+}
+
+function Dashboard({ user }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("All");
   const [selectedLocation, setSelectedLocation] = useState("All");
@@ -16,6 +21,7 @@ function Dashboard() {
   const [selectedDistrict, setSelectedDistrict] = useState("All");
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [agentName, setAgentName] = useState("");
   const [priceRange, setPriceRange] = useState([0, 20_000_000_000]); // 0 to 20 M
   const [priceInputs, setPriceInputs] = useState(['0', '20,000,000,000']); // For text inputs
   const [ltMin, setLtMin] = useState(null);
@@ -108,27 +114,103 @@ function Dashboard() {
   };
 
   useEffect(() => {
+    async function fetchAgentName() {
+      if (!user) return;
+      
+      // Check if user is admin
+      const allowedUserIds = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136'];
+      const isAdmin = allowedUserIds.includes(user.id);
+      
+      // For admin users, always show "Admin"
+      if (isAdmin) {
+        setAgentName('Admin');
+        return;
+      }
+      
+      // Use the utility function to get or create profile
+      // This automatically handles:
+      // 1. Fetching existing profile from database
+      // 2. Creating new profile if it doesn't exist
+      // 3. Generating name from email if needed
+      const profile = await getOrCreateProfile(user);
+      
+      if (profile) {
+        const name = profile.name || profile.full_name || '';
+        setAgentName(name);
+      }
+    }
+    
+    fetchAgentName();
+  }, [user]);
+
+  useEffect(() => {
     async function fetchListings() {
       setLoading(true);
-      const { data, error } = await supabase.from("listings").select();
-      if (error || !data) {
-        setListings([]);
-      } else {
-        const mapped = data.map((item) => ({
-          ...item,
-          image: item.image_urls,
-          beds: item.kt ?? item.beds ?? null,
-          baths: item.km ?? item.baths ?? null,
-          lt: item.lt ?? null,
-          lb: item.lb ?? null,
-          type: item.type ?? "-",
-          status: item.status ?? "-",
-          location: item.city ?? item.location ?? "-",
-          province: item.province ?? "-",
-          district: item.district ?? "-",
-          price: item.price || "-",
-        }));
+      try {
+        // First, fetch listings - explicitly select owner column
+        const { data, error } = await supabase.from("listings").select('*');
+        if (error || !data) {
+          console.error('Error fetching listings:', error);
+          setListings([]);
+          setLoading(false);
+          return;
+        }
+
+        // Debug: Log raw data to see what we're getting
+        console.log('Raw data from database:', data);
+        console.log('Sample listing raw data:', data[0] ? {
+          title: data[0].title,
+          owner: data[0].owner,
+          ownerType: typeof data[0].owner,
+          ownerIsNull: data[0].owner === null,
+          ownerIsUndefined: data[0].owner === undefined,
+          ownerValue: JSON.stringify(data[0].owner)
+        } : 'No data');
+
+        // Map listings - use owner column directly from database
+        const mapped = data.map((item) => {
+          // Handle owner field more carefully - check for null, undefined, empty string
+          let owner = item.owner;
+          if (owner === null || owner === undefined || owner === '') {
+            owner = 'Unknown Owner';
+          } else {
+            // Trim whitespace in case there are spaces
+            owner = String(owner).trim();
+            if (owner === '') {
+              owner = 'Unknown Owner';
+            }
+          }
+          
+          // Log owner information for each listing with detailed info
+          console.log(`Listing "${item.title}":`, {
+            rawOwner: item.owner,
+            processedOwner: owner,
+            ownerType: typeof item.owner,
+            isNull: item.owner === null,
+            isUndefined: item.owner === undefined
+          });
+          
+          return {
+            ...item,
+            image: item.image_urls,
+            beds: item.kt ?? item.beds ?? null,
+            baths: item.km ?? item.baths ?? null,
+            lt: item.lt ?? null,
+            lb: item.lb ?? null,
+            type: item.type ?? "-",
+            status: item.status ?? "-",
+            location: item.city ?? item.location ?? "-",
+            province: item.province ?? "-",
+            district: item.district ?? "-",
+            price: item.price || "-",
+            owner: owner,  // Use owner column directly from database
+          };
+        });
+        console.log('All listings with owners:', mapped.map(l => ({ title: l.title, owner: l.owner })));
         setListings(mapped);
+      } catch (error) {
+        console.error('Error fetching listings:', error);
+        setListings([]);
       }
       setLoading(false);
     }
@@ -148,7 +230,7 @@ function Dashboard() {
     // fetchPropertyTypes();
     // fetchTransactionTypes();
     fetchListings();
-  }, []);
+  }, [user]);
 
   // Extract unique locations from the data
   const uniqueProvinces = [...new Set(listings.map(listing => listing.province))];
@@ -256,7 +338,9 @@ function Dashboard() {
         <div className="row mb-4">
           <div className="col">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h3 className="fw-bold mb-0" style={{ color: 'var(--text-primary)', fontSize: '2rem' }}>Daftar Properti</h3>
+              <h3 className="fw-bold mb-0" style={{ color: 'var(--text-primary)', fontSize: '2rem' }}>
+                {agentName ? `Welcome, ${agentName}` : 'Welcome'}
+              </h3>
               <button
                 className="btn btn-outline-secondary"
                 onClick={() => setFiltersOpen(prev => !prev)}
@@ -615,9 +699,13 @@ function Dashboard() {
                 </div>
                 <div className="card-body" style={{ padding: '1.25rem' }}>
                   <h5 className="card-title fw-bold mb-2" style={{ color: 'var(--text-primary)', fontSize: '1.125rem' }}>{listing.title}</h5>
-                  <p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
+                  <p className="text-muted mb-2" style={{ fontSize: '0.875rem' }}>
                     <i className="bi bi-geo-alt me-1" style={{ color: 'var(--primary-color)' }}></i>
                     {listing.location}
+                  </p>
+                  <p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
+                    <i className="bi bi-person me-1" style={{ color: 'var(--primary-color)' }}></i>
+                    Owner: <strong>{getOwnerName(listing.owner)}</strong>
                   </p>
                   {listing.property_type === 'Kavling' ? (
                     <div className="row text-center mb-3">

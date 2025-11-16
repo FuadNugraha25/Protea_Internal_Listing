@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import Navbar from './Navbar';
+import { getOrCreateProfile } from '../utils/profileUtils';
 
 const EditPropertyForm = () => {
   const { id } = useParams();
@@ -12,6 +13,9 @@ const EditPropertyForm = () => {
   const [user, setUser] = useState(null);
   const [alert, setAlert] = useState({ message: '', severity: '' });
   const [showNotification, setShowNotification] = useState(false);
+  const [ownerName, setOwnerName] = useState('');
+  const [allUsers, setAllUsers] = useState([]); // Store all users for dropdown
+  const [usersLoading, setUsersLoading] = useState(true);
   
   // Add state for existing location data
   const [existingListings, setExistingListings] = useState([]);
@@ -46,6 +50,39 @@ const EditPropertyForm = () => {
       fetchListingData();
     });
   }, [id, navigate]);
+
+  // Fetch all users/profiles for owner dropdown
+  useEffect(() => {
+    async function fetchAllUsers() {
+      setUsersLoading(true);
+      try {
+        // Fetch all profiles from the database
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, name, full_name, email')
+          .order('name', { ascending: true });
+
+        if (error) {
+          console.error('Error fetching users:', error);
+          setAllUsers([]);
+        } else {
+          // Map profiles to a format suitable for dropdown
+          const usersList = (data || []).map(profile => ({
+            id: profile.id,
+            name: profile.name || profile.full_name || profile.email || 'Unknown User',
+            email: profile.email || ''
+          }));
+          setAllUsers(usersList);
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        setAllUsers([]);
+      } finally {
+        setUsersLoading(false);
+      }
+    }
+    fetchAllUsers();
+  }, []);
 
   // Fetch existing listings for dropdown data
   useEffect(() => {
@@ -101,6 +138,45 @@ const EditPropertyForm = () => {
         transaction_type: data.transaction_type || '',
         property_type: data.property_type || '',
       });
+
+      // Set owner name from listing data if it exists, otherwise fetch from profile
+      // This will be used to set the default selected value in the dropdown
+      if (data.owner) {
+        setOwnerName(data.owner);
+      } else if (data.user_id) {
+        try {
+          // First try to get profile
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('id, name, full_name, email')
+            .eq('id', data.user_id)
+            .single();
+
+          if (!profileError && profile) {
+            const name = profile.name || profile.full_name || profile.email || 'Unknown User';
+            setOwnerName(name);
+          } else {
+            // Profile doesn't exist, try to create it if it's the current user
+            const { data: { user: currentUser } } = await supabase.auth.getUser();
+            if (currentUser && currentUser.id === data.user_id) {
+              const createdProfile = await getOrCreateProfile(currentUser);
+              if (createdProfile) {
+                const name = createdProfile.name || createdProfile.full_name || createdProfile.email || 'Unknown User';
+                setOwnerName(name);
+              } else {
+                setOwnerName('Unknown User');
+              }
+            } else {
+              setOwnerName('Unknown User');
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching owner name:', error);
+          setOwnerName('Unknown User');
+        }
+      } else {
+        setOwnerName('Unknown User');
+      }
     } catch (error) {
       setAlert({ message: '❌ Error loading property data: ' + error.message, severity: 'error' });
     } finally {
@@ -153,6 +229,7 @@ const EditPropertyForm = () => {
       const updateData = {
         title: formData.title,
         description: formData.description,
+        owner: ownerName || 'Unknown User',  // Include owner name
         lt: formData.lt || null,
         lb: formData.lb || null,
         kt: formData.kt || null,
@@ -199,7 +276,13 @@ const EditPropertyForm = () => {
   if (loading) {
     return (
       <>
-        <Navbar title="Edit Property" showAdminButton={user && allowedUserId.includes(user.id)} />
+        <Navbar 
+          title="Edit Property" 
+          showAdminButton={user && allowedUserId.includes(user.id)}
+          showTestingButton={user && allowedUserId.includes(user.id)}
+          showTambahListingButton={true}
+          user={user}
+        />
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', paddingTop: '6rem', background: 'var(--background)' }}>
           <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
             <span className="visually-hidden">Loading...</span>
@@ -211,7 +294,12 @@ const EditPropertyForm = () => {
 
   return (
     <>
-      <Navbar title="Edit Property" showAdminButton={user && allowedUserId.includes(user.id)} />
+      <Navbar 
+        title="Edit Property" 
+        showAdminButton={user && allowedUserId.includes(user.id)}
+        showTambahListingButton={true}
+        user={user}
+      />
       <div style={{ background: 'var(--background)', minHeight: '100vh', paddingBottom: '2rem', paddingTop: '6rem' }}>
         <div className="container mb-5" style={{ marginTop: '1rem' }}>
           <div className="d-flex mb-3 gap-2 align-items-center">
@@ -264,6 +352,35 @@ const EditPropertyForm = () => {
               </div>
               <div className="card-body" style={{ background: 'var(--surface)' }}>
                 <form onSubmit={handleSubmit}>
+                  <div className="mb-3">
+                    <label className="form-label">Owner</label>
+                    <select
+                      name="owner"
+                      className="form-select"
+                      value={ownerName}
+                      onChange={(e) => setOwnerName(e.target.value)}
+                      disabled={usersLoading}
+                      required
+                      style={{
+                        backgroundColor: usersLoading ? '#f8f9fa' : 'white',
+                        cursor: usersLoading ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {usersLoading ? (
+                        <option>Loading users...</option>
+                      ) : (
+                        <>
+                          <option value="">Select Owner</option>
+                          {allUsers.map((user) => (
+                            <option key={user.id} value={user.name}>
+                              {user.name}
+                            </option>
+                          ))}
+                        </>
+                      )}
+                    </select>
+                    <small className="text-muted">Select the owner of this listing</small>
+                  </div>
                   <div className="mb-3">
                     <label className="form-label">Title</label>
                     <input 

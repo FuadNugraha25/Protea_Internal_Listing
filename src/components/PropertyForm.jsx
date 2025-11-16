@@ -2,6 +2,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import Alert from '@mui/material/Alert';
+import imageCompression from 'browser-image-compression';
+import { getOrCreateProfile } from '../utils/profileUtils';
 
 const PropertyForm = ({ user }) => {
   const [formData, setFormData] = useState({
@@ -19,6 +21,8 @@ const PropertyForm = ({ user }) => {
     property_type: '',
   });
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [imageFileSize, setImageFileSize] = useState(null);
+  const [originalFileSize, setOriginalFileSize] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
   // Add state for alert
@@ -27,6 +31,13 @@ const PropertyForm = ({ user }) => {
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiResponse, setAiResponse] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
+  const [ownerName, setOwnerName] = useState('');
+  const [allUsers, setAllUsers] = useState([]); // Store all users for dropdown
+  const [usersLoading, setUsersLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // Admin user IDs
+  const allowedUserId = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136'];
 
   useEffect(() => {
     if (alert.message) {
@@ -40,6 +51,91 @@ const PropertyForm = ({ user }) => {
       return () => clearTimeout(timer);
     }
   }, [alert.message]);
+
+  // Check if user is admin
+  useEffect(() => {
+    if (user) {
+      setIsAdmin(allowedUserId.includes(user.id));
+    }
+  }, [user]);
+
+  // Fetch all users/profiles for owner dropdown (admin only)
+  useEffect(() => {
+    async function fetchAllUsers() {
+      if (!isAdmin) {
+        setUsersLoading(false);
+        return;
+      }
+
+      setUsersLoading(true);
+      try {
+        // Fetch all profiles from the database
+        // Try without order first to see if that's causing issues
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, name, full_name, email');
+
+        if (error) {
+          console.error('Error fetching users:', error);
+          console.error('Error details:', error.message, error.details);
+          setAllUsers([]);
+        } else {
+          console.log('Fetched users from database:', data);
+          console.log('Number of users fetched:', data?.length || 0);
+          
+          // Map profiles to a format suitable for dropdown
+          const usersList = (data || []).map(profile => {
+            const name = profile.name || profile.full_name || profile.email || 'Unknown User';
+            return {
+              id: profile.id,
+              name: name,
+              email: profile.email || ''
+            };
+          });
+          
+          // Sort by name alphabetically
+          usersList.sort((a, b) => {
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+            if (nameA < nameB) return -1;
+            if (nameA > nameB) return 1;
+            return 0;
+          });
+          
+          console.log('Mapped and sorted users list:', usersList);
+          setAllUsers(usersList);
+        }
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        setAllUsers([]);
+      } finally {
+        setUsersLoading(false);
+      }
+    }
+    fetchAllUsers();
+  }, [isAdmin]);
+
+  // Fetch owner name (current user's profile)
+  useEffect(() => {
+    async function fetchOwnerName() {
+      if (!user) return;
+      
+      try {
+        const profile = await getOrCreateProfile(user);
+        if (profile) {
+          const name = profile.name || profile.full_name || profile.email || 'Unknown User';
+          setOwnerName(name);
+        } else {
+          setOwnerName(user.email || 'Unknown User');
+        }
+      } catch (error) {
+        console.error('Error fetching owner name:', error);
+        setOwnerName(user.email || 'Unknown User');
+      }
+    }
+    
+    fetchOwnerName();
+  }, [user]);
 
   const formatPriceWithCommas = (value) => {
     // Remove all non-digit characters
@@ -150,7 +246,26 @@ const PropertyForm = ({ user }) => {
     try {
       // Only take the first file
       const file = files[0];
-      const publicUrl = await uploadImageToSupabase(file);
+      
+      // Store original file size
+      setOriginalFileSize(file.size);
+      
+      // Compress image options
+      const options = {
+        maxSizeMB: 1, // Maximum size in MB (1MB)
+        maxWidthOrHeight: 1920, // Maximum width or height
+        useWebWorker: true, // Use web worker for better performance
+        fileType: file.type, // Keep original file type
+      };
+      
+      // Compress the image
+      const compressedFile = await imageCompression(file, options);
+      
+      // Store compressed file size
+      setImageFileSize(compressedFile.size);
+      
+      // Upload compressed image
+      const publicUrl = await uploadImageToSupabase(compressedFile);
       setUploadedImage(publicUrl);
       setFormData(prev => ({
         ...prev,
@@ -186,10 +301,19 @@ const PropertyForm = ({ user }) => {
 
   const removeImage = () => {
     setUploadedImage(null);
+    setImageFileSize(null);
+    setOriginalFileSize(null);
     setFormData(prev => ({
       ...prev,
       image_urls: ''
     }));
+  };
+
+  const formatFileSize = (bytes) => {
+    if (!bytes) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
   };
 
   const callGeminiAI = async () => {
@@ -200,11 +324,16 @@ const PropertyForm = ({ user }) => {
 
     setAiLoading(true);
     try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error('API key not configured. Please set VITE_GEMINI_API_KEY in your .env file.');
+      }
+
       const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-goog-api-key': 'AIzaSyD3JMlOCqFABXmWkHn-crVY-06iUOEGWak'
+          'X-goog-api-key': apiKey
         },
         body: JSON.stringify({
           contents: [{
@@ -341,6 +470,16 @@ Property data: ${aiPrompt}`
   const handleSubmit = async (e) => {
     e.preventDefault()
   
+    // Ensure user profile exists before creating listing
+    if (user) {
+      try {
+        await getOrCreateProfile(user);
+      } catch (error) {
+        console.error('Error ensuring profile exists:', error);
+        // Continue anyway, profile creation is not critical for listing creation
+      }
+    }
+  
     // Generate a random UUID for the listing ID (primary key)
     const listingId = crypto.randomUUID();
     
@@ -372,6 +511,7 @@ Property data: ${aiPrompt}`
     const submission = {
       id: listingId,  // This is the primary key for the listing
       user_id: user.id,  // This is the foreign key to the user
+      owner: ownerName || user.email || 'Unknown User',  // Owner name for easy display
       title: formData.title,
       description: formData.description,
       image_urls: formData.image_urls,
@@ -542,6 +682,54 @@ Property data: ${aiPrompt}`
             </div>
           </div>
           <div className="mb-3">
+            <label className="form-label">Owner</label>
+            {isAdmin ? (
+              <select
+                name="owner"
+                className="form-select"
+                value={ownerName}
+                onChange={(e) => setOwnerName(e.target.value)}
+                disabled={usersLoading}
+                required
+                style={{
+                  backgroundColor: usersLoading ? '#f8f9fa' : 'white',
+                  cursor: usersLoading ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {usersLoading ? (
+                  <option>Loading users...</option>
+                ) : allUsers.length === 0 ? (
+                  <option value="">No users found</option>
+                ) : (
+                  <>
+                    <option value="">Select Owner</option>
+                    {allUsers.map((userOption) => (
+                      <option key={userOption.id} value={userOption.name}>
+                        {userOption.name}
+                      </option>
+                    ))}
+                  </>
+                )}
+              </select>
+            ) : (
+              <input 
+                name="owner" 
+                className="form-control" 
+                value={ownerName} 
+                readOnly 
+                disabled
+                style={{ 
+                  backgroundColor: '#f8f9fa', 
+                  cursor: 'not-allowed',
+                  color: '#6c757d'
+                }}
+              />
+            )}
+            <small className="text-muted">
+              {isAdmin ? 'Select the owner of this listing' : 'This listing will be associated with your account'}
+            </small>
+          </div>
+          <div className="mb-3">
             <label className="form-label">Title</label>
             <input name="title" className="form-control" value={formData.title} onChange={handleChange} />
           </div>
@@ -629,7 +817,19 @@ Property data: ${aiPrompt}`
             {/* Display uploaded image */}
             {uploadedImage && (
               <div className="mt-3">
-                <h6 style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Uploaded Image:</h6>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                  <h6 style={{ color: 'var(--text-primary)', fontWeight: 600, margin: 0 }}>Uploaded Image:</h6>
+                  {imageFileSize && (
+                    <small style={{ color: '#767676', fontSize: '0.875rem' }}>
+                      Size: {formatFileSize(imageFileSize)}
+                      {originalFileSize && originalFileSize > imageFileSize && (
+                        <span style={{ color: '#28a745', marginLeft: '0.5rem' }}>
+                          (compressed from {formatFileSize(originalFileSize)})
+                        </span>
+                      )}
+                    </small>
+                  )}
+                </div>
                 <div className="position-relative w-100 rounded overflow-hidden" style={{ boxShadow: 'var(--shadow-md)' }}>
                   <img 
                     src={uploadedImage} 
