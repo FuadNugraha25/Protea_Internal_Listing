@@ -199,8 +199,9 @@ const EditPropertyForm = () => {
   if (loading) {
     return (
       <>
-        <div className="container mt-4 d-flex justify-content-center">
-          <div className="spinner-border" role="status">
+        <Navbar title="Edit Property" showAdminButton={user && allowedUserId.includes(user.id)} />
+        <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', paddingTop: '6rem', background: 'var(--background)' }}>
+          <div className="spinner-border text-primary" role="status" style={{ width: '3rem', height: '3rem' }}>
             <span className="visually-hidden">Loading...</span>
           </div>
         </div>
@@ -211,12 +212,17 @@ const EditPropertyForm = () => {
   return (
     <>
       <Navbar title="Edit Property" showAdminButton={user && allowedUserId.includes(user.id)} />
-      <div className="container mt-4 mb-5">
-        <div className="d-flex mb-3 gap-2 align-items-center">
-          <button className="btn btn-secondary d-inline-flex align-items-center" onClick={() => navigate(`/listing/${id}`)}>
-            <span className="me-2" style={{fontSize: '1.2em'}}>&larr;</span> Back to Property
-          </button>
-        </div>
+      <div style={{ background: 'var(--background)', minHeight: '100vh', paddingBottom: '2rem', paddingTop: '6rem' }}>
+        <div className="container mb-5" style={{ marginTop: '1rem' }}>
+          <div className="d-flex mb-3 gap-2 align-items-center">
+            <button 
+              className="btn btn-secondary d-inline-flex align-items-center" 
+              onClick={() => navigate(`/listing/${id}`)}
+              style={{ borderRadius: '8px' }}
+            >
+              <span className="me-2" style={{fontSize: '1.2em'}}>&larr;</span> Back to Property
+            </button>
+          </div>
         
         {alert.message && (
           <div 
@@ -233,12 +239,16 @@ const EditPropertyForm = () => {
             <div 
               className="p-3 rounded shadow-lg"
               style={{
-                backgroundColor: alert.severity === 'success' ? '#10b981' : '#ef4444',
+                background: alert.severity === 'success' 
+                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+                  : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                 color: 'white',
                 minWidth: '300px',
                 maxWidth: '400px',
                 fontSize: '14px',
-                fontWeight: '500'
+                fontWeight: '500',
+                borderRadius: '12px',
+                backdropFilter: 'blur(10px)'
               }}
             >
               {alert.message}
@@ -248,11 +258,11 @@ const EditPropertyForm = () => {
 
         <div className="row justify-content-center">
           <div className="col-12 d-flex justify-content-center">
-            <div className="card w-100" style={{ maxWidth: '1000px' }}>
-              <div className="card-header">
-                <h3 className="mb-0">Edit Property</h3>
+            <div className="card w-100" style={{ maxWidth: '1000px', border: 'none', boxShadow: 'var(--shadow-lg)', borderRadius: '12px' }}>
+              <div className="card-header" style={{ background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)', border: 'none', borderRadius: '12px 12px 0 0' }}>
+                <h3 className="mb-0" style={{ color: 'white', fontWeight: 600 }}>Edit Property</h3>
               </div>
-              <div className="card-body">
+              <div className="card-body" style={{ background: 'var(--surface)' }}>
                 <form onSubmit={handleSubmit}>
                   <div className="mb-3">
                     <label className="form-label">Title</label>
@@ -482,6 +492,7 @@ const EditPropertyForm = () => {
                       type="submit" 
                       className="btn btn-primary flex-fill" 
                       disabled={saving}
+                      style={{ borderRadius: '10px', fontWeight: 600, padding: '0.75rem 1.5rem' }}
                     >
                       {saving ? (
                         <>
@@ -497,6 +508,7 @@ const EditPropertyForm = () => {
                       type="button" 
                       className="btn btn-secondary" 
                       onClick={() => navigate(`/listing/${id}`)}
+                      style={{ borderRadius: '10px', fontWeight: 600, padding: '0.75rem 1.5rem' }}
                     >
                       Cancel
                     </button>
@@ -505,6 +517,7 @@ const EditPropertyForm = () => {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </>

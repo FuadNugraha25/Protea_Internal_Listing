@@ -151,9 +151,29 @@ function Dashboard() {
   }, []);
 
   // Extract unique locations from the data
-  const uniqueLocations = [...new Set(listings.map(listing => listing.location))];
   const uniqueProvinces = [...new Set(listings.map(listing => listing.province))];
-  const uniqueDistricts = [...new Set(listings.map(listing => listing.district))];
+  
+  // Filter locations based on selected province
+  const uniqueLocations = selectedProvince === "All" 
+    ? [...new Set(listings.map(listing => listing.location))]
+    : [...new Set(listings
+        .filter(listing => listing.province === selectedProvince)
+        .map(listing => listing.location))];
+  
+  // Filter districts based on selected province and city
+  const uniqueDistricts = selectedProvince === "All" && selectedLocation === "All"
+    ? [...new Set(listings.map(listing => listing.district))]
+    : selectedProvince !== "All" && selectedLocation === "All"
+    ? [...new Set(listings
+        .filter(listing => listing.province === selectedProvince)
+        .map(listing => listing.district))]
+    : selectedProvince === "All" && selectedLocation !== "All"
+    ? [...new Set(listings
+        .filter(listing => listing.location === selectedLocation)
+        .map(listing => listing.district))]
+    : [...new Set(listings
+        .filter(listing => listing.province === selectedProvince && listing.location === selectedLocation)
+        .map(listing => listing.district))];
 
   const filteredListings = listings.filter(listing => {
     if ((listing.title || "").trim() === "DELETED") return false;
@@ -230,23 +250,25 @@ function Dashboard() {
   }, [totalPages, currentPage]);
 
   return (
-    <div>
+    <div style={{ background: 'var(--background)', minHeight: '100vh', paddingBottom: '2rem', paddingTop: '6rem' }}>
       {/* Filter Section */}
-      <div className="container mt-4 mb-5">
+      <div className="container mb-5" style={{ marginTop: '1rem' }}>
         <div className="row mb-4">
           <div className="col">
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h3 className="fw-bold mb-0">Daftar Properti</h3>
+              <h3 className="fw-bold mb-0" style={{ color: 'var(--text-primary)', fontSize: '2rem' }}>Daftar Properti</h3>
               <button
                 className="btn btn-outline-secondary"
                 onClick={() => setFiltersOpen(prev => !prev)}
+                style={{ borderRadius: '8px' }}
               >
+                <i className={`bi ${filtersOpen ? 'bi-chevron-up' : 'bi-chevron-down'} me-2`}></i>
                 {filtersOpen ? 'Sembunyikan Filter' : 'Tampilkan Filter'}
               </button>
             </div>
             {filtersOpen && (
-            <div className="card shadow-sm">
-              <div className="card-body">
+            <div className="card shadow-lg" style={{ border: 'none', borderRadius: '12px' }}>
+              <div className="card-body" style={{ background: 'var(--surface)' }}>
                 {/* Basic Filters */}
                 <div className="row g-3 mb-4">
                   <div className="col-md-2">
@@ -334,7 +356,12 @@ function Dashboard() {
                     <select
                       className="form-select"
                       value={selectedProvince}
-                      onChange={(e) => setSelectedProvince(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedProvince(e.target.value);
+                        // Reset dependent dropdowns when province changes
+                        setSelectedLocation("All");
+                        setSelectedDistrict("All");
+                      }}
                     >
                       <option value="All">Semua Provinsi</option>
                       {uniqueProvinces.map((province, index) => (
@@ -347,13 +374,27 @@ function Dashboard() {
                     <select
                       className="form-select"
                       value={selectedLocation}
-                      onChange={(e) => setSelectedLocation(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedLocation(e.target.value);
+                        // Reset district when city changes
+                        setSelectedDistrict("All");
+                      }}
+                      disabled={selectedProvince === "All"}
+                      style={{
+                        opacity: selectedProvince === "All" ? 0.6 : 1,
+                        cursor: selectedProvince === "All" ? "not-allowed" : "pointer"
+                      }}
                     >
                       <option value="All">Semua Kota</option>
                       {uniqueLocations.map((location, index) => (
                         <option key={index} value={location}>{location}</option>
                       ))}
                     </select>
+                    {selectedProvince === "All" && (
+                      <small className="text-muted" style={{ fontSize: '0.75rem' }}>
+                        Pilih Provinsi terlebih dahulu
+                      </small>
+                    )}
                   </div>
                   <div className="col-md-3">
                     <label className="form-label fw-semibold">Kecamatan</label>
@@ -361,12 +402,22 @@ function Dashboard() {
                       className="form-select"
                       value={selectedDistrict}
                       onChange={(e) => setSelectedDistrict(e.target.value)}
+                      disabled={selectedLocation === "All" || selectedProvince === "All"}
+                      style={{
+                        opacity: (selectedLocation === "All" || selectedProvince === "All") ? 0.6 : 1,
+                        cursor: (selectedLocation === "All" || selectedProvince === "All") ? "not-allowed" : "pointer"
+                      }}
                     >
                       <option value="All">Semua Kecamatan</option>
                       {uniqueDistricts.map((district, index) => (
                         <option key={index} value={district}>{district}</option>
                       ))}
                     </select>
+                    {(selectedLocation === "All" || selectedProvince === "All") && (
+                      <small className="text-muted" style={{ fontSize: '0.75rem' }}>
+                        Pilih Kota terlebih dahulu
+                      </small>
+                    )}
                   </div>
                 </div>
 
@@ -457,6 +508,7 @@ function Dashboard() {
                     <button 
                       className="btn btn-primary px-4 py-2"
                       onClick={applyFilters}
+                      style={{ borderRadius: '8px' }}
                     >
                       <i className="bi bi-funnel me-2"></i>
                       Terapkan Filter
@@ -464,6 +516,7 @@ function Dashboard() {
                     <button 
                       className="btn btn-outline-secondary px-4 py-2"
                       onClick={resetFilters}
+                      style={{ borderRadius: '8px' }}
                     >
                       <i className="bi bi-arrow-clockwise me-2"></i>
                       Atur Ulang Filter
@@ -479,47 +532,71 @@ function Dashboard() {
         {/* Search Section */}
         <div className="row mb-4">
           <div className="col-md-8 mx-auto">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <div className="position-relative">
+              <i className="bi bi-search position-absolute" style={{ 
+                left: '1rem', 
+                top: '50%', 
+                transform: 'translateY(-50%)',
+                color: 'var(--text-secondary)',
+                fontSize: '1.1rem'
+              }}></i>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Search properties..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{ paddingLeft: '2.75rem', borderRadius: '10px' }}
+              />
+            </div>
           </div>
         </div>
 
         {/* Results Info */}
         <div className="row mb-4">
           <div className="col">
-            <p className="text-muted mb-0">Showing {filteredListings.length} properties</p>
+            <p className="text-muted mb-0" style={{ fontSize: '0.9375rem', fontWeight: 500 }}>
+              <i className="bi bi-house-door me-2"></i>
+              Showing <strong style={{ color: 'var(--text-primary)' }}>{filteredListings.length}</strong> properties
+            </p>
           </div>
         </div>
 
         {/* Properties Grid */}
         <div className="row g-4">
           {loading ? (
-            <div className="text-center">Loading...</div>
+            <div className="text-center" style={{ padding: '3rem', color: 'var(--text-secondary)' }}>
+              <div className="spinner-border text-primary mb-3" role="status" style={{ width: '3rem', height: '3rem' }}>
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p style={{ fontSize: '1.125rem', fontWeight: 500 }}>Loading properties...</p>
+            </div>
           ) : filteredListings.length === 0 ? (
-            <div className="text-center">No properties found.</div>
+            <div className="text-center" style={{ padding: '3rem', color: 'var(--text-secondary)' }}>
+              <i className="bi bi-inbox fs-1 mb-3 d-block" style={{ color: 'var(--text-secondary)', opacity: 0.5 }}></i>
+              <p style={{ fontSize: '1.125rem', fontWeight: 500 }}>No properties found.</p>
+              <p style={{ fontSize: '0.875rem' }}>Try adjusting your filters or search terms.</p>
+            </div>
           ) : paginatedListings.map((listing) => (
             <div className="col-lg-4 col-md-6" key={listing.id}>
               <div 
                 className="card h-100 border-0" 
                 style={{
-                  // boxShadow: 'rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px',
-                  boxShadow: 'rgba(0, 0, 0, 0.16) 0px 3px 6px -1px, rgba(0, 0, 0, 0.23) 0px 3px 6px',
+                  boxShadow: 'var(--shadow-md)',
                   transition: 'all 0.3s ease-in-out',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  background: 'var(--surface)'
                 }}
                 onClick={() => navigate(`/listing/${listing.id}`)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-8px)';
-                  e.currentTarget.style.boxShadow = 'rgba(50, 50, 93, 0.35) 0px 8px 15px -3px, rgba(0, 0, 0, 0.4) 0px 4px 6px -2px';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'rgba(0, 0, 0, 0.16) 0px 3px 6px -1px, rgba(0, 0, 0, 0.23) 0px 3px 6px';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
                 }}
               >
                 <div className="position-relative">
@@ -536,10 +613,10 @@ function Dashboard() {
                     {/* <span className="badge bg-primary">{listing.type}</span> */}
                   </div>
                 </div>
-                <div className="card-body">
-                  <h5 className="card-title fw-bold mb-2">{listing.title}</h5>
-                  <p className="text-muted mb-3">
-                    <i className="bi bi-geo-alt me-1"></i>
+                <div className="card-body" style={{ padding: '1.25rem' }}>
+                  <h5 className="card-title fw-bold mb-2" style={{ color: 'var(--text-primary)', fontSize: '1.125rem' }}>{listing.title}</h5>
+                  <p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
+                    <i className="bi bi-geo-alt me-1" style={{ color: 'var(--primary-color)' }}></i>
                     {listing.location}
                   </p>
                   {listing.property_type === 'Kavling' ? (
@@ -581,7 +658,11 @@ function Dashboard() {
                     </span>
                     <button
                       className="btn btn-outline-primary btn-sm"
-                      onClick={() => navigate(`/listing/${listing.id}`)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/listing/${listing.id}`);
+                      }}
+                      style={{ borderRadius: '8px', fontWeight: 600 }}
                     >
                       View Details
                     </button>
@@ -599,16 +680,22 @@ function Dashboard() {
                 className="btn btn-outline-secondary"
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
+                style={{ borderRadius: '8px' }}
               >
+                <i className="bi bi-chevron-left me-1"></i>
                 Prev
               </button>
-              <span className="text-muted">Page {currentPage} of {totalPages}</span>
+              <span className="text-muted" style={{ fontWeight: 500, padding: '0 1rem' }}>
+                Page <strong style={{ color: 'var(--text-primary)' }}>{currentPage}</strong> of <strong style={{ color: 'var(--text-primary)' }}>{totalPages}</strong>
+              </span>
               <button
                 className="btn btn-outline-secondary"
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
+                style={{ borderRadius: '8px' }}
               >
                 Next
+                <i className="bi bi-chevron-right ms-1"></i>
               </button>
             </div>
           </div>

@@ -422,9 +422,13 @@ Property data: ${aiPrompt}`
   }
 
   return (
-    <div className="container d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-      <div className="col-md-6">
-        <h3 className="text-center mb-4">Add Property</h3>
+    <div style={{ minHeight: '100vh', padding: '7rem 0 2rem 0', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', width: '100%' }}>
+      <div className="container d-flex justify-content-center align-items-center" style={{ padding: '0 1rem' }}>
+        <div className="col-md-8 col-lg-6">
+        <div className="text-center mb-4">
+          <h3 className="fw-bold mb-2" style={{ color: 'var(--text-primary)', fontSize: '2rem' }}>Add Property</h3>
+          <p className="text-muted">Create a new property listing</p>
+        </div>
         {alert.message && (
           <div 
             className="position-fixed"
@@ -440,12 +444,16 @@ Property data: ${aiPrompt}`
             <div 
               className="p-3 rounded shadow-lg"
               style={{
-                backgroundColor: alert.severity === 'success' ? '#10b981' : '#ef4444',
+                background: alert.severity === 'success' 
+                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
+                  : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                 color: 'white',
                 minWidth: '300px',
                 maxWidth: '400px',
                 fontSize: '14px',
-                fontWeight: '500'
+                fontWeight: '500',
+                borderRadius: '12px',
+                backdropFilter: 'blur(10px)'
               }}
             >
               {alert.message}
@@ -455,14 +463,14 @@ Property data: ${aiPrompt}`
         <form onSubmit={handleSubmit}>
           {/* AI Assistant Section */}
           <div className="mb-4">
-            <div className="card border-primary">
-              <div className="card-header bg-primary text-white">
-                <h6 className="mb-0">
+            <div className="card" style={{ border: 'none', boxShadow: 'var(--shadow-lg)' }}>
+              <div className="card-header" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', border: 'none' }}>
+                <h6 className="mb-0" style={{ color: 'white', fontWeight: 600 }}>
                   <i className="bi bi-robot me-2"></i>
                   AI Assistant
                 </h6>
               </div>
-              <div className="card-body">
+              <div className="card-body" style={{ background: 'var(--surface)' }}>
                 <div className="mb-3">
                   <label className="form-label fw-semibold">Ask AI for help:</label>
                   <div className="input-group">
@@ -499,7 +507,11 @@ Property data: ${aiPrompt}`
                 {aiResponse && (
                   <div className="mb-3">
                     <label className="form-label fw-semibold">AI Response:</label>
-                    <div className="border rounded p-3 bg-light">
+                    <div className="border rounded p-3" style={{ 
+                      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                      borderColor: 'var(--border-color)',
+                      borderRadius: '8px'
+                    }}>
                       <div 
                         className="mb-3"
                         style={{
@@ -508,7 +520,8 @@ Property data: ${aiPrompt}`
                           maxHeight: '300px',
                           overflowY: 'auto',
                           lineHeight: '1.5',
-                          fontSize: '14px'
+                          fontSize: '14px',
+                          color: 'var(--text-primary)'
                         }}
                       >
                         {aiResponse}
@@ -517,6 +530,7 @@ Property data: ${aiPrompt}`
                         type="button"
                         className="btn btn-success btn-sm"
                         onClick={useAIResponse}
+                        style={{ borderRadius: '8px' }}
                       >
                         <i className="bi bi-check-circle me-2"></i>
                         Use This Response
@@ -567,16 +581,30 @@ Property data: ${aiPrompt}`
           <div className="mb-3">
             <label className="form-label">Images</label>
             <div 
-              className="border border-dashed border-2 p-4 text-center"
+              className="border border-dashed border-2 p-4 text-center rounded"
               style={{ 
                 borderStyle: 'dashed', 
-                borderColor: '#ccc',
-                backgroundColor: '#f8f9fa',
+                borderColor: 'var(--primary-color)',
+                backgroundColor: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
                 cursor: 'pointer',
-                minHeight: '120px'
+                minHeight: '120px',
+                borderRadius: '12px',
+                transition: 'all 0.3s ease',
+                borderWidth: '2px'
               }}
               onClick={() => fileInputRef.current?.click()}
               onPaste={handlePaste}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--primary-dark)';
+                e.currentTarget.style.backgroundColor = '#f1f5f9';
+                e.currentTarget.style.transform = 'scale(1.01)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--primary-color)';
+                e.currentTarget.style.backgroundColor = '#f8fafc';
+                e.currentTarget.style.transform = 'scale(1)';
+              }}
             >
               <input
                 ref={fileInputRef}
@@ -587,13 +615,13 @@ Property data: ${aiPrompt}`
               />
               {isUploading ? (
                 <div>
-                  <div className="spinner-border spinner-border-sm me-2" role="status"></div>
-                  Uploading image...
+                  <div className="spinner-border spinner-border-sm me-2 text-primary" role="status"></div>
+                  <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>Uploading image...</span>
                 </div>
               ) : (
                 <div>
-                  <i className="bi bi-cloud-upload fs-1 text-muted"></i>
-                  <p className="mt-2 mb-0">Click to upload image or paste from clipboard</p>
+                  <i className="bi bi-cloud-upload fs-1" style={{ color: 'var(--primary-color)' }}></i>
+                  <p className="mt-2 mb-0" style={{ color: 'var(--text-primary)', fontWeight: 500 }}>Click to upload image or paste from clipboard</p>
                   <small className="text-muted">Supports: JPG, PNG, GIF</small>
                 </div>
               )}
@@ -601,18 +629,31 @@ Property data: ${aiPrompt}`
             {/* Display uploaded image */}
             {uploadedImage && (
               <div className="mt-3">
-                <h6>Uploaded Image:</h6>
-                <div className="position-relative w-100">
+                <h6 style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Uploaded Image:</h6>
+                <div className="position-relative w-100 rounded overflow-hidden" style={{ boxShadow: 'var(--shadow-md)' }}>
                   <img 
                     src={uploadedImage} 
                     alt="Uploaded"
                     className="img-fluid"
-                    style={{ width: '100%', height: 'auto', objectFit: 'contain', maxHeight: '400px' }}
+                    style={{ width: '100%', height: 'auto', objectFit: 'contain', maxHeight: '400px', display: 'block' }}
                   />
                   <button
                     type="button"
                     className="btn btn-danger btn-sm position-absolute"
-                    style={{ top: '5px', right: '5px' }}
+                    style={{ 
+                      top: '10px', 
+                      right: '10px',
+                      borderRadius: '50%',
+                      width: '32px',
+                      height: '32px',
+                      padding: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '18px',
+                      fontWeight: 'bold',
+                      boxShadow: 'var(--shadow-md)'
+                    }}
                     onClick={removeImage}
                   >
                     ×
@@ -674,8 +715,20 @@ Property data: ${aiPrompt}`
               )}
             </div>
           </div>
-          <button className="btn btn-primary w-100 mb-3" disabled={isUploading}>
-            {isUploading ? 'Uploading...' : 'Submit'}
+          <button className="btn btn-primary w-100 mb-3" disabled={isUploading} style={{ 
+            padding: '0.75rem 1.5rem',
+            fontSize: '1rem',
+            fontWeight: 600,
+            borderRadius: '10px'
+          }}>
+            {isUploading ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                Uploading...
+              </>
+            ) : (
+              'Submit'
+            )}
           </button>
           {/* <button 
             type="button" 
@@ -745,6 +798,7 @@ Property data: ${aiPrompt}`
             Check Current User
           </button> */}
         </form>
+        </div>
       </div>
     </div>
   );

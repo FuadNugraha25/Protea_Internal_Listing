@@ -21,43 +21,47 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, onLogout
 
   const buttonStyle = {
     fontWeight: 600, 
-    letterSpacing: '0.05em',
-    color: '#333',
-    borderColor: '#333',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    backdropFilter: 'blur(10px)',
-    WebkitBackdropFilter: 'blur(10px)',
-    transition: 'all 0.2s ease'
+    letterSpacing: '0.01em',
+    color: 'var(--text-primary)',
+    borderColor: 'var(--border-color)',
+    backgroundColor: 'transparent',
+    transition: 'all 0.2s ease',
+    borderRadius: '8px',
+    padding: '0.5rem 1rem'
   };
 
   const buttonHoverStyle = {
     ...buttonStyle,
-    backgroundColor: 'rgba(51, 51, 51, 0.1)',
-    color: '#000',
-    borderColor: '#000'
+    backgroundColor: 'var(--primary-color)',
+    color: '#fff',
+    borderColor: 'var(--primary-color)',
+    transform: 'translateY(-1px)',
+    boxShadow: 'var(--shadow-md)'
   };
 
   return (
     <nav style={{ 
       position: 'fixed',
-      top: -2,
+      top: 0,
       left: 0,
       right: 0,
-      background: 'rgba(231, 231, 231, 0.85)', 
-      backdropFilter: 'blur(5px)',
-      WebkitBackdropFilter: 'blur(5px)',
-      padding: '10px 20px', 
-      borderBottom: '1px solid rgba(100, 100, 100, 0.5)',
+      background: 'var(--surface)', 
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)',
+      padding: '1rem 2rem', 
+      borderBottom: '1px solid var(--border-color)',
       fontSize: '1.1rem',
-      zIndex: 1000
+      zIndex: 1000,
+      boxShadow: 'var(--shadow-sm)'
     }}>
       <div style={{ 
         textAlign: 'left', 
-        padding: '0.75rem 0', 
-        fontWeight: 600, 
+        padding: '0.5rem 0', 
+        fontWeight: 700, 
         letterSpacing: '0.05em',
         display: 'inline-block',
-        color: '#333'
+        color: 'var(--text-primary)',
+        fontSize: '1.25rem'
       }}>
         Protea Realty
       </div>

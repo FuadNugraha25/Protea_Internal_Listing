@@ -70,17 +70,46 @@ export default function ListingDetails() {
   };
 
   const confirmDelete = async () => {
-    // Update in database
-    await supabase.from("listings").update({ title: "DELETED" }).eq("id", id);
-    // Update local state
-    setIsDeleted(true);
-    setListing((prev) => prev ? { ...prev, title: "DELETED" } : prev);
-    setShowDeleteConfirm(false);
-    setShowSuccess(true);
-    setTimeout(() => {
-      setShowSuccess(false);
-      navigate('/dashboard');
-    }, 1500);
+    try {
+      // Delete image from storage if it exists
+      if (listing?.image_urls) {
+        try {
+          // Extract the file path from the URL
+          const imageUrl = listing.image_urls;
+          const pathMatch = imageUrl.match(/house-photos\/([^?]+)/);
+          if (pathMatch) {
+            const filePath = pathMatch[1];
+            await supabase.storage.from("house-photos").remove([filePath]);
+          }
+        } catch (imageError) {
+          console.error('Error deleting image:', imageError);
+          // Continue with deletion even if image deletion fails
+        }
+      }
+
+      // Delete the record from database
+      const { error } = await supabase.from("listings").delete().eq("id", id);
+      
+      if (error) {
+        console.error('Error deleting listing:', error);
+        alert('Failed to delete listing. Please try again.');
+        setShowDeleteConfirm(false);
+        return;
+      }
+
+      // Update local state
+      setIsDeleted(true);
+      setShowDeleteConfirm(false);
+      setShowSuccess(true);
+      setTimeout(() => {
+        setShowSuccess(false);
+        navigate('/dashboard');
+      }, 1500);
+    } catch (error) {
+      console.error('Error during deletion:', error);
+      alert('An error occurred while deleting the listing. Please try again.');
+      setShowDeleteConfirm(false);
+    }
   };
 
   const cancelDelete = () => {
@@ -90,7 +119,7 @@ export default function ListingDetails() {
   return (
     <>
       <Navbar title="Dashboard" showAdminButton={user && user.id === allowedUserId} />
-      <div className="container mt-4 mb-5">
+      <div className="container mb-5" style={{ paddingTop: '6rem', marginTop: '1rem' }}>
         <div className="d-flex mb-3 justify-content-between align-items-center">
           {/* Left group: Back, Copy Link */}
           <div className="d-flex gap-2 align-items-center">
@@ -143,50 +172,219 @@ export default function ListingDetails() {
         
         <div className="row">
           <div className="col-12">
-            <h2 className="fw-bold mb-2">{isDeleted ? "DELETED" : listing?.title}</h2>
-            <p className="text-muted mb-3">
-              <i className="bi bi-geo-alt me-1"></i>
+            {/* Main Title - Largest, Boldest, Darkest */}
+            <h1 
+              className="fw-bold mb-3" 
+              style={{
+                fontSize: '2.5rem',
+                fontWeight: 700,
+                color: '#212529',
+                lineHeight: 1.2,
+                letterSpacing: '-0.02em'
+              }}
+            >
+              {isDeleted ? "DELETED" : listing?.title}
+            </h1>
+            
+            {/* Location - Subheading with medium size and muted color */}
+            <p 
+              className="mb-4" 
+              style={{
+                fontSize: '1.1rem',
+                fontWeight: 500,
+                color: '#6c757d',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <i className="bi bi-geo-alt" style={{ fontSize: '1.2rem' }}></i>
               {listing?.location}
             </p>
-            <h4 className="text-primary fw-bold mb-4">{formatIDR(listing?.price)}</h4>
             
-            <div className="row mb-4">
-              <div className="col-md-3 col-6 mb-3">
-                <div className="d-flex align-items-center">
-                  <FaBed className="text-primary me-2" />
-                  <div>
-                    <div className="fw-bold">{listing?.beds}</div>
-                    <small className="text-muted">Kamar Tidur</small>
+            {/* Price - Large, Bold, Primary Color */}
+            <h2 
+              className="fw-bold mb-5" 
+              style={{
+                fontSize: '2rem',
+                fontWeight: 700,
+                color: '#0d6efd',
+                lineHeight: 1.3
+              }}
+            >
+              {formatIDR(listing?.price)}
+            </h2>
+            
+            {/* Property Details Section */}
+            <div className="mb-5">
+              <h3 
+                className="fw-semibold mb-4" 
+                style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 600,
+                  color: '#212529',
+                  borderBottom: '2px solid #e9ecef',
+                  paddingBottom: '0.75rem'
+                }}
+              >
+                Property Details
+              </h3>
+              <div className="row">
+                <div className="col-md-3 col-6 mb-4">
+                  <div className="d-flex align-items-center">
+                    <FaBed 
+                      className="text-primary me-3" 
+                      style={{ fontSize: '1.5rem', flexShrink: 0 }}
+                    />
+                    <div>
+                      <div 
+                        className="fw-bold" 
+                        style={{
+                          fontSize: '1.5rem',
+                          fontWeight: 700,
+                          color: '#212529',
+                          lineHeight: 1.2,
+                          marginBottom: '0.25rem'
+                        }}
+                      >
+                        {listing?.beds}
+                      </div>
+                      <small 
+                        className="text-muted" 
+                        style={{
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                          color: '#6c757d',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
+                        }}
+                      >
+                        Kamar Tidur
+                      </small>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="col-md-3 col-6 mb-3">
-                <div className="d-flex align-items-center">
-                  <FaBath className="text-primary me-2" />
-                  <div>
-                    <div className="fw-bold">{listing?.baths}</div>
-                    <small className="text-muted">Kamar Mandi</small>
+                <div className="col-md-3 col-6 mb-4">
+                  <div className="d-flex align-items-center">
+                    <FaBath 
+                      className="text-primary me-3" 
+                      style={{ fontSize: '1.5rem', flexShrink: 0 }}
+                    />
+                    <div>
+                      <div 
+                        className="fw-bold" 
+                        style={{
+                          fontSize: '1.5rem',
+                          fontWeight: 700,
+                          color: '#212529',
+                          lineHeight: 1.2,
+                          marginBottom: '0.25rem'
+                        }}
+                      >
+                        {listing?.baths}
+                      </div>
+                      <small 
+                        className="text-muted" 
+                        style={{
+                          fontSize: '0.875rem',
+                          fontWeight: 500,
+                          color: '#6c757d',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
+                        }}
+                      >
+                        Kamar Mandi
+                      </small>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="col-md-3 col-6 mb-3">
-                <div>
-                  <div className="fw-bold">{listing?.lt} m²</div>
-                  <small className="text-muted">Luas Tanah</small>
+                <div className="col-md-3 col-6 mb-4">
+                  <div>
+                    <div 
+                      className="fw-bold" 
+                      style={{
+                        fontSize: '1.5rem',
+                        fontWeight: 700,
+                        color: '#212529',
+                        lineHeight: 1.2,
+                        marginBottom: '0.25rem'
+                      }}
+                    >
+                      {listing?.lt} m²
+                    </div>
+                    <small 
+                      className="text-muted" 
+                      style={{
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        color: '#6c757d',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}
+                    >
+                      Luas Tanah
+                    </small>
+                  </div>
                 </div>
-              </div>
-              <div className="col-md-3 col-6 mb-3">
-                <div>
-                  <div className="fw-bold">{listing?.lb} m²</div>
-                  <small className="text-muted">Luas Bangunan</small>
+                <div className="col-md-3 col-6 mb-4">
+                  <div>
+                    <div 
+                      className="fw-bold" 
+                      style={{
+                        fontSize: '1.5rem',
+                        fontWeight: 700,
+                        color: '#212529',
+                        lineHeight: 1.2,
+                        marginBottom: '0.25rem'
+                      }}
+                    >
+                      {listing?.lb} m²
+                    </div>
+                    <small 
+                      className="text-muted" 
+                      style={{
+                        fontSize: '0.875rem',
+                        fontWeight: 500,
+                        color: '#6c757d',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em'
+                      }}
+                    >
+                      Luas Bangunan
+                    </small>
+                  </div>
                 </div>
               </div>
             </div>
             
+            {/* Description Section */}
             {listing?.description && (
-              <div className="mt-4">
-                <h5 className="fw-semibold mb-3">Deskripsi</h5>
-                <div className="text-muted" style={{whiteSpace: 'pre-line'}}>{listing.description}</div>
+              <div className="mt-5">
+                <h3 
+                  className="fw-semibold mb-3" 
+                  style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 600,
+                    color: '#212529',
+                    borderBottom: '2px solid #e9ecef',
+                    paddingBottom: '0.75rem'
+                  }}
+                >
+                  Deskripsi
+                </h3>
+                <div 
+                  className="text-muted" 
+                  style={{
+                    whiteSpace: 'pre-line',
+                    fontSize: '1rem',
+                    fontWeight: 400,
+                    color: '#495057',
+                    lineHeight: 1.7,
+                    maxWidth: '900px'
+                  }}
+                >
+                  {listing.description}
+                </div>
               </div>
             )}
           </div>
@@ -233,7 +431,7 @@ export default function ListingDetails() {
               </div>
               <div className="card-body">
                 <p>Are you sure you want to delete this property?</p>
-                <p className="text-muted mb-0">This action will mark the property as deleted.</p>
+                <p className="text-muted mb-0">This action will permanently delete the property and cannot be undone.</p>
               </div>
               <div className="card-footer d-flex justify-content-end gap-2">
                 <button type="button" className="btn btn-secondary" onClick={cancelDelete}>
