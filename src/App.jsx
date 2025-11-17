@@ -7,11 +7,11 @@ import EditPropertyForm from './components/EditPropertyForm'
 import Navbar from './components/Navbar'
 import Dashboard from './user_page/dashboard'
 import ListingDetails from './user_page/ListingDetails';
-import Testing from './user_page/Testing';
 import ConfirmListings from './user_page/ConfirmListings';
 import TotalListings from './user_page/TotalListings';
 import BackupListings from './user_page/BackupListings';
 import Profile from './user_page/Profile';
+import ListingPribadi from './user_page/ListingPribadi';
 
 function App() {
   const [user, setUser] = useState(null)
@@ -50,12 +50,12 @@ function App() {
         <Route path="/admin" element={<AdminPage user={user} />} />
         <Route path="/dashboard" element={<DashboardPage user={user} />} />
         <Route path="/tambah-listing" element={<AddListingPage user={user} />} />
+        <Route path="/listing-pribadi" element={<ListingPribadiPage user={user} />} />
         <Route path="/confirm-listings" element={<ConfirmListingsPage user={user} />} />
         <Route path="/total-listings" element={<TotalListingsPage user={user} />} />
         <Route path="/backup" element={<BackupListingsPage user={user} />} />
         <Route path="/listing/:id" element={<ListingDetails />} />
         <Route path="/edit-listing/:id" element={<EditPropertyForm />} />
-        <Route path="/testing" element={<Testing />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
@@ -88,7 +88,6 @@ function AdminPage({ user }) {
     <>
       <Navbar 
         showDashboardButton={true}
-        showTestingButton={true}
         user={user}
       />
       <div style={{ display: 'flex', marginTop: '73px', minHeight: 'calc(100vh - 73px)' }}>
@@ -139,14 +138,6 @@ function AdminPage({ user }) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--primary-dark)';
-                  e.target.style.transform = 'translateX(4px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(0)';
                 }}
               >
                 <span>📝</span>
@@ -275,9 +266,10 @@ function DashboardPage({ user }) {
   return (
     <>
       <Navbar 
+        showDashboardButton={true}
         showAdminButton={isAdmin}
-        showTestingButton={isAdmin}
         showTambahListingButton={!isAdmin}  // Only show for non-admin users
+        showListingPribadiButton={!isAdmin}
         user={user}
       />
       <Dashboard user={user} />
@@ -288,19 +280,25 @@ function DashboardPage({ user }) {
 // Add Listing Page Component
 function AddListingPage({ user }) {
   const allowedUserIds = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136']
+  const isAdmin = allowedUserIds.includes(user.id);
   
   return (
     <>
       <Navbar 
         showDashboardButton={true}
-        showAdminButton={allowedUserIds.includes(user.id)}
-        showTestingButton={allowedUserIds.includes(user.id)}
-        showTambahListingButton={false}
+        showAdminButton={isAdmin}
+        showTambahListingButton={!isAdmin}
+        showListingPribadiButton={!isAdmin}
         user={user}
       />
       <PropertyForm user={user} />
     </>
   )
+}
+
+// Listing Pribadi Page Component
+function ListingPribadiPage({ user }) {
+  return <ListingPribadi user={user} />
 }
 
 // Confirm Listings Page Component
@@ -328,7 +326,6 @@ function ConfirmListingsPage({ user }) {
     <>
       <Navbar 
         showDashboardButton={true}
-        showTestingButton={true}
         user={user}
       />
       <div style={{ display: 'flex', marginTop: '73px', minHeight: 'calc(100vh - 73px)' }}>
@@ -412,14 +409,6 @@ function ConfirmListingsPage({ user }) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--primary-dark)';
-                  e.target.style.transform = 'translateX(4px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(0)';
                 }}
               >
                 <span>📊</span>
@@ -532,7 +521,6 @@ function TotalListingsPage({ user }) {
     <>
       <Navbar 
         showDashboardButton={true}
-        showTestingButton={true}
         user={user}
       />
       <div style={{ display: 'flex', marginTop: '73px', minHeight: 'calc(100vh - 73px)' }}>
@@ -650,14 +638,6 @@ function TotalListingsPage({ user }) {
                   alignItems: 'center',
                   gap: '0.5rem'
                 }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--primary-dark)';
-                  e.target.style.transform = 'translateX(4px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(0)';
-                }}
               >
                 <span>📊</span>
                 <span>Total Listingan</span>
@@ -736,7 +716,6 @@ function BackupListingsPage({ user }) {
     <>
       <Navbar 
         showDashboardButton={true}
-        showTestingButton={true}
         user={user}
       />
       <div style={{ display: 'flex', marginTop: '73px', minHeight: 'calc(100vh - 73px)' }}>
@@ -889,14 +868,6 @@ function BackupListingsPage({ user }) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--primary-dark)';
-                  e.target.style.transform = 'translateX(4px)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(0)';
                 }}
               >
                 <span>💾</span>

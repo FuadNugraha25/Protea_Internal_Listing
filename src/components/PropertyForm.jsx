@@ -14,11 +14,15 @@ const PropertyForm = ({ user }) => {
     lb: '',
     kt: '',
     km: '',
+    district: '',
     city: '',
     province: '',
     price: '',
     transaction_type: '',
     property_type: '',
+    has_full_interior_photos: false,
+    has_tiktok_video: false,
+    has_youtube_video: false,
   });
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imageFileSize, setImageFileSize] = useState(null);
@@ -32,9 +36,11 @@ const PropertyForm = ({ user }) => {
   const [aiResponse, setAiResponse] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
   const [ownerName, setOwnerName] = useState('');
+  const [selectedOwnerId, setSelectedOwnerId] = useState(null);
   const [allUsers, setAllUsers] = useState([]); // Store all users for dropdown
   const [usersLoading, setUsersLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const descriptionRef = useRef(null);
 
   // Admin user IDs
   const allowedUserId = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136'];
@@ -115,10 +121,21 @@ const PropertyForm = ({ user }) => {
     fetchAllUsers();
   }, [isAdmin]);
 
-  // Fetch owner name (current user's profile)
+  // Fetch owner name (current user's profile) when not admin
   useEffect(() => {
     async function fetchOwnerName() {
-      if (!user) return;
+      if (!user) {
+        setOwnerName('');
+        setSelectedOwnerId(null);
+        return;
+      }
+
+      // Admin will choose owner from dropdown, reset defaults
+      if (isAdmin) {
+        setOwnerName('');
+        setSelectedOwnerId('');
+        return;
+      }
       
       try {
         const profile = await getOrCreateProfile(user);
@@ -131,11 +148,21 @@ const PropertyForm = ({ user }) => {
       } catch (error) {
         console.error('Error fetching owner name:', error);
         setOwnerName(user.email || 'Unknown User');
+      } finally {
+        setSelectedOwnerId(user.id);
       }
     }
     
     fetchOwnerName();
-  }, [user]);
+  }, [user, isAdmin]);
+
+  useEffect(() => {
+    if (descriptionRef.current) {
+      const textarea = descriptionRef.current;
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [formData.description]);
 
   const formatPriceWithCommas = (value) => {
     // Remove all non-digit characters
@@ -162,63 +189,15 @@ const PropertyForm = ({ user }) => {
       [name]: value,
     };
 
-    // If description changes, try to extract LT, LB, and price
-    if (name === 'description') {
-      // Extract LT (e.g., LT. 84m² or Luas Tanah: 112 m²)
-      let ltMatch = value.match(/LT\.?\s*(\d+)/i);
-      if (!ltMatch) {
-        ltMatch = value.match(/Luas\s*Tanah\s*[:：]?\s*(\d+)/i);
-      }
-      if (ltMatch) {
-        updatedForm.lt = ltMatch[1];
-      }
-      // Extract LB (e.g., LB. 100m² or Luas Bangunan: 100 m²)
-      let lbMatch = value.match(/LB\.?\s*(\d+)/i);
-      if (!lbMatch) {
-        lbMatch = value.match(/Luas\s*Bangunan\s*[:：]?\s*(\d+)/i);
-      }
-      if (lbMatch) {
-        updatedForm.lb = lbMatch[1];
-      }
-      // Extract KT (e.g., KT 3+1, 3 Kamar Tidur)
-      let ktMatch = value.match(/KT\.?\s*(\d+)(\s*\+\s*(\d+))?/i);
-      if (!ktMatch) {
-        ktMatch = value.match(/(\d+)\s*Kamar\s*Tidur/i);
-      }
-      if (ktMatch) {
-        let kt = parseInt(ktMatch[1] || '0', 10);
-        if (ktMatch[3]) {
-          kt += parseInt(ktMatch[3], 10);
-        }
-        updatedForm.kt = kt;
-      }
-      // Extract KM (e.g., KM 4+1, 2 Kamar Mandi)
-      let kmMatch = value.match(/KM\.?\s*(\d+)(\s*\+\s*(\d+))?/i);
-      if (!kmMatch) {
-        kmMatch = value.match(/(\d+)\s*Kamar\s*Mandi/i);
-      }
-      if (kmMatch) {
-        let km = parseInt(kmMatch[1] || '0', 10);
-        if (kmMatch[3]) {
-          km += parseInt(kmMatch[3], 10);
-        }
-        updatedForm.km = km;
-      }
-      // Extract Harga/Price (e.g., Harga: 1.95 M, Harga: Rp 1.725 M, Harga: 2400000000)
-      let priceMatch = value.match(/Harga\s*[:：]?\s*Rp?\.?\s*([\d.,]+)\s*([Mm]?)/i);
-      if (!priceMatch) {
-        priceMatch = value.match(/Harga\s*[:：]?\s*([\d.,]+)\s*([Mm]?)/i);
-      }
-      if (priceMatch) {
-        let priceNum = priceMatch[1].replace(/\./g, '').replace(/,/g, '');
-        if (priceMatch[2] && priceMatch[2].toLowerCase() === 'm') {
-          // If 'M' is present, multiply by 1,000,000
-          priceNum = String(Number(priceNum) * 1000000);
-        }
-        updatedForm.price = priceNum;
-      }
-    }
     setFormData(updatedForm);
+  };
+
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: checked,
+    }));
   };
 
   const uploadImageToSupabase = async (file) => {
@@ -460,7 +439,8 @@ Property data: ${aiPrompt}`
       // Update form data with extracted values
       setFormData(prev => ({
         ...prev,
-        ...extractedData
+        ...extractedData,
+        description: aiPrompt
       }));
       
       setAlert({ message: '✅ AI extracted data applied to form fields!', severity: 'success' });
@@ -507,11 +487,18 @@ Property data: ${aiPrompt}`
       return cleanValue === '' ? null : cleanValue;
     };
 
+    const ownerIdForSubmission = isAdmin ? selectedOwnerId : user?.id;
+
+    if (!ownerIdForSubmission) {
+      setAlert({ message: '❌ Please select an owner before submitting.', severity: 'error' });
+      return;
+    }
+
     // Only include fields that exist in the database table
     const submission = {
       id: listingId,  // This is the primary key for the listing
-      user_id: user.id,  // This is the foreign key to the user
-      owner: ownerName || user.email || 'Unknown User',  // Owner name for easy display
+      user_id: ownerIdForSubmission,  // This is the foreign key to the user
+      owner: ownerName || user?.email || 'Unknown User',  // Owner name for easy display
       title: formData.title,
       description: formData.description,
       image_urls: formData.image_urls,
@@ -519,11 +506,15 @@ Property data: ${aiPrompt}`
       lb: convertToNumberOrNull(formData.lb),
       kt: convertToNumberOrNull(formData.kt),
       km: convertToNumberOrNull(formData.km),
+      district: formData.district,
       city: formData.city,
       province: formData.province,
       price: convertPriceToStringOrNull(formData.price),
       transaction_type: formData.transaction_type,
       property_type: formData.property_type,
+      has_full_interior_photos: formData.has_full_interior_photos,
+      has_tiktok_video: formData.has_tiktok_video,
+      has_youtube_video: formData.has_youtube_video,
     }
   
     console.log('Submitting data:', submission);
@@ -551,18 +542,28 @@ Property data: ${aiPrompt}`
         lb: '',
         kt: '',
         km: '',
+        district: '',
         city: '',
         province: '',
         price: '',
         transaction_type: '',
         property_type: '',
+        has_full_interior_photos: false,
+        has_tiktok_video: false,
+        has_youtube_video: false,
       })
       setUploadedImage(null);
+      if (isAdmin) {
+        setSelectedOwnerId('');
+        setOwnerName('');
+      } else {
+        setSelectedOwnerId(user?.id || null);
+      }
     }
   }
 
   return (
-    <div style={{ minHeight: '100vh', padding: '7rem 0 2rem 0', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', width: '100%' }}>
+    <div style={{ minHeight: '100vh', padding: '3rem 0 2rem 0', marginTop: isAdmin ? '0' : '5rem', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', width: '100%' }}>
       <div className="container d-flex justify-content-center align-items-center" style={{ padding: '0 1rem' }}>
         <div className="col-md-8 col-lg-6">
         <div className="text-center mb-4">
@@ -687,8 +688,17 @@ Property data: ${aiPrompt}`
               <select
                 name="owner"
                 className="form-select"
-                value={ownerName}
-                onChange={(e) => setOwnerName(e.target.value)}
+                value={selectedOwnerId || ''}
+                onChange={(e) => {
+                  const selectedId = e.target.value;
+                  setSelectedOwnerId(selectedId);
+                  if (!selectedId) {
+                    setOwnerName('');
+                    return;
+                  }
+                  const selectedUser = allUsers.find((userOption) => userOption.id === selectedId);
+                  setOwnerName(selectedUser?.name || 'Unknown User');
+                }}
                 disabled={usersLoading}
                 required
                 style={{
@@ -704,7 +714,7 @@ Property data: ${aiPrompt}`
                   <>
                     <option value="">Select Owner</option>
                     {allUsers.map((userOption) => (
-                      <option key={userOption.id} value={userOption.name}>
+                      <option key={userOption.id} value={userOption.id}>
                         {userOption.name}
                       </option>
                     ))}
@@ -735,7 +745,15 @@ Property data: ${aiPrompt}`
           </div>
           <div className="mb-3">
             <label className="form-label">Description</label>
-            <textarea name="description" className="form-control" value={formData.description} onChange={handleChange} />
+            <textarea
+              name="description"
+              className="form-control"
+              ref={descriptionRef}
+              value={formData.description}
+              onChange={handleChange}
+              style={{ resize: 'none', overflow: 'hidden' }}
+              rows="3"
+            />
           </div>
           <div className="mb-3">
             <label className="form-label">Transaction Type</label>
@@ -890,6 +908,10 @@ Property data: ${aiPrompt}`
             </div>
           )}
           <div className="mb-3 mt-3">
+            <label className="form-label">District</label>
+            <input name="district" className="form-control" value={formData.district} onChange={handleChange} />
+          </div>
+          <div className="mb-3">
             <label className="form-label">City</label>
             <input name="city" className="form-control" value={formData.city} onChange={handleChange} />
           </div>
@@ -913,6 +935,47 @@ Property data: ${aiPrompt}`
               {formData.transaction_type === 'Sewa' && (
                 <span className="ms-2 text-muted">/Tahun</span>
               )}
+            </div>
+          </div>
+          <div className="mb-4">
+            <div className="form-check">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="dummyCheckbox1"
+                name="has_full_interior_photos"
+                checked={formData.has_full_interior_photos}
+                onChange={handleCheckboxChange}
+              />
+              <label className="form-check-label" htmlFor="dummyCheckbox1">
+                Foto dalam lengkap
+              </label>
+            </div>
+            <div className="form-check mt-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="dummyCheckbox2"
+                name="has_tiktok_video"
+                checked={formData.has_tiktok_video}
+                onChange={handleCheckboxChange}
+              />
+              <label className="form-check-label" htmlFor="dummyCheckbox2">
+                Video Tiktok
+              </label>
+            </div>
+            <div className="form-check mt-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="dummyCheckbox3"
+                name="has_youtube_video"
+                checked={formData.has_youtube_video}
+                onChange={handleCheckboxChange}
+              />
+              <label className="form-check-label" htmlFor="dummyCheckbox3">
+                Video Youtube
+              </label>
             </div>
           </div>
           <button className="btn btn-primary w-100 mb-3" disabled={isUploading} style={{ 

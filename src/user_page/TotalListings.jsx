@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FoundationWrapper from '../components/FoundationWrapper';
+import { supabase } from '../supabaseClient';
+import { getOrCreateProfile } from '../utils/profileUtils';
 
 function formatIDR(price) {
   if (!price || isNaN(Number(price))) return '-';
@@ -7,59 +9,144 @@ function formatIDR(price) {
 }
 
 function TotalListings() {
-  // Dummy data for agents
-  const [agents] = useState([
-    {
-      id: 1,
-      name: 'Budi Santoso',
-      email: 'budi.santoso@protea.com',
-      phone: '+62 812-3456-7890',
-      totalListings: 15,
-      activeListings: 12,
-      pendingListings: 3
-    },
-    {
-      id: 2,
-      name: 'Siti Nurhaliza',
-      email: 'siti.nurhaliza@protea.com',
-      phone: '+62 812-3456-7891',
-      totalListings: 23,
-      activeListings: 20,
-      pendingListings: 3
-    },
-    {
-      id: 3,
-      name: 'Ahmad Fauzi',
-      email: 'ahmad.fauzi@protea.com',
-      phone: '+62 812-3456-7892',
-      totalListings: 8,
-      activeListings: 7,
-      pendingListings: 1
-    },
-    {
-      id: 4,
-      name: 'Dewi Lestari',
-      email: 'dewi.lestari@protea.com',
-      phone: '+62 812-3456-7893',
-      totalListings: 19,
-      activeListings: 18,
-      pendingListings: 1
-    },
-    {
-      id: 5,
-      name: 'Rizki Pratama',
-      email: 'rizki.pratama@protea.com',
-      phone: '+62 812-3456-7894',
-      totalListings: 12,
-      activeListings: 10,
-      pendingListings: 2
+  const [agents, setAgents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      try {
+        // Fetch all listings
+        const { data: listingsData, error: listingsError } = await supabase
+          .from('listings')
+          .select('user_id, owner')
+          .order('created_at', { ascending: false });
+
+        if (listingsError) {
+          console.error('Error fetching listings:', listingsError);
+          setAgents([]);
+          setLoading(false);
+          return;
+        }
+
+        if (!listingsData || listingsData.length === 0) {
+          console.log('No listings data found');
+          setAgents([]);
+          setLoading(false);
+          return;
+        }
+
+        console.log('Fetched listings:', listingsData.length);
+        console.log('Sample listing:', listingsData[0]);
+
+        // Group listings by user_id
+        const listingsByUser = {};
+        let listingsWithoutUserId = 0;
+        
+        listingsData.forEach(listing => {
+          const userId = listing.user_id;
+          if (!userId) {
+            listingsWithoutUserId++;
+            console.log('Listing without user_id:', listing);
+            return;
+          }
+
+          if (!listingsByUser[userId]) {
+            listingsByUser[userId] = {
+              totalListings: 0
+            };
+          }
+
+          listingsByUser[userId].totalListings++;
+        });
+
+        console.log('Listings grouped by user:', listingsByUser);
+        console.log('Listings without user_id:', listingsWithoutUserId);
+
+        // Get unique user IDs
+        const userIds = Object.keys(listingsByUser);
+        
+        // Fetch profiles for all users
+        let profilesMap = {};
+        if (userIds.length > 0) {
+          const { data: profilesData, error: profilesError } = await supabase
+            .from('profiles')
+            .select('id, name, full_name, email')
+            .in('id', userIds);
+
+          if (!profilesError && profilesData) {
+            profilesMap = profilesData.reduce((acc, profile) => {
+              acc[profile.id] = profile;
+              return acc;
+            }, {});
+          }
+        }
+
+        // Build agents array with real data
+        const agentsData = userIds.map(userId => {
+          const profile = profilesMap[userId];
+          const stats = listingsByUser[userId];
+          
+          // Get owner name from listing if profile doesn't exist
+          const ownerName = profile 
+            ? (profile.name || profile.full_name || profile.email || 'Unknown User')
+            : (listingsData.find(l => l.user_id === userId)?.owner || 'Unknown User');
+
+          return {
+            id: userId,
+            name: ownerName,
+            email: profile?.email || 'N/A',
+            phone: profile?.phone || 'N/A',
+            totalListings: stats.totalListings
+          };
+        });
+
+        // Sort by total listings (descending)
+        agentsData.sort((a, b) => b.totalListings - a.totalListings);
+
+        setAgents(agentsData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setAgents([]);
+      } finally {
+        setLoading(false);
+      }
     }
-  ]);
+
+    fetchData();
+  }, []);
 
   // Calculate total listings
   const totalListings = agents.reduce((sum, agent) => sum + agent.totalListings, 0);
-  const totalActiveListings = agents.reduce((sum, agent) => sum + agent.activeListings, 0);
-  const totalPendingListings = agents.reduce((sum, agent) => sum + agent.pendingListings, 0);
+
+  if (loading) {
+    return (
+      <FoundationWrapper style={{ paddingTop: '1.5rem', minHeight: '100vh', background: '#f8f9fa' }}>
+        <div className="grid-container" style={{ maxWidth: '1400px' }}>
+          <div className="grid-x grid-margin-x">
+            <div className="cell text-center" style={{ padding: '4rem 0' }}>
+              <div style={{ 
+                width: '3rem', 
+                height: '3rem', 
+                border: '4px solid #e6e6e6',
+                borderTop: '4px solid #1779ba',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                margin: '0 auto'
+              }}></div>
+              <p style={{ marginTop: '1rem', color: '#767676' }}>Loading data...</p>
+              <style>{`
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+              `}</style>
+            </div>
+          </div>
+        </div>
+      </FoundationWrapper>
+    );
+  }
 
   return (
     <FoundationWrapper style={{ paddingTop: '1.5rem', minHeight: '100vh', background: '#f8f9fa' }}>
@@ -90,9 +177,9 @@ function TotalListings() {
           </div>
         </div>
 
-        {/* Summary Cards */}
+        {/* Summary Card */}
         <div className="grid-x grid-margin-x grid-margin-y" style={{ marginBottom: '2rem' }}>
-          <div className="cell small-12 medium-4">
+          <div className="cell small-12 medium-6 large-4">
             <div className="card" style={{ 
               border: 'none', 
               boxShadow: '0 4px 12px rgba(0,0,0,0.1)', 
@@ -106,42 +193,6 @@ function TotalListings() {
                 </div>
                 <div style={{ fontSize: '2.5rem', fontWeight: 700, lineHeight: 1 }}>
                   {totalListings}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="cell small-12 medium-4">
-            <div className="card" style={{ 
-              border: 'none', 
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)', 
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #28a745 0%, #218838 100%)',
-              color: '#fff'
-            }}>
-              <div className="card-section" style={{ padding: '1.5rem' }}>
-                <div style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.5rem' }}>
-                  Listingan Aktif
-                </div>
-                <div style={{ fontSize: '2.5rem', fontWeight: 700, lineHeight: 1 }}>
-                  {totalActiveListings}
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="cell small-12 medium-4">
-            <div className="card" style={{ 
-              border: 'none', 
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)', 
-              borderRadius: '12px',
-              background: 'linear-gradient(135deg, #ffc107 0%, #e0a800 100%)',
-              color: '#fff'
-            }}>
-              <div className="card-section" style={{ padding: '1.5rem' }}>
-                <div style={{ fontSize: '0.875rem', opacity: 0.9, marginBottom: '0.5rem' }}>
-                  Listingan Pending
-                </div>
-                <div style={{ fontSize: '2.5rem', fontWeight: 700, lineHeight: 1 }}>
-                  {totalPendingListings}
                 </div>
               </div>
             </div>
@@ -207,32 +258,17 @@ function TotalListings() {
                         }}>
                           Total Listingan
                         </th>
-                        <th style={{ 
-                          padding: '1rem 1.5rem', 
-                          textAlign: 'center', 
-                          fontWeight: 600,
-                          fontSize: '0.875rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          color: '#767676'
-                        }}>
-                          Aktif
-                        </th>
-                        <th style={{ 
-                          padding: '1rem 1.5rem', 
-                          textAlign: 'center', 
-                          fontWeight: 600,
-                          fontSize: '0.875rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em',
-                          color: '#767676'
-                        }}>
-                          Pending
-                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {agents.map((agent, index) => (
+                      {agents.length === 0 ? (
+                        <tr>
+                          <td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#767676' }}>
+                            No listings found
+                          </td>
+                        </tr>
+                      ) : (
+                        agents.map((agent, index) => (
                         <tr 
                           key={agent.id} 
                           style={{ 
@@ -246,16 +282,13 @@ function TotalListings() {
                             <div style={{ fontWeight: 600, color: '#0a0a0a', marginBottom: '0.25rem' }}>
                               {agent.name}
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: '#767676' }}>
+                            <div style={{ fontSize: '0.75rem', color: '#767676', wordBreak: 'break-all' }}>
                               ID: {agent.id}
                             </div>
                           </td>
                           <td style={{ padding: '1rem 1.5rem' }}>
-                            <div style={{ color: '#767676', fontSize: '0.875rem', marginBottom: '0.25rem' }}>
-                              {agent.email}
-                            </div>
                             <div style={{ color: '#767676', fontSize: '0.875rem' }}>
-                              {agent.phone}
+                              {agent.email !== 'N/A' ? agent.email : 'No email'}
                             </div>
                           </td>
                           <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
@@ -272,34 +305,9 @@ function TotalListings() {
                               {agent.totalListings}
                             </span>
                           </td>
-                          <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
-                            <span style={{ 
-                              display: 'inline-block',
-                              padding: '0.375rem 0.75rem',
-                              background: '#28a745',
-                              color: '#fff',
-                              borderRadius: '6px',
-                              fontSize: '0.9375rem',
-                              fontWeight: 600
-                            }}>
-                              {agent.activeListings}
-                            </span>
-                          </td>
-                          <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
-                            <span style={{ 
-                              display: 'inline-block',
-                              padding: '0.375rem 0.75rem',
-                              background: '#ffc107',
-                              color: '#0a0a0a',
-                              borderRadius: '6px',
-                              fontSize: '0.9375rem',
-                              fontWeight: 600
-                            }}>
-                              {agent.pendingListings}
-                            </span>
-                          </td>
                         </tr>
-                      ))}
+                      ))
+                      )}
                     </tbody>
                   </table>
                 </div>

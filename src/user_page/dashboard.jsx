@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FaBed, FaBath } from "react-icons/fa";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
+import { getOrCreateProfile } from '../utils/profileUtils';
 
 function formatIDR(price) {
   if (!price || isNaN(Number(price))) return '-';
@@ -30,6 +31,7 @@ function Dashboard({ user }) {
   const [lbMax, setLbMax] = useState(null);
   const [selectedKM, setSelectedKM] = useState("All");
   const [selectedKT, setSelectedKT] = useState("All");
+  const [selectedOwner, setSelectedOwner] = useState("All");
   const propertyTypes = ["Rumah", "Kavling", "Apartemen"];
   const transactionTypes = ["Jual", "Sewa"];
   const [selectedTransactionType, setSelectedTransactionType] = useState("All");
@@ -49,6 +51,7 @@ function Dashboard({ user }) {
     lbMax: null,
     selectedKM: "All",
     selectedKT: "All",
+    selectedOwner: "All",
     selectedTransactionType: "All"
   });
 
@@ -75,6 +78,7 @@ function Dashboard({ user }) {
       lbMax,
       selectedKM,
       selectedKT,
+      selectedOwner,
       selectedTransactionType
     });
   };
@@ -93,6 +97,7 @@ function Dashboard({ user }) {
     setLbMax(null);
     setSelectedKM("All");
     setSelectedKT("All");
+    setSelectedOwner("All");
     setSelectedTransactionType("All");
     
     // Also reset the applied filters
@@ -109,6 +114,7 @@ function Dashboard({ user }) {
       lbMax: null,
       selectedKM: "All",
       selectedKT: "All",
+      selectedOwner: "All",
       selectedTransactionType: "All"
     });
   };
@@ -135,8 +141,12 @@ function Dashboard({ user }) {
       const profile = await getOrCreateProfile(user);
       
       if (profile) {
-        const name = profile.name || profile.full_name || '';
+        const name = profile.name || profile.full_name || user.email?.split('@')[0] || 'User';
         setAgentName(name);
+      } else {
+        // Fallback to email username if profile creation fails
+        const fallbackName = user.email?.split('@')[0] || 'User';
+        setAgentName(fallbackName);
       }
     }
     
@@ -257,6 +267,10 @@ function Dashboard({ user }) {
         .filter(listing => listing.province === selectedProvince && listing.location === selectedLocation)
         .map(listing => listing.district))];
 
+  const uniqueOwners = [...new Set(listings.map(listing => listing.owner))].filter(Boolean).sort((a, b) =>
+    a.localeCompare(b, 'id-ID', { sensitivity: 'base' })
+  );
+
   const filteredListings = listings.filter(listing => {
     if ((listing.title || "").trim() === "DELETED") return false;
     const matchesSearch =
@@ -267,6 +281,7 @@ function Dashboard({ user }) {
     const matchesLocation = appliedFilters.selectedLocation === "All" || listing.location === appliedFilters.selectedLocation;
     const matchesProvince = appliedFilters.selectedProvince === "All" || listing.province === appliedFilters.selectedProvince;
     const matchesDistrict = appliedFilters.selectedDistrict === "All" || listing.district === appliedFilters.selectedDistrict;
+    const matchesOwner = appliedFilters.selectedOwner === "All" || listing.owner === appliedFilters.selectedOwner;
     // Price filter
     const priceNum = Number(listing.price?.toString().replace(/[^0-9]/g, ""));
     const matchesPrice =
@@ -310,6 +325,7 @@ function Dashboard({ user }) {
       matchesLocation &&
       matchesProvince &&
       matchesDistrict &&
+      matchesOwner &&
       matchesPrice &&
       matchesLT &&
       matchesLB &&
@@ -502,6 +518,26 @@ function Dashboard({ user }) {
                         Pilih Kota terlebih dahulu
                       </small>
                     )}
+                  </div>
+                </div>
+
+                {/* Owner Filter */}
+                <div className="row g-3 mb-4">
+                  <div className="col-12">
+                    <h6 className="text-muted mb-3">Filter Owner</h6>
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold">Owner Listing</label>
+                    <select
+                      className="form-select"
+                      value={selectedOwner}
+                      onChange={(e) => setSelectedOwner(e.target.value)}
+                    >
+                      <option value="All">Semua Owner</option>
+                      {uniqueOwners.map((owner, index) => (
+                        <option key={index} value={owner}>{owner}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 

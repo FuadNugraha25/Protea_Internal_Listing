@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 
-const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTestingButton = false, showTambahListingButton = false, user = null, onLogout }) => {
+const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTambahListingButton = false, showListingPribadiButton = false, user = null, onLogout }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const dropdownRef = useRef(null);
   
@@ -28,12 +29,12 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTest
     navigate('/dashboard');
   };
 
-  const goToTesting = () => {
-    navigate('/testing');
-  };
-
   const goToTambahListing = () => {
     navigate('/tambah-listing');
+  };
+
+  const goToListingPribadi = () => {
+    navigate('/listing-pribadi');
   };
 
   const goToProfile = () => {
@@ -60,23 +61,46 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTest
 
   const buttonStyle = {
     fontWeight: 600, 
-    letterSpacing: '0.01em',
-    color: 'var(--text-primary)',
-    borderColor: 'var(--border-color)',
-    backgroundColor: 'transparent',
-    transition: 'all 0.2s ease',
-    borderRadius: '8px',
-    padding: '0.5rem 1rem'
+    letterSpacing: '0.02em',
+    color: 'var(--text-secondary)',
+    border: 'none',
+    background: 'transparent',
+    transition: 'color 0.2s ease, background 0.2s ease',
+    borderRadius: '6px',
+    padding: '0.35rem 0.85rem',
+    fontSize: '0.95rem',
+    cursor: 'pointer'
   };
 
-  const buttonHoverStyle = {
+  const getButtonStyle = (isActive = false) => ({
     ...buttonStyle,
-    backgroundColor: 'var(--primary-color)',
-    color: '#fff',
-    borderColor: 'var(--primary-color)',
-    transform: 'translateY(-1px)',
-    boxShadow: 'var(--shadow-md)'
+    color: isActive ? 'var(--primary-color)' : buttonStyle.color,
+    background: isActive ? 'rgba(23, 121, 186, 0.12)' : buttonStyle.background,
+    boxShadow: isActive ? 'inset 0 -2px 0 var(--primary-color)' : 'none'
+  });
+
+  const adminOverrideButtons = isAdmin;
+  const dashboardVisible = adminOverrideButtons || showDashboardButton;
+  const adminVisible = adminOverrideButtons || showAdminButton;
+  const tambahListingVisible = !isAdmin && showTambahListingButton;
+  const listingPribadiVisible = adminOverrideButtons || showListingPribadiButton;
+
+  const handleHover = (e) => {
+    e.currentTarget.style.color = 'var(--primary-color)';
+    e.currentTarget.style.background = 'rgba(23, 121, 186, 0.12)';
   };
+
+  const handleHoverExit = (e, isActive = false) => {
+    const styles = getButtonStyle(isActive);
+    Object.keys(styles).forEach(key => {
+      e.currentTarget.style[key] = styles[key];
+    });
+  };
+
+  const dashboardActive = location.pathname === '/dashboard';
+  const tambahListingActive = location.pathname === '/tambah-listing';
+  const listingPribadiActive = location.pathname === '/listing-pribadi';
+  const adminActive = location.pathname.startsWith('/admin');
 
   return (
     <nav style={{ 
@@ -91,67 +115,84 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTest
       borderBottom: '1px solid var(--border-color)',
       fontSize: '1.1rem',
       zIndex: 1000,
-      boxShadow: 'var(--shadow-sm)'
+      boxShadow: 'var(--shadow-sm)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between'
     }}>
-      <div style={{ 
-        textAlign: 'left', 
-        padding: '0.5rem 0', 
-        fontWeight: 700, 
-        letterSpacing: '0.05em',
-        display: 'inline-block',
-        color: 'var(--text-primary)',
-        fontSize: '1.25rem'
-      }}>
+      <div 
+        onClick={goToDashboard}
+        style={{ 
+          textAlign: 'left', 
+          padding: '0.5rem 0', 
+          fontWeight: 700, 
+          letterSpacing: '0.05em',
+          display: 'inline-block',
+          color: 'var(--text-primary)',
+          fontSize: '1.25rem',
+          cursor: 'pointer',
+          transition: 'opacity 0.2s ease',
+          marginLeft: '1.5rem',
+          flex: '0 0 auto'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.opacity = '0.7';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.opacity = '1';
+        }}
+      >
         Protea Realty
       </div>
       <div style={{ 
-        float: 'right', 
         display: 'flex', 
         gap: '0.5rem',
-        marginTop: '0.75rem'
+        alignItems: 'center',
+        flex: '0 0 auto',
+        marginRight: '1.5rem'
       }}>
-        {showDashboardButton && (
+        {dashboardVisible && (
           <button 
             onClick={goToDashboard} 
-            className="btn btn-outline-secondary btn-sm"
-            style={buttonStyle}
-            onMouseEnter={(e) => Object.assign(e.target.style, buttonHoverStyle)}
-            onMouseLeave={(e) => Object.assign(e.target.style, buttonStyle)}
+            aria-current={dashboardActive ? 'page' : undefined}
+            style={getButtonStyle(dashboardActive)}
+            onMouseEnter={handleHover}
+            onMouseLeave={(e) => handleHoverExit(e, dashboardActive)}
           >
             Dashboard
           </button>
         )}
-        {showAdminButton && (
+        {adminVisible && (
           <button 
             onClick={goToAdmin} 
-            className="btn btn-outline-secondary btn-sm"
-            style={buttonStyle}
-            onMouseEnter={(e) => Object.assign(e.target.style, buttonHoverStyle)}
-            onMouseLeave={(e) => Object.assign(e.target.style, buttonStyle)}
+            aria-current={adminActive ? 'page' : undefined}
+            style={getButtonStyle(adminActive)}
+            onMouseEnter={handleHover}
+            onMouseLeave={(e) => handleHoverExit(e, adminActive)}
           >
             Admin
           </button>
         )}
-        {showTestingButton && (
-          <button 
-            onClick={goToTesting} 
-            className="btn btn-outline-secondary btn-sm"
-            style={buttonStyle}
-            onMouseEnter={(e) => Object.assign(e.target.style, buttonHoverStyle)}
-            onMouseLeave={(e) => Object.assign(e.target.style, buttonStyle)}
-          >
-            Testing
-          </button>
-        )}
-        {showTambahListingButton && (
+        {tambahListingVisible && (
           <button 
             onClick={goToTambahListing} 
-            className="btn btn-outline-secondary btn-sm"
-            style={buttonStyle}
-            onMouseEnter={(e) => Object.assign(e.target.style, buttonHoverStyle)}
-            onMouseLeave={(e) => Object.assign(e.target.style, buttonStyle)}
+            aria-current={tambahListingActive ? 'page' : undefined}
+            style={getButtonStyle(tambahListingActive)}
+            onMouseEnter={handleHover}
+            onMouseLeave={(e) => handleHoverExit(e, tambahListingActive)}
           >
             Tambah Listing
+          </button>
+        )}
+        {listingPribadiVisible && (
+          <button 
+            onClick={goToListingPribadi} 
+            aria-current={listingPribadiActive ? 'page' : undefined}
+            style={getButtonStyle(listingPribadiActive)}
+            onMouseEnter={handleHover}
+            onMouseLeave={(e) => handleHoverExit(e, listingPribadiActive)}
+          >
+            Listing Pribadi
           </button>
         )}
         
@@ -159,10 +200,9 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTest
         {isAdmin && (
           <button 
             onClick={handleLogout} 
-            className="btn btn-outline-secondary btn-sm"
-            style={buttonStyle}
-            onMouseEnter={(e) => Object.assign(e.target.style, buttonHoverStyle)}
-            onMouseLeave={(e) => Object.assign(e.target.style, buttonStyle)}
+            style={getButtonStyle(false)}
+            onMouseEnter={handleHover}
+            onMouseLeave={(e) => handleHoverExit(e, false)}
           >
             Logout
           </button>
@@ -173,9 +213,8 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTest
         <div ref={dropdownRef} style={{ position: 'relative' }}>
           <button 
             onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-            className="btn btn-outline-secondary btn-sm"
             style={{
-              ...buttonStyle,
+              ...getButtonStyle(false),
               width: '40px',
               height: '40px',
               padding: 0,

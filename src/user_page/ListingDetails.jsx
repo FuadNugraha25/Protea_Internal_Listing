@@ -7,6 +7,7 @@ import FoundationWrapper from "../components/FoundationWrapper";
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
+import { getOrCreateProfile } from '../utils/profileUtils';
 
 
 function formatIDR(price) {
@@ -21,11 +22,42 @@ export default function ListingDetails() {
   const [user, setUser] = useState(null);
   const [isDeleted, setIsDeleted] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [agentName, setAgentName] = useState("");
   const toast = useRef(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
   }, []);
+
+  useEffect(() => {
+    async function fetchAgentName() {
+      if (!user) return;
+      
+      // Check if user is admin
+      const allowedUserIds = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136'];
+      const isAdmin = allowedUserIds.includes(user.id);
+      
+      // For admin users, always show "Admin"
+      if (isAdmin) {
+        setAgentName('Admin');
+        return;
+      }
+      
+      // Use the utility function to get or create profile
+      const profile = await getOrCreateProfile(user);
+      
+      if (profile) {
+        const name = profile.name || profile.full_name || user.email?.split('@')[0] || 'User';
+        setAgentName(name);
+      } else {
+        // Fallback to email username if profile creation fails
+        const fallbackName = user.email?.split('@')[0] || 'User';
+        setAgentName(fallbackName);
+      }
+    }
+    
+    fetchAgentName();
+  }, [user]);
 
   useEffect(() => {
     async function fetchListing() {
@@ -123,10 +155,25 @@ export default function ListingDetails() {
         showAdminButton={user && allowedUserId.includes(user.id)}
         showTestingButton={user && allowedUserId.includes(user.id)}
         showTambahListingButton={user && !allowedUserId.includes(user.id)}
+        showListingPribadiButton={user && !allowedUserId.includes(user.id)}
         user={user}
       />
       <FoundationWrapper style={{ paddingTop: '6rem', minHeight: '100vh', background: '#f8f9fa' }}>
         <div className="grid-container" style={{ maxWidth: '1400px' }}>
+          
+          {/* Welcome Message */}
+          <div className="grid-x grid-margin-x" style={{ marginBottom: '1.5rem' }}>
+            <div className="cell">
+              <h3 style={{ 
+                color: 'var(--text-primary)', 
+                fontSize: '2rem', 
+                fontWeight: 700,
+                margin: 0
+              }}>
+                {agentName ? `Welcome, ${agentName}` : 'Welcome'}
+              </h3>
+            </div>
+          </div>
           
           {/* Action Bar */}
           {user && allowedUserId.includes(user.id) && (

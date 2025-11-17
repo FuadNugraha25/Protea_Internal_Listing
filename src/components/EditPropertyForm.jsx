@@ -281,6 +281,7 @@ const EditPropertyForm = () => {
           showAdminButton={user && allowedUserId.includes(user.id)}
           showTestingButton={user && allowedUserId.includes(user.id)}
           showTambahListingButton={true}
+          showListingPribadiButton={true}
           user={user}
         />
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', paddingTop: '6rem', background: 'var(--background)' }}>
@@ -298,6 +299,7 @@ const EditPropertyForm = () => {
         title="Edit Property" 
         showAdminButton={user && allowedUserId.includes(user.id)}
         showTambahListingButton={true}
+        showListingPribadiButton={true}
         user={user}
       />
       <div style={{ background: 'var(--background)', minHeight: '100vh', paddingBottom: '2rem', paddingTop: '6rem' }}>

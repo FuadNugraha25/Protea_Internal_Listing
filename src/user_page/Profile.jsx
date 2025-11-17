@@ -20,8 +20,7 @@ export default function Profile() {
   const [formData, setFormData] = useState({
     name: '',
     full_name: '',
-    agent_code: '',
-    bio: ''
+    agent_code: ''
   });
 
   useEffect(() => {
@@ -40,8 +39,7 @@ export default function Profile() {
           setFormData({
             name: isAdminUser ? 'Admin' : (profileData.name || ''),
             full_name: isAdminUser ? 'Admin' : (profileData.full_name || profileData.name || ''),
-            agent_code: profileData.agent_code || '',
-            bio: profileData.bio || ''
+            agent_code: profileData.agent_code || ''
           });
         }
       }
@@ -71,8 +69,7 @@ export default function Profile() {
       setFormData({
         name: isAdminUser ? 'Admin' : (profile.name || ''),
         full_name: isAdminUser ? 'Admin' : (profile.full_name || profile.name || ''),
-        agent_code: profile.agent_code || '',
-        bio: profile.bio || ''
+        agent_code: profile.agent_code || ''
       });
     }
     setIsEditing(false);
@@ -129,6 +126,7 @@ export default function Profile() {
         showAdminButton={user && allowedUserIds.includes(user.id)}
         showTestingButton={user && allowedUserIds.includes(user.id)}
         showTambahListingButton={true}
+        showListingPribadiButton={true}
         user={user}
       />
         <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', paddingTop: '6rem' }}>
@@ -147,6 +145,7 @@ export default function Profile() {
         showAdminButton={user && allowedUserIds.includes(user?.id)}
         showTestingButton={user && allowedUserIds.includes(user?.id)}
         showTambahListingButton={true}
+        showListingPribadiButton={true}
         user={user}
       />
       <div style={{ background: 'var(--background)', minHeight: '100vh', paddingBottom: '2rem', paddingTop: '6rem' }}>
@@ -162,16 +161,6 @@ export default function Profile() {
               alignItems: 'center'
             }}>
               <h3 className="mb-0" style={{ color: '#fff', fontWeight: 700 }}>Profile</h3>
-              {!isEditing && (
-                <button
-                  onClick={handleEdit}
-                  className="btn btn-light btn-sm"
-                  style={{ borderRadius: '8px', fontWeight: 600 }}
-                >
-                  <i className="bi bi-pencil me-2"></i>
-                  Edit
-                </button>
-              )}
             </div>
             <div className="card-body" style={{ padding: '2rem' }}>
               {/* Alert Message */}
@@ -294,37 +283,6 @@ export default function Profile() {
                       alignItems: 'center'
                     }}>
                       {formData.agent_code || <span className="text-muted">Not set</span>}
-                    </div>
-                  )}
-                </div>
-
-                {/* Bio */}
-                <div className="mb-3">
-                  <label className="form-label fw-semibold" style={{ color: 'var(--text-primary)' }}>
-                    Bio
-                  </label>
-                  {isEditing ? (
-                    <textarea 
-                      name="bio"
-                      className="form-control" 
-                      value={formData.bio} 
-                      onChange={handleInputChange}
-                      rows="4"
-                      placeholder="Tell us about yourself..."
-                      style={{ 
-                        background: '#fff',
-                        resize: 'vertical'
-                      }}
-                    />
-                  ) : (
-                    <div style={{ 
-                      padding: '0.375rem 0.75rem',
-                      color: 'var(--text-primary)',
-                      minHeight: '96px',
-                      whiteSpace: 'pre-wrap',
-                      wordWrap: 'break-word'
-                    }}>
-                      {formData.bio || <span className="text-muted">Not set</span>}
                     </div>
                   )}
                 </div>
