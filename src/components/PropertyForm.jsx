@@ -563,506 +563,515 @@ Property data: ${aiPrompt}`
   }
 
   return (
-    <div style={{ minHeight: '100vh', padding: '3rem 0 2rem 0', marginTop: isAdmin ? '0' : '5rem', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', width: '100%' }}>
-      <div className="container d-flex justify-content-center align-items-center" style={{ padding: '0 1rem' }}>
-        <div className="col-md-8 col-lg-6">
-        <div className="text-center mb-4">
-          <h3 className="fw-bold mb-2" style={{ color: 'var(--text-primary)', fontSize: '2rem' }}>Add Property</h3>
-          <p className="text-muted">Create a new property listing</p>
+    <div className="animate-fade-in" style={{ 
+      minHeight: '100vh', 
+      padding: '7rem 1rem 4rem 1rem', 
+      background: 'var(--background)',
+      width: '100%' 
+    }}>
+      <div className="container" style={{ maxWidth: '800px' }}>
+        <div className="text-center mb-5">
+          <h1 className="display-5 fw-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+            Add New Property
+          </h1>
+          <p className="text-secondary" style={{ fontSize: '1.1rem' }}>Create a high-quality internal property listing</p>
         </div>
+
         {alert.message && (
           <div 
             className="position-fixed"
             style={{
-              bottom: '20px',
-              right: '20px',
+              bottom: '30px',
+              right: '30px',
               zIndex: 9999,
-              transition: 'all 0.3s ease-in-out',
-              transform: showNotification ? 'translateY(0)' : 'translateY(100px)',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+              transform: showNotification ? 'translateX(0)' : 'translateX(120%)',
               opacity: showNotification ? 1 : 0,
             }}
           >
             <div 
-              className="p-3 rounded shadow-lg"
+              className="p-4 rounded-4 shadow-xl glass"
               style={{
                 background: alert.severity === 'success' 
-                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
-                  : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                color: 'white',
-                minWidth: '300px',
-                maxWidth: '400px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '12px',
-                backdropFilter: 'blur(10px)'
+                  ? 'rgba(16, 185, 129, 0.15)' 
+                  : 'rgba(239, 68, 68, 0.15)',
+                borderLeft: `4px solid ${alert.severity === 'success' ? 'var(--success)' : 'var(--danger)'}`,
+                color: 'var(--text-primary)',
+                minWidth: '320px',
+                maxWidth: '450px',
+                backdropFilter: 'blur(16px)',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
               }}
             >
-              {alert.message}
+              <div className="d-flex align-items-center gap-3">
+                <i className={`bi ${alert.severity === 'success' ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-danger'} fs-4`}></i>
+                <div>
+                  <div className="fw-bold mb-1">{alert.severity === 'success' ? 'Success' : 'Notification'}</div>
+                  <div className="small opacity-90">{alert.message}</div>
+                </div>
+              </div>
             </div>
           </div>
         )}
-        <form onSubmit={handleSubmit}>
-          {/* AI Assistant Section */}
-          <div className="mb-4">
-            <div className="card" style={{ border: 'none', boxShadow: 'var(--shadow-lg)' }}>
-              <div className="card-header" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', border: 'none' }}>
-                <h6 className="mb-0" style={{ color: 'white', fontWeight: 600 }}>
-                  <i className="bi bi-robot me-2"></i>
-                  AI Assistant
-                </h6>
-              </div>
-              <div className="card-body" style={{ background: 'var(--surface)' }}>
-                <div className="mb-3">
-                  <label className="form-label fw-semibold">Ask AI for help:</label>
-                  <div className="input-group">
-                    <textarea
-                      className="form-control"
-                      placeholder="Paste property data here to extract LT, LB, KT, KM, and Price automatically"
-                      value={aiPrompt}
-                      onChange={(e) => setAiPrompt(e.target.value)}
-                      rows="2"
-                      style={{ resize: 'vertical', minHeight: '60px' }}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={callGeminiAI}
-                      disabled={aiLoading}
-                      style={{ minWidth: '100px' }}
-                    >
-                      {aiLoading ? (
-                        <>
-                          <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                          AI Thinking...
-                        </>
-                      ) : (
-                        <>
-                          <i className="bi bi-magic me-2"></i>
-                          Ask AI
-                        </>
-                      )}
-                    </button>
+
+        <div className="glass-card p-4 p-md-5" style={{ borderRadius: 'var(--radius-xl)' }}>
+          <form onSubmit={handleSubmit}>
+            {/* AI Assistant Section */}
+            <div className="mb-5 position-relative">
+              <div 
+                className="p-4 rounded-4 position-relative overflow-hidden" 
+                style={{ 
+                  background: 'rgba(99, 102, 241, 0.05)',
+                  border: '1px solid rgba(99, 102, 241, 0.2)',
+                }}
+              >
+                {/* Subtle Glow Effect */}
+                <div style={{
+                  position: 'absolute',
+                  top: '-50px',
+                  right: '-50px',
+                  width: '150px',
+                  height: '150px',
+                  background: 'var(--primary)',
+                  filter: 'blur(80px)',
+                  opacity: 0.15,
+                  pointerEvents: 'none'
+                }}></div>
+
+                <div className="d-flex align-items-center gap-2 mb-3">
+                  <div className="p-2 rounded-3 bg-primary bg-opacity-10 text-primary">
+                    <i className="bi bi-robot fs-5"></i>
                   </div>
+                  <h5 className="mb-0 fw-bold" style={{ color: 'var(--text-primary)' }}>AI Smart Extract</h5>
                 </div>
                 
+                <p className="text-secondary small mb-3">
+                  Paste property descriptions from WhatsApp or other sources. AI will automatically fill the form for you.
+                </p>
+
+                <div className="mb-3">
+                  <textarea
+                    className="form-control"
+                    placeholder="Paste property data here..."
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    rows="3"
+                    style={{ 
+                      resize: 'none', 
+                      background: 'rgba(15, 23, 42, 0.5)',
+                      borderColor: 'rgba(255, 255, 255, 0.05)'
+                    }}
+                  />
+                </div>
+                
+                <button
+                  type="button"
+                  className="btn btn-primary w-100"
+                  onClick={callGeminiAI}
+                  disabled={aiLoading}
+                  style={{ borderRadius: 'var(--radius-md)' }}
+                >
+                  {aiLoading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                      AI Analyzing Data...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-magic me-2"></i>
+                      Extract Data with AI
+                    </>
+                  )}
+                </button>
+
                 {aiResponse && (
-                  <div className="mb-3">
-                    <label className="form-label fw-semibold">AI Response:</label>
-                    <div className="border rounded p-3" style={{ 
-                      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-                      borderColor: 'var(--border-color)',
-                      borderRadius: '8px'
+                  <div className="mt-4 animate-fade-in">
+                    <div className="p-3 rounded-3" style={{ 
+                      background: 'rgba(15, 23, 42, 0.8)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
                     }}>
+                      <div className="d-flex justify-content-between align-items-center mb-2">
+                        <span className="text-primary small fw-bold uppercase">Extracted Details:</span>
+                        <button
+                          type="button"
+                          className="btn btn-success btn-sm py-1 px-3"
+                          onClick={useAIResponse}
+                          style={{ fontSize: '0.8rem', borderRadius: '6px' }}
+                        >
+                          <i className="bi bi-check2-all me-1"></i> Apply to Form
+                        </button>
+                      </div>
                       <div 
-                        className="mb-3"
                         style={{
                           whiteSpace: 'pre-wrap',
-                          wordWrap: 'break-word',
-                          maxHeight: '300px',
+                          fontSize: '0.875rem',
+                          color: 'var(--text-secondary)',
+                          maxHeight: '200px',
                           overflowY: 'auto',
-                          lineHeight: '1.5',
-                          fontSize: '14px',
-                          color: 'var(--text-primary)'
+                          lineHeight: '1.6'
                         }}
                       >
                         {aiResponse}
                       </div>
-                      <button
-                        type="button"
-                        className="btn btn-success btn-sm"
-                        onClick={useAIResponse}
-                        style={{ borderRadius: '8px' }}
-                      >
-                        <i className="bi bi-check-circle me-2"></i>
-                        Use This Response
-                      </button>
                     </div>
                   </div>
                 )}
               </div>
             </div>
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Owner</label>
-            {isAdmin ? (
-              <select
-                name="owner"
-                className="form-select"
-                value={selectedOwnerId || ''}
-                onChange={(e) => {
-                  const selectedId = e.target.value;
-                  setSelectedOwnerId(selectedId);
-                  if (!selectedId) {
-                    setOwnerName('');
-                    return;
-                  }
-                  const selectedUser = allUsers.find((userOption) => userOption.id === selectedId);
-                  setOwnerName(selectedUser?.name || 'Unknown User');
-                }}
-                disabled={usersLoading}
-                required
-                style={{
-                  backgroundColor: usersLoading ? '#f8f9fa' : 'white',
-                  cursor: usersLoading ? 'not-allowed' : 'pointer'
-                }}
-              >
-                {usersLoading ? (
-                  <option>Loading users...</option>
-                ) : allUsers.length === 0 ? (
-                  <option value="">No users found</option>
+
+            <div className="row g-4 mb-4">
+              <div className="col-12">
+                <label className="form-label">Property Title</label>
+                <input 
+                  name="title" 
+                  className="form-control form-control-lg" 
+                  placeholder="e.g. Modern Villa with Pool in Sanur"
+                  value={formData.title} 
+                  onChange={handleChange} 
+                  required
+                />
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label">Property Owner</label>
+                {isAdmin ? (
+                  <select
+                    name="owner"
+                    className="form-select"
+                    value={selectedOwnerId || ''}
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      setSelectedOwnerId(selectedId);
+                      if (!selectedId) {
+                        setOwnerName('');
+                        return;
+                      }
+                      const selectedUser = allUsers.find((userOption) => userOption.id === selectedId);
+                      setOwnerName(selectedUser?.name || 'Unknown User');
+                    }}
+                    disabled={usersLoading}
+                    required
+                  >
+                    {usersLoading ? (
+                      <option>Loading users...</option>
+                    ) : (
+                      <>
+                        <option value="">Select Owner</option>
+                        {allUsers.map((userOption) => (
+                          <option key={userOption.id} value={userOption.id}>
+                            {userOption.name}
+                          </option>
+                        ))}
+                      </>
+                    )}
+                  </select>
                 ) : (
-                  <>
-                    <option value="">Select Owner</option>
-                    {allUsers.map((userOption) => (
-                      <option key={userOption.id} value={userOption.id}>
-                        {userOption.name}
-                      </option>
-                    ))}
-                  </>
+                  <input 
+                    className="form-control" 
+                    value={ownerName} 
+                    readOnly 
+                    disabled
+                    style={{ background: 'rgba(255, 255, 255, 0.03)', opacity: 0.7 }}
+                  />
                 )}
-              </select>
-            ) : (
-              <input 
-                name="owner" 
-                className="form-control" 
-                value={ownerName} 
-                readOnly 
-                disabled
-                style={{ 
-                  backgroundColor: '#f8f9fa', 
-                  cursor: 'not-allowed',
-                  color: '#6c757d'
-                }}
-              />
-            )}
-            <small className="text-muted">
-              {isAdmin ? 'Select the owner of this listing' : 'This listing will be associated with your account'}
-            </small>
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Title</label>
-            <input name="title" className="form-control" value={formData.title} onChange={handleChange} />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Description</label>
-            <textarea
-              name="description"
-              className="form-control"
-              ref={descriptionRef}
-              value={formData.description}
-              onChange={handleChange}
-              style={{ resize: 'none', overflow: 'hidden' }}
-              rows="3"
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Transaction Type</label>
-            <select
-              name="transaction_type"
-              className="form-select"
-              value={formData.transaction_type}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Pilih Tipe Transaksi</option>
-              <option value="Jual">Jual</option>
-              <option value="Sewa">Sewa</option>
-            </select>
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Property Type</label>
-            <select
-              name="property_type"
-              className="form-select"
-              value={formData.property_type}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Pilih Tipe Properti</option>
-              <option value="Rumah">Rumah</option>
-              <option value="Kavling">Kavling</option>
-              <option value="Apartemen">Apartemen</option>
-            </select>
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Images</label>
-            <div 
-              className="border border-dashed border-2 p-4 text-center rounded"
-              style={{ 
-                borderStyle: 'dashed', 
-                borderColor: 'var(--primary-color)',
-                backgroundColor: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-                background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-                cursor: 'pointer',
-                minHeight: '120px',
-                borderRadius: '12px',
-                transition: 'all 0.3s ease',
-                borderWidth: '2px'
-              }}
-              onClick={() => fileInputRef.current?.click()}
-              onPaste={handlePaste}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--primary-dark)';
-                e.currentTarget.style.backgroundColor = '#f1f5f9';
-                e.currentTarget.style.transform = 'scale(1.01)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--primary-color)';
-                e.currentTarget.style.backgroundColor = '#f8fafc';
-                e.currentTarget.style.transform = 'scale(1)';
-              }}
-            >
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileInputChange}
-                style={{ display: 'none' }}
-              />
-              {isUploading ? (
-                <div>
-                  <div className="spinner-border spinner-border-sm me-2 text-primary" role="status"></div>
-                  <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>Uploading image...</span>
-                </div>
-              ) : (
-                <div>
-                  <i className="bi bi-cloud-upload fs-1" style={{ color: 'var(--primary-color)' }}></i>
-                  <p className="mt-2 mb-0" style={{ color: 'var(--text-primary)', fontWeight: 500 }}>Click to upload image or paste from clipboard</p>
-                  <small className="text-muted">Supports: JPG, PNG, GIF</small>
-                </div>
-              )}
-            </div>
-            {/* Display uploaded image */}
-            {uploadedImage && (
-              <div className="mt-3">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <h6 style={{ color: 'var(--text-primary)', fontWeight: 600, margin: 0 }}>Uploaded Image:</h6>
-                  {imageFileSize && (
-                    <small style={{ color: '#767676', fontSize: '0.875rem' }}>
-                      Size: {formatFileSize(imageFileSize)}
-                      {originalFileSize && originalFileSize > imageFileSize && (
-                        <span style={{ color: '#28a745', marginLeft: '0.5rem' }}>
-                          (compressed from {formatFileSize(originalFileSize)})
-                        </span>
-                      )}
-                    </small>
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label">Property Type</label>
+                <select
+                  name="property_type"
+                  className="form-select"
+                  value={formData.property_type}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Type</option>
+                  <option value="Rumah">Rumah</option>
+                  <option value="Kavling">Kavling</option>
+                  <option value="Apartemen">Apartemen</option>
+                </select>
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label">Transaction Type</label>
+                <select
+                  name="transaction_type"
+                  className="form-select"
+                  value={formData.transaction_type}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Transaction</option>
+                  <option value="Jual">Jual</option>
+                  <option value="Sewa">Sewa</option>
+                </select>
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label">Price (IDR)</label>
+                <div className="input-group">
+                  <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--border)' }}>Rp</span>
+                  <input 
+                    name="price" 
+                    type="text" 
+                    className="form-control border-start-0 ps-0" 
+                    placeholder="0"
+                    value={formatPriceWithCommas(formData.price)} 
+                    onChange={handlePriceChange} 
+                    required
+                  />
+                  {(formData.property_type === 'Kavling' || formData.transaction_type === 'Sewa') && (
+                    <span className="input-group-text bg-transparent text-muted small" style={{ borderColor: 'var(--border)' }}>
+                      {formData.property_type === 'Kavling' ? '/m²' : '/Thn'}
+                    </span>
                   )}
                 </div>
-                <div className="position-relative w-100 rounded overflow-hidden" style={{ boxShadow: 'var(--shadow-md)' }}>
-                  <img 
-                    src={uploadedImage} 
-                    alt="Uploaded"
-                    className="img-fluid"
-                    style={{ width: '100%', height: 'auto', objectFit: 'contain', maxHeight: '400px', display: 'block' }}
+              </div>
+
+              <div className="col-12">
+                <label className="form-label">Description</label>
+                <textarea
+                  name="description"
+                  className="form-control"
+                  ref={descriptionRef}
+                  placeholder="Describe the property's unique features, orientation, and surroundings..."
+                  value={formData.description}
+                  onChange={handleChange}
+                  style={{ resize: 'none', minHeight: '120px' }}
+                />
+              </div>
+
+              <div className="col-12">
+                <label className="form-label">Property Photos</label>
+                <div 
+                  className="p-5 text-center rounded-4 border-2"
+                  style={{ 
+                    borderStyle: 'dashed', 
+                    borderColor: 'rgba(99, 102, 241, 0.3)',
+                    background: 'rgba(99, 102, 241, 0.02)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                  onPaste={handlePaste}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--primary)';
+                    e.currentTarget.style.background = 'rgba(99, 102, 241, 0.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(99, 102, 241, 0.3)';
+                    e.currentTarget.style.background = 'rgba(99, 102, 241, 0.02)';
+                  }}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileInputChange}
+                    style={{ display: 'none' }}
                   />
-                  <button
-                    type="button"
-                    className="btn btn-danger btn-sm position-absolute"
-                    style={{ 
-                      top: '10px', 
-                      right: '10px',
-                      borderRadius: '50%',
-                      width: '32px',
-                      height: '32px',
-                      padding: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '18px',
-                      fontWeight: 'bold',
-                      boxShadow: 'var(--shadow-md)'
-                    }}
-                    onClick={removeImage}
-                  >
-                    ×
-                  </button>
+                  {isUploading ? (
+                    <div className="py-2">
+                      <div className="spinner-border text-primary mb-3" role="status"></div>
+                      <h6 className="text-primary mb-0">Processing & Uploading...</h6>
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="bg-primary bg-opacity-10 d-inline-flex p-3 rounded-circle text-primary mb-3">
+                        <i className="bi bi-cloud-arrow-up fs-2"></i>
+                      </div>
+                      <h6 className="fw-bold" style={{ color: 'var(--text-primary)' }}>Click or drop image here</h6>
+                      <p className="text-muted small mb-0">Original high-res image will be automatically compressed for speed.</p>
+                    </div>
+                  )}
+                </div>
+
+                {uploadedImage && (
+                  <div className="mt-4 animate-fade-in">
+                    <div className="d-flex justify-content-between align-items-end mb-2">
+                       <span className="badge bg-success-subtle text-success">Image Uploaded Successfully</span>
+                       {imageFileSize && (
+                         <span className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                            {formatFileSize(imageFileSize)} 
+                            {originalFileSize && <span className="text-success ms-1">({Math.round((1 - imageFileSize/originalFileSize) * 100)}% saved)</span>}
+                         </span>
+                       )}
+                    </div>
+                    <div className="position-relative rounded-4 overflow-hidden border border-white border-opacity-10 shadow-lg">
+                      <img 
+                        src={uploadedImage} 
+                        alt="Preview"
+                        className="w-100"
+                        style={{ height: 'auto', maxHeight: '450px', objectFit: 'cover' }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm m-3 position-absolute top-0 end-0 rounded-circle shadow"
+                        style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        onClick={removeImage}
+                      >
+                        <i className="bi bi-trash-fill"></i>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="col-12 mt-4">
+                <div className="row g-4">
+                  <div className="col-md-4">
+                    <label className="form-label">Provinsi</label>
+                    <input name="province" className="form-control" placeholder="e.g. Jawa Barat" value={formData.province} onChange={handleChange} />
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label">Kota / Kabupaten</label>
+                    <input name="city" className="form-control" placeholder="e.g. Bandung" value={formData.city} onChange={handleChange} />
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label">Kecamatan</label>
+                    <input name="district" className="form-control" placeholder="e.g. Coblong" value={formData.district} onChange={handleChange} />
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
-          <div className="row">
-            <div className="col">
-              <label className="form-label">LT</label>
-              <input name="lt" type="number" className="form-control" value={formData.lt} onChange={handleChange} />
-              {formData.property_type === 'Kavling' && (
-                <small className="text-muted">Total Luas</small>
-              )}
-            </div>
-            {formData.property_type !== 'Kavling' && (
-              <div className="col">
-                <label className="form-label">LB</label>
-                <input name="lb" type="number" className="form-control" value={formData.lb} onChange={handleChange} />
+
+              <div className="col-12">
+                <hr className="my-4 opacity-10" />
+                <h6 className="text-primary fw-bold mb-4 d-flex align-items-center gap-2">
+                  <i className="bi bi-building-gear fs-5"></i> Specification Details
+                </h6>
+                <div className="row g-4">
+                  <div className="col-md-3">
+                    <label className="form-label">LT (m²)</label>
+                    <input name="lt" type="number" className="form-control" placeholder="0" value={formData.lt} onChange={handleChange} />
+                  </div>
+                  {formData.property_type !== 'Kavling' && (
+                    <>
+                      <div className="col-md-3">
+                        <label className="form-label">LB (m²)</label>
+                        <input name="lb" type="number" className="form-control" placeholder="0" value={formData.lb} onChange={handleChange} />
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label">KT (Bed)</label>
+                        <input name="kt" type="number" className="form-control" placeholder="0" value={formData.kt} onChange={handleChange} />
+                      </div>
+                      <div className="col-md-3">
+                        <label className="form-label">KM (Bath)</label>
+                        <input name="km" type="number" className="form-control" placeholder="0" value={formData.km} onChange={handleChange} />
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-          {formData.property_type !== 'Kavling' && (
-            <div className="row mt-3">
-              <div className="col">
-                <label className="form-label">KT</label>
-                <input name="kt" type="number" className="form-control" value={formData.kt} onChange={handleChange} />
+
+              <div className="col-12">
+                <div className="p-4 rounded-4 mt-2" style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                  <h6 className="text-secondary mb-3 small fw-bold">ADDITIONAL FEATURES</h6>
+                  <div className="row g-3">
+                    <div className="col-md-4">
+                      <div className="form-check form-switch">
+                        <input
+                          className="form-check-input custom-switch"
+                          type="checkbox"
+                          id="interiorCheck"
+                          name="has_full_interior_photos"
+                          checked={formData.has_full_interior_photos}
+                          onChange={handleCheckboxChange}
+                        />
+                        <label className="form-check-label text-secondary small" htmlFor="interiorCheck">
+                          Full Interior Photos
+                        </label>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="form-check form-switch">
+                        <input
+                          className="form-check-input custom-switch"
+                          type="checkbox"
+                          id="tiktokCheck"
+                          name="has_tiktok_video"
+                          checked={formData.has_tiktok_video}
+                          onChange={handleCheckboxChange}
+                        />
+                        <label className="form-check-label text-secondary small" htmlFor="tiktokCheck">
+                          TikTok Video Ready
+                        </label>
+                      </div>
+                    </div>
+                    <div className="col-md-4">
+                      <div className="form-check form-switch">
+                        <input
+                          className="form-check-input custom-switch"
+                          type="checkbox"
+                          id="youtubeCheck"
+                          name="has_youtube_video"
+                          checked={formData.has_youtube_video}
+                          onChange={handleCheckboxChange}
+                        />
+                        <label className="form-check-label text-secondary small" htmlFor="youtubeCheck">
+                          YouTube Tour
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="col">
-                <label className="form-label">KM</label>
-                <input name="km" type="number" className="form-control" value={formData.km} onChange={handleChange} />
+
+              <div className="col-12 pt-3">
+                <button 
+                  className="btn btn-primary w-100 py-3 shadow-lg" 
+                  disabled={isUploading} 
+                  style={{ 
+                    borderRadius: '12px',
+                    fontSize: '1.1rem',
+                    background: 'linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%)',
+                    border: 'none'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  {isUploading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                      Finalizing...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-cloud-plus-fill me-2"></i> Create Property Listing
+                    </>
+                  )}
+                </button>
               </div>
             </div>
-          )}
-          <div className="mb-3 mt-3">
-            <label className="form-label">District</label>
-            <input name="district" className="form-control" value={formData.district} onChange={handleChange} />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">City</label>
-            <input name="city" className="form-control" value={formData.city} onChange={handleChange} />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Province</label>
-            <input name="province" className="form-control" value={formData.province} onChange={handleChange} />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Price</label>
-            <div className="d-flex align-items-center">
-              <input 
-                name="price" 
-                type="text" 
-                className="form-control" 
-                value={formatPriceWithCommas(formData.price)} 
-                onChange={handlePriceChange} 
-              />
-              {formData.property_type === 'Kavling' && (
-                <span className="ms-2 text-muted">/m²</span>
-              )}
-              {formData.transaction_type === 'Sewa' && (
-                <span className="ms-2 text-muted">/Tahun</span>
-              )}
-            </div>
-          </div>
-          <div className="mb-4">
-            <div className="form-check">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="dummyCheckbox1"
-                name="has_full_interior_photos"
-                checked={formData.has_full_interior_photos}
-                onChange={handleCheckboxChange}
-              />
-              <label className="form-check-label" htmlFor="dummyCheckbox1">
-                Foto dalam lengkap
-              </label>
-            </div>
-            <div className="form-check mt-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="dummyCheckbox2"
-                name="has_tiktok_video"
-                checked={formData.has_tiktok_video}
-                onChange={handleCheckboxChange}
-              />
-              <label className="form-check-label" htmlFor="dummyCheckbox2">
-                Video Tiktok
-              </label>
-            </div>
-            <div className="form-check mt-2">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                id="dummyCheckbox3"
-                name="has_youtube_video"
-                checked={formData.has_youtube_video}
-                onChange={handleCheckboxChange}
-              />
-              <label className="form-check-label" htmlFor="dummyCheckbox3">
-                Video Youtube
-              </label>
-            </div>
-          </div>
-          <button className="btn btn-primary w-100 mb-3" disabled={isUploading} style={{ 
-            padding: '0.75rem 1.5rem',
-            fontSize: '1rem',
-            fontWeight: 600,
-            borderRadius: '10px'
-          }}>
-            {isUploading ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                Uploading...
-              </>
-            ) : (
-              'Submit'
-            )}
-          </button>
-          {/* <button 
-            type="button" 
-            className="btn btn-secondary w-100 mb-3" 
-            onClick={async () => {
-              console.log('Testing database connection...');
-              const { data, error } = await supabase.from('listings').select('*').limit(1);
-              if (error) {
-                console.error('Database test error:', error);
-                alert('Database test failed: ' + error.message);
-              } else {
-                console.log('Database test successful:', data);
-                console.log('Table structure:', data.length > 0 ? Object.keys(data[0]) : 'No records');
-                alert('Database connection working! Found ' + data.length + ' records');
-              }
-            }}
-          >
-            Test Database Connection
-          </button> */}
-          {/* <button 
-            type="button" 
-            className="btn btn-warning w-100 mb-3" 
-            onClick={async () => {
-              console.log('Testing minimal insert...');
-              const testData = {
-                id: crypto.randomUUID(),
-                user_id: user.id,
-                title: 'Test Property',
-                description: 'Test description',
-                image_urls: '',
-                city: 'Test City',
-                province: 'Test Province'
-              };
-              console.log('Test data:', testData);
-              const { data, error } = await supabase.from('listings').insert(testData).select();
-              if (error) {
-                console.error('Minimal insert error:', error);
-                console.error('Error code:', error.code);
-                console.error('Error details:', error.details);
-                console.error('Error hint:', error.hint);
-                alert('Minimal insert failed: ' + error.message);
-              } else {
-                console.log('Minimal insert successful:', data);
-                alert('Minimal insert successful!');
-              }
-            }}
-          >
-            Test Minimal Insert
-          </button> */}
-          {/* <button 
-            type="button" 
-            className="btn btn-info w-100 mb-3" 
-            onClick={async () => {
-              console.log('Checking current user...');
-              const { data: { user }, error } = await supabase.auth.getUser();
-              if (error) {
-                console.error('Auth error:', error);
-                alert('Auth error: ' + error.message);
-              } else {
-                console.log('Current user:', user);
-                console.log('User ID:', user?.id);
-                console.log('User email:', user?.email);
-                alert('Current user: ' + (user?.email || 'Not logged in'));
-              }
-            }}
-          >
-            Check Current User
-          </button> */}
-        </form>
+          </form>
         </div>
       </div>
+
+      <style>{`
+        .custom-switch {
+          width: 3em !important;
+          height: 1.5em !important;
+          cursor: pointer;
+        }
+        .custom-switch:checked {
+          background-color: var(--primary) !important;
+          border-color: var(--primary) !important;
+        }
+        .form-label {
+          margin-bottom: 0.75rem;
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+        .input-group-text {
+          border-color: var(--border);
+          color: var(--text-muted);
+        }
+        hr {
+          border-top-color: var(--border);
+        }
+        .shadow-xl {
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+      `}</style>
     </div>
   );
 };

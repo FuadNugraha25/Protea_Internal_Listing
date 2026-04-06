@@ -297,105 +297,164 @@ const EditPropertyForm = () => {
     <>
       <Navbar 
         title="Edit Property" 
+        showDashboardButton={true}
         showAdminButton={user && allowedUserId.includes(user.id)}
         showTambahListingButton={true}
         showListingPribadiButton={true}
         user={user}
       />
-      <div style={{ background: 'var(--background)', minHeight: '100vh', paddingBottom: '2rem', paddingTop: '6rem' }}>
-        <div className="container mb-5" style={{ marginTop: '1rem' }}>
-          <div className="d-flex mb-3 gap-2 align-items-center">
+      <div className="animate-fade-in" style={{ 
+        minHeight: '100vh', 
+        padding: '7rem 1rem 4rem 1rem', 
+        background: 'var(--background)',
+        width: '100%' 
+      }}>
+        <div className="container" style={{ maxWidth: '900px' }}>
+          <div className="d-flex justify-content-between align-items-center mb-5">
+            <div>
+              <h1 className="display-5 fw-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+                Edit Property
+              </h1>
+              <p className="text-secondary" style={{ fontSize: '1.1rem' }}>Updating listing details for consistency</p>
+            </div>
             <button 
-              className="btn btn-secondary d-inline-flex align-items-center" 
+              className="btn btn-outline-secondary d-inline-flex align-items-center" 
               onClick={() => navigate(`/listing/${id}`)}
-              style={{ borderRadius: '8px' }}
+              style={{ padding: '0.75rem 1.25rem' }}
             >
-              <span className="me-2" style={{fontSize: '1.2em'}}>&larr;</span> Back to Property
+              <i className="bi bi-arrow-left me-2"></i> Back to Listing
             </button>
           </div>
         
-        {alert.message && (
-          <div 
-            className="position-fixed"
-            style={{
-              bottom: '20px',
-              right: '20px',
-              zIndex: 9999,
-              transition: 'all 0.3s ease-in-out',
-              transform: showNotification ? 'translateY(0)' : 'translateY(100px)',
-              opacity: showNotification ? 1 : 0,
-            }}
-          >
+          {alert.message && (
             <div 
-              className="p-3 rounded shadow-lg"
+              className="position-fixed"
               style={{
-                background: alert.severity === 'success' 
-                  ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' 
-                  : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                color: 'white',
-                minWidth: '300px',
-                maxWidth: '400px',
-                fontSize: '14px',
-                fontWeight: '500',
-                borderRadius: '12px',
-                backdropFilter: 'blur(10px)'
+                bottom: '30px',
+                right: '30px',
+                zIndex: 9999,
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                transform: showNotification ? 'translateX(0)' : 'translateX(120%)',
+                opacity: showNotification ? 1 : 0,
               }}
             >
-              {alert.message}
-            </div>
-          </div>
-        )}
-
-        <div className="row justify-content-center">
-          <div className="col-12 d-flex justify-content-center">
-            <div className="card w-100" style={{ maxWidth: '1000px', border: 'none', boxShadow: 'var(--shadow-lg)', borderRadius: '12px' }}>
-              <div className="card-header" style={{ background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)', border: 'none', borderRadius: '12px 12px 0 0' }}>
-                <h3 className="mb-0" style={{ color: 'white', fontWeight: 600 }}>Edit Property</h3>
+              <div 
+                className="p-4 rounded-4 shadow-xl glass"
+                style={{
+                  background: alert.severity === 'success' 
+                    ? 'rgba(16, 185, 129, 0.15)' 
+                    : 'rgba(239, 68, 68, 0.15)',
+                  borderLeft: `4px solid ${alert.severity === 'success' ? 'var(--success)' : 'var(--danger)'}`,
+                  color: 'var(--text-primary)',
+                  minWidth: '320px',
+                  maxWidth: '450px',
+                  backdropFilter: 'blur(16px)',
+                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                }}
+              >
+                <div className="d-flex align-items-center gap-3">
+                  <i className={`bi ${alert.severity === 'success' ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-danger'} fs-4`}></i>
+                  <div>
+                    <div className="fw-bold mb-1">{alert.severity === 'success' ? 'Success' : 'Notification'}</div>
+                    <div className="small opacity-90">{alert.message}</div>
+                  </div>
+                </div>
               </div>
-              <div className="card-body" style={{ background: 'var(--surface)' }}>
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-3">
-                    <label className="form-label">Owner</label>
-                    <select
-                      name="owner"
-                      className="form-select"
-                      value={ownerName}
-                      onChange={(e) => setOwnerName(e.target.value)}
-                      disabled={usersLoading}
-                      required
-                      style={{
-                        backgroundColor: usersLoading ? '#f8f9fa' : 'white',
-                        cursor: usersLoading ? 'not-allowed' : 'pointer'
-                      }}
-                    >
-                      {usersLoading ? (
-                        <option>Loading users...</option>
-                      ) : (
-                        <>
-                          <option value="">Select Owner</option>
-                          {allUsers.map((user) => (
-                            <option key={user.id} value={user.name}>
-                              {user.name}
-                            </option>
-                          ))}
-                        </>
-                      )}
-                    </select>
-                    <small className="text-muted">Select the owner of this listing</small>
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Title</label>
+            </div>
+          )}
+
+          <div className="glass-card p-4 p-md-5" style={{ borderRadius: 'var(--radius-xl)' }}>
+            <form onSubmit={handleSubmit}>
+              <div className="row g-4">
+                <div className="col-12">
+                  <label className="form-label">Property Title</label>
+                  <input 
+                    name="title" 
+                    className="form-control form-control-lg" 
+                    value={formData.title} 
+                    onChange={handleChange}
+                    required 
+                  />
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label">Property Owner</label>
+                  <select
+                    name="owner"
+                    className="form-select"
+                    value={ownerName}
+                    onChange={(e) => setOwnerName(e.target.value)}
+                    disabled={usersLoading}
+                    required
+                  >
+                    {usersLoading ? (
+                      <option>Loading users...</option>
+                    ) : (
+                      <>
+                        <option value="">Select Owner</option>
+                        {allUsers.map((user) => (
+                          <option key={user.id} value={user.name}>
+                            {user.name}
+                          </option>
+                        ))}
+                      </>
+                    )}
+                  </select>
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label">Property Type</label>
+                  <select
+                    name="property_type"
+                    className="form-select"
+                    value={formData.property_type}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Type</option>
+                    <option value="Rumah">Rumah</option>
+                    <option value="Kavling">Kavling</option>
+                    <option value="Apartemen">Apartemen</option>
+                  </select>
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label">Transaction Type</label>
+                  <select
+                    name="transaction_type"
+                    className="form-select"
+                    value={formData.transaction_type}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Transaction</option>
+                    <option value="Jual">Jual</option>
+                    <option value="Sewa">Sewa</option>
+                  </select>
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label">Price (IDR)</label>
+                  <div className="input-group">
+                    <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--border)' }}>Rp</span>
                     <input 
-                      name="title" 
-                      className="form-control" 
-                      value={formData.title} 
-                      onChange={handleChange}
-                      required 
+                      name="price" 
+                      type="text" 
+                      className="form-control border-start-0 ps-0" 
+                      value={formatPriceWithCommas(formData.price)} 
+                      onChange={handlePriceChange}
+                      required
                     />
+                    {(formData.property_type === 'Kavling' || formData.transaction_type === 'Sewa') && (
+                      <span className="input-group-text bg-transparent text-muted small" style={{ borderColor: 'var(--border)' }}>
+                        {formData.property_type === 'Kavling' ? '/m²' : '/Thn'}
+                      </span>
+                    )}
                   </div>
-                  
-                  <div className="mb-3">
-                    <label className="form-label">Description</label>
+                </div>
+
+                <div className="col-12">
+                  <label className="form-label">Description</label>
                   <textarea
                     ref={descriptionRef}
                     name="description"
@@ -403,242 +462,167 @@ const EditPropertyForm = () => {
                     value={formData.description}
                     onChange={e => {
                       handleChange(e);
-                      // Auto-resize
-                      e.target.style.height = 'auto';
-                      e.target.style.height = e.target.scrollHeight + 'px';
                     }}
-                    style={{ overflow: 'hidden', resize: 'none', minHeight: '80px' }}
+                    style={{ overflow: 'hidden', resize: 'none', minHeight: '120px' }}
                     placeholder="Enter property description"
                   />
                 </div>
-                  
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label">Transaction Type</label>
-                      <select
-                        name="transaction_type"
-                        className="form-select"
-                        value={formData.transaction_type}
-                        onChange={handleChange}
-                        required
-                      >
-                        <option value="">Pilih Tipe Transaksi</option>
-                        <option value="Jual">Jual</option>
-                        <option value="Sewa">Sewa</option>
-                      </select>
-                    </div>
-                    
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label">Property Type</label>
-                      <select
-                        name="property_type"
-                        className="form-select"
-                        value={formData.property_type}
-                        onChange={handleChange}
-                        required
-                      >
-                        <option value="">Pilih Tipe Properti</option>
-                        <option value="Rumah">Rumah</option>
-                        <option value="Kavling">Kavling</option>
-                        <option value="Apartemen">Apartemen</option>
-                      </select>
-                    </div>
-                  </div>
-                  
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label className="form-label">LT (Luas Tanah)</label>
-                      <input 
-                        name="lt" 
-                        type="number" 
-                        className="form-control" 
-                        value={formData.lt} 
-                        onChange={handleChange}
-                        placeholder="m²"
-                      />
-                    </div>
-                    
-                    {formData.property_type !== 'Kavling' && (
-                      <div className="col-md-6 mb-3">
-                        <label className="form-label">LB (Luas Bangunan)</label>
-                        <input 
-                          name="lb" 
-                          type="number" 
-                          className="form-control" 
-                          value={formData.lb} 
-                          onChange={handleChange}
-                          placeholder="m²"
-                        />
-                      </div>
-                    )}
-                  </div>
-                  
-                  {formData.property_type !== 'Kavling' && (
-                    <div className="row">
-                      <div className="col-md-6 mb-3">
-                        <label className="form-label">KT (Kamar Tidur)</label>
-                        <input 
-                          name="kt" 
-                          type="number" 
-                          className="form-control" 
-                          value={formData.kt} 
-                          onChange={handleChange}
-                        />
-                      </div>
-                      
-                      <div className="col-md-6 mb-3">
-                        <label className="form-label">KM (Kamar Mandi)</label>
-                        <input 
-                          name="km" 
-                          type="number" 
-                          className="form-control" 
-                          value={formData.km} 
-                          onChange={handleChange}
-                        />
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div className="row">
-                    <div className="col-md-4 mb-3">
+
+                <div className="col-12 mt-5">
+                  <h6 className="text-primary fw-bold mb-4 d-flex align-items-center gap-2">
+                    <i className="bi bi-geo-alt fs-5"></i> Location Details
+                  </h6>
+                  <div className="row g-4">
+                    <div className="col-md-4">
                       <label className="form-label">Province</label>
                       <div className="input-group">
-                        <select
-                          name="province"
-                          className="form-select"
-                          value={formData.province}
-                          onChange={handleChange}
-                          style={{ borderRight: 'none' }}
-                        >
-                          <option value="">Select Province</option>
-                          {uniqueProvinces.map((province, index) => (
-                            <option key={index} value={province}>{province}</option>
-                          ))}
-                        </select>
                         <input
-                          type="text"
+                          list="provinces-list"
                           name="province"
                           className="form-control"
-                          placeholder="Or type new province"
+                          placeholder="Type province..."
                           value={formData.province}
                           onChange={handleChange}
-                          style={{ borderLeft: 'none' }}
                         />
+                        <datalist id="provinces-list">
+                          {uniqueProvinces.map((province, index) => (
+                            <option key={index} value={province} />
+                          ))}
+                        </datalist>
                       </div>
-                      {locationLoading && <small className="text-muted">Loading provinces...</small>}
                     </div>
                     
-                    <div className="col-md-4 mb-3">
+                    <div className="col-md-4">
                       <label className="form-label">City</label>
                       <div className="input-group">
-                        <select
-                          name="city"
-                          className="form-select"
-                          value={formData.city}
-                          onChange={handleChange}
-                          style={{ borderRight: 'none' }}
-                        >
-                          <option value="">Select City</option>
-                          {uniqueCities.map((city, index) => (
-                            <option key={index} value={city}>{city}</option>
-                          ))}
-                        </select>
                         <input
-                          type="text"
+                          list="cities-list"
                           name="city"
                           className="form-control"
-                          placeholder="Or type new city"
+                          placeholder="Type city..."
                           value={formData.city}
                           onChange={handleChange}
-                          style={{ borderLeft: 'none' }}
                           required
                         />
+                        <datalist id="cities-list">
+                          {uniqueCities.map((city, index) => (
+                            <option key={index} value={city} />
+                          ))}
+                        </datalist>
                       </div>
-                      {locationLoading && <small className="text-muted">Loading cities...</small>}
                     </div>
                     
-                    <div className="col-md-4 mb-3">
+                    <div className="col-md-4">
                       <label className="form-label">District</label>
                       <div className="input-group">
-                        <select
-                          name="district"
-                          className="form-select"
-                          value={formData.district}
-                          onChange={handleChange}
-                          style={{ borderRight: 'none' }}
-                        >
-                          <option value="">Select District</option>
-                          {uniqueDistricts.map((district, index) => (
-                            <option key={index} value={district}>{district}</option>
-                          ))}
-                        </select>
                         <input
-                          type="text"
+                          list="districts-list"
                           name="district"
                           className="form-control"
-                          placeholder="Or type new district"
+                          placeholder="Type district..."
                           value={formData.district}
                           onChange={handleChange}
-                          style={{ borderLeft: 'none' }}
                         />
+                        <datalist id="districts-list">
+                          {uniqueDistricts.map((district, index) => (
+                            <option key={index} value={district} />
+                          ))}
+                        </datalist>
                       </div>
-                      {locationLoading && <small className="text-muted">Loading districts...</small>}
                     </div>
                   </div>
-                  
-                  <div className="mb-3">
-                    <label className="form-label">Price</label>
-                    <div className="d-flex align-items-center">
-                      <input 
-                        name="price" 
-                        type="text" 
-                        className="form-control" 
-                        value={formatPriceWithCommas(formData.price)} 
-                        onChange={handlePriceChange}
-                        required
-                      />
-                      {formData.property_type === 'Tanah' && (
-                        <span className="ms-2 text-muted">/m²</span>
-                      )}
-                      {formData.transaction_type === 'Sewa' && (
-                        <span className="ms-2 text-muted">/Tahun</span>
-                      )}
+                  {locationLoading && <small className="text-muted mt-2 d-block">Loading existing location data...</small>}
+                </div>
+
+                <div className="col-12 mt-5">
+                  <h6 className="text-primary fw-bold mb-4 d-flex align-items-center gap-2">
+                    <i className="bi bi-building-gear fs-5"></i> Specification Details
+                  </h6>
+                  <div className="row g-4">
+                    <div className="col-md-3">
+                      <label className="form-label">LT (m²)</label>
+                      <input name="lt" type="number" className="form-control" placeholder="0" value={formData.lt} onChange={handleChange} />
                     </div>
+                    {formData.property_type !== 'Kavling' && (
+                      <>
+                        <div className="col-md-3">
+                          <label className="form-label">LB (m²)</label>
+                          <input name="lb" type="number" className="form-control" placeholder="0" value={formData.lb} onChange={handleChange} />
+                        </div>
+                        <div className="col-md-3">
+                          <label className="form-label">KT (Bed)</label>
+                          <input name="kt" type="number" className="form-control" placeholder="0" value={formData.kt} onChange={handleChange} />
+                        </div>
+                        <div className="col-md-3">
+                          <label className="form-label">KM (Bath)</label>
+                          <input name="km" type="number" className="form-control" placeholder="0" value={formData.km} onChange={handleChange} />
+                        </div>
+                      </>
+                    )}
                   </div>
-                  
-                  <div className="d-flex gap-2">
+                </div>
+
+                <div className="col-12 mt-5">
+                  <div className="d-flex gap-3">
                     <button 
                       type="submit" 
-                      className="btn btn-primary flex-fill" 
+                      className="btn btn-primary flex-fill py-3 shadow-lg" 
                       disabled={saving}
-                      style={{ borderRadius: '10px', fontWeight: 600, padding: '0.75rem 1.5rem' }}
+                      style={{ 
+                        borderRadius: '12px', 
+                        fontWeight: 600, 
+                        fontSize: '1.1rem',
+                        background: 'linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%)',
+                        border: 'none'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                     >
                       {saving ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                          Saving...
+                          Saving Changes...
                         </>
                       ) : (
-                        'Update Property'
+                        <>
+                          <i className="bi bi-save2-fill me-2"></i> Update Property Listing
+                        </>
                       )}
                     </button>
                     
                     <button 
                       type="button" 
-                      className="btn btn-secondary" 
+                      className="btn btn-outline-secondary px-5" 
                       onClick={() => navigate(`/listing/${id}`)}
-                      style={{ borderRadius: '10px', fontWeight: 600, padding: '0.75rem 1.5rem' }}
+                      style={{ borderRadius: '12px', fontWeight: 600 }}
                     >
                       Cancel
                     </button>
                   </div>
-                </form>
+                </div>
               </div>
-            </div>
+            </form>
           </div>
         </div>
-        </div>
       </div>
+
+      <style>{`
+        .form-label {
+          margin-bottom: 0.75rem;
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+        .input-group-text {
+          border-color: var(--border);
+          color: var(--text-muted);
+        }
+        .shadow-xl {
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        .form-control:focus, .form-select:focus {
+           background: var(--surface-hover);
+        }
+      `}</style>
     </>
   );
 };

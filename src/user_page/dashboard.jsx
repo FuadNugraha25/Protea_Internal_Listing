@@ -157,7 +157,7 @@ function Dashboard({ user }) {
     async function fetchListings() {
       setLoading(true);
       try {
-        // First, fetch listings - explicitly select owner column
+        // Fetch listings
         const { data, error } = await supabase.from("listings").select('*');
         if (error || !data) {
           console.error('Error fetching listings:', error);
@@ -166,39 +166,14 @@ function Dashboard({ user }) {
           return;
         }
 
-        // Debug: Log raw data to see what we're getting
-        console.log('Raw data from database:', data);
-        console.log('Sample listing raw data:', data[0] ? {
-          title: data[0].title,
-          owner: data[0].owner,
-          ownerType: typeof data[0].owner,
-          ownerIsNull: data[0].owner === null,
-          ownerIsUndefined: data[0].owner === undefined,
-          ownerValue: JSON.stringify(data[0].owner)
-        } : 'No data');
-
         // Map listings - use owner column directly from database
         const mapped = data.map((item) => {
-          // Handle owner field more carefully - check for null, undefined, empty string
           let owner = item.owner;
-          if (owner === null || owner === undefined || owner === '') {
+          if (!owner) {
             owner = 'Unknown Owner';
           } else {
-            // Trim whitespace in case there are spaces
-            owner = String(owner).trim();
-            if (owner === '') {
-              owner = 'Unknown Owner';
-            }
+            owner = String(owner).trim() || 'Unknown Owner';
           }
-          
-          // Log owner information for each listing with detailed info
-          console.log(`Listing "${item.title}":`, {
-            rawOwner: item.owner,
-            processedOwner: owner,
-            ownerType: typeof item.owner,
-            isNull: item.owner === null,
-            isUndefined: item.owner === undefined
-          });
           
           return {
             ...item,
@@ -213,10 +188,9 @@ function Dashboard({ user }) {
             province: item.province ?? "-",
             district: item.district ?? "-",
             price: item.price || "-",
-            owner: owner,  // Use owner column directly from database
+            owner: owner,
           };
         });
-        console.log('All listings with owners:', mapped.map(l => ({ title: l.title, owner: l.owner })));
         setListings(mapped);
       } catch (error) {
         console.error('Error fetching listings:', error);
@@ -242,97 +216,70 @@ function Dashboard({ user }) {
     fetchListings();
   }, [user]);
 
-  // Extract unique locations from the data
-  const uniqueProvinces = [...new Set(listings.map(listing => listing.province))];
+  // Use react hooks for memoized filter values to improve performance
+  const uniqueProvinces = React.useMemo(() => {
+    return [...new Set(listings.map(listing => listing.province))].filter(Boolean);
+  }, [listings]);
   
-  // Filter locations based on selected province
-  const uniqueLocations = selectedProvince === "All" 
-    ? [...new Set(listings.map(listing => listing.location))]
-    : [...new Set(listings
-        .filter(listing => listing.province === selectedProvince)
-        .map(listing => listing.location))];
+  const uniqueLocations = React.useMemo(() => {
+    const list = selectedProvince === "All" 
+      ? listings 
+      : listings.filter(listing => listing.province === selectedProvince);
+    return [...new Set(list.map(listing => listing.location))].filter(Boolean);
+  }, [listings, selectedProvince]);
   
-  // Filter districts based on selected province and city
-  const uniqueDistricts = selectedProvince === "All" && selectedLocation === "All"
-    ? [...new Set(listings.map(listing => listing.district))]
-    : selectedProvince !== "All" && selectedLocation === "All"
-    ? [...new Set(listings
-        .filter(listing => listing.province === selectedProvince)
-        .map(listing => listing.district))]
-    : selectedProvince === "All" && selectedLocation !== "All"
-    ? [...new Set(listings
-        .filter(listing => listing.location === selectedLocation)
-        .map(listing => listing.district))]
-    : [...new Set(listings
-        .filter(listing => listing.province === selectedProvince && listing.location === selectedLocation)
-        .map(listing => listing.district))];
+  const uniqueDistricts = React.useMemo(() => {
+    let list = listings;
+    if (selectedProvince !== "All") list = list.filter(l => l.province === selectedProvince);
+    if (selectedLocation !== "All") list = list.filter(l => l.location === selectedLocation);
+    return [...new Set(list.map(listing => listing.district))].filter(Boolean);
+  }, [listings, selectedProvince, selectedLocation]);
 
-  const uniqueOwners = [...new Set(listings.map(listing => listing.owner))].filter(Boolean).sort((a, b) =>
-    a.localeCompare(b, 'id-ID', { sensitivity: 'base' })
-  );
+  const uniqueOwners = React.useMemo(() => {
+    return [...new Set(listings.map(listing => listing.owner))]
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b, 'id-ID', { sensitivity: 'base' }));
+  }, [listings]);
 
-  const filteredListings = listings.filter(listing => {
-    if ((listing.title || "").trim() === "DELETED") return false;
-    const matchesSearch =
-      (listing.title || "").toLowerCase().includes(appliedFilters.searchTerm.toLowerCase()) ||
-      (listing.location || "").toLowerCase().includes(appliedFilters.searchTerm.toLowerCase());
-    const matchesType = appliedFilters.selectedType === "All" || listing.property_type === appliedFilters.selectedType;
-    const matchesTransactionType = appliedFilters.selectedTransactionType === "All" || listing.transaction_type === appliedFilters.selectedTransactionType;
-    const matchesLocation = appliedFilters.selectedLocation === "All" || listing.location === appliedFilters.selectedLocation;
-    const matchesProvince = appliedFilters.selectedProvince === "All" || listing.province === appliedFilters.selectedProvince;
-    const matchesDistrict = appliedFilters.selectedDistrict === "All" || listing.district === appliedFilters.selectedDistrict;
-    const matchesOwner = appliedFilters.selectedOwner === "All" || listing.owner === appliedFilters.selectedOwner;
-    // Price filter
-    const priceNum = Number(listing.price?.toString().replace(/[^0-9]/g, ""));
-    const matchesPrice =
-      (!isNaN(priceNum) && priceNum >= appliedFilters.priceRange[0] && priceNum <= appliedFilters.priceRange[1]);
-    // LT filter
-    const ltNum = Number(listing.lt);
-    const matchesLT =
-      (!isNaN(ltNum) && (appliedFilters.ltMin === null || ltNum >= appliedFilters.ltMin) && (appliedFilters.ltMax === null || ltNum <= appliedFilters.ltMax));
-    // LB filter
-    const lbNum = Number(listing.lb);
-    const matchesLB = listing.property_type === 'Kavling' ? true : (!isNaN(lbNum) && (appliedFilters.lbMin === null || lbNum >= appliedFilters.lbMin) && (appliedFilters.lbMax === null || lbNum <= appliedFilters.lbMax));
-    // KM filter
-    const matchesKM = listing.property_type === 'Kavling' ? true : (appliedFilters.selectedKM === "All" || String(listing.baths) === String(appliedFilters.selectedKM));
-    // KT filter
-    const matchesKT = listing.property_type === 'Kavling' ? true : (appliedFilters.selectedKT === "All" || String(listing.beds) === String(appliedFilters.selectedKT));
-    
-    // Debug logging for Kavling properties
-    if (listing.property_type === 'Kavling') {
-      console.log('Kavling property filter check:', {
-        title: listing.title,
-        matchesSearch,
-        matchesType,
-        matchesTransactionType,
-        matchesLocation,
-        price: listing.price,
-        priceNum,
-        matchesPrice,
-        lt: listing.lt,
-        ltNum,
-        matchesLT,
-        matchesLB,
-        matchesKM,
-        matchesKT
-      });
-    }
-    
-    return (
-      matchesSearch &&
-      matchesType &&
-      matchesTransactionType &&
-      matchesLocation &&
-      matchesProvince &&
-      matchesDistrict &&
-      matchesOwner &&
-      matchesPrice &&
-      matchesLT &&
-      matchesLB &&
-      matchesKM &&
-      matchesKT
-    );
-  });
+  const filteredListings = React.useMemo(() => {
+    return listings.filter(listing => {
+      if ((listing.title || "").trim() === "DELETED") return false;
+      
+      const matchesSearch = !appliedFilters.searchTerm || 
+        (listing.title || "").toLowerCase().includes(appliedFilters.searchTerm.toLowerCase()) ||
+        (listing.location || "").toLowerCase().includes(appliedFilters.searchTerm.toLowerCase()) ||
+        (listing.district || "").toLowerCase().includes(appliedFilters.searchTerm.toLowerCase());
+        
+      const matchesType = appliedFilters.selectedType === "All" || listing.property_type === appliedFilters.selectedType;
+      const matchesTransactionType = appliedFilters.selectedTransactionType === "All" || listing.transaction_type === appliedFilters.selectedTransactionType;
+      const matchesLocation = appliedFilters.selectedLocation === "All" || listing.location === appliedFilters.selectedLocation;
+      const matchesProvince = appliedFilters.selectedProvince === "All" || listing.province === appliedFilters.selectedProvince;
+      const matchesDistrict = appliedFilters.selectedDistrict === "All" || listing.district === appliedFilters.selectedDistrict;
+      const matchesOwner = appliedFilters.selectedOwner === "All" || listing.owner === appliedFilters.selectedOwner;
+      
+      const priceNum = Number(listing.price?.toString().replace(/[^0-9]/g, ""));
+      const matchesPrice = isNaN(priceNum) || (priceNum >= appliedFilters.priceRange[0] && priceNum <= appliedFilters.priceRange[1]);
+      
+      const ltNum = Number(listing.lt);
+      const matchesLT = isNaN(ltNum) || (
+        (appliedFilters.ltMin === null || ltNum >= appliedFilters.ltMin) && 
+        (appliedFilters.ltMax === null || ltNum <= appliedFilters.ltMax)
+      );
+      
+      const lbNum = Number(listing.lb);
+      const matchesLB = listing.property_type === 'Kavling' || isNaN(lbNum) || (
+        (appliedFilters.lbMin === null || lbNum >= appliedFilters.lbMin) && 
+        (appliedFilters.lbMax === null || lbNum <= appliedFilters.lbMax)
+      );
+      
+      const matchesKM = listing.property_type === 'Kavling' || appliedFilters.selectedKM === "All" || String(listing.baths) === String(appliedFilters.selectedKM);
+      const matchesKT = listing.property_type === 'Kavling' || appliedFilters.selectedKT === "All" || String(listing.beds) === String(appliedFilters.selectedKT);
+      
+      return matchesSearch && matchesType && matchesTransactionType && matchesLocation && 
+             matchesProvince && matchesDistrict && matchesOwner && matchesPrice && 
+             matchesLT && matchesLB && matchesKM && matchesKT;
+    });
+  }, [listings, appliedFilters]);
 
   // Pagination calculations (must be after filteredListings is defined)
   const totalPages = Math.ceil(filteredListings.length / ITEMS_PER_PAGE) || 1;
@@ -348,27 +295,33 @@ function Dashboard({ user }) {
   }, [totalPages, currentPage]);
 
   return (
-    <div style={{ background: 'var(--background)', minHeight: '100vh', paddingBottom: '2rem', paddingTop: '6rem' }}>
+    <div className="animate-fade-in" style={{ background: 'var(--background)', minHeight: '100vh', paddingBottom: '4rem', paddingTop: '7rem' }}>
       {/* Filter Section */}
-      <div className="container mb-5" style={{ marginTop: '1rem' }}>
-        <div className="row mb-4">
+      <div className="container" style={{ maxWidth: '1200px' }}>
+        <div className="row mb-5">
           <div className="col">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h3 className="fw-bold mb-0" style={{ color: 'var(--text-primary)', fontSize: '2rem' }}>
-                {agentName ? `Welcome, ${agentName}` : 'Welcome'}
-              </h3>
+            <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-4 mb-4">
+              <div>
+                <h1 className="display-4 fw-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.04em' }}>
+                  {agentName ? `Welcome back, ${agentName}` : 'Welcome back'}
+                </h1>
+                <p className="text-secondary mb-0" style={{ fontSize: '1.1rem', opacity: 0.8 }}>
+                  Discover premium internal listings with Protea Realty.
+                </p>
+              </div>
               <button
                 className="btn btn-outline-secondary"
                 onClick={() => setFiltersOpen(prev => !prev)}
-                style={{ borderRadius: '8px' }}
+                style={{ padding: '0.75rem 1.25rem' }}
               >
-                <i className={`bi ${filtersOpen ? 'bi-chevron-up' : 'bi-chevron-down'} me-2`}></i>
-                {filtersOpen ? 'Sembunyikan Filter' : 'Tampilkan Filter'}
+                <i className={`bi ${filtersOpen ? 'bi-chevron-up' : 'bi-funnel'} me-2`}></i>
+                {filtersOpen ? 'Hide Filters' : 'Filter Properties'}
               </button>
             </div>
+            
             {filtersOpen && (
-            <div className="card shadow-lg" style={{ border: 'none', borderRadius: '12px' }}>
-              <div className="card-body" style={{ background: 'var(--surface)' }}>
+            <div className="glass-card mb-5 animate-fade-in" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+              <div className="card-body p-4 p-md-5">
                 {/* Basic Filters */}
                 <div className="row g-3 mb-4">
                   <div className="col-md-2">
@@ -650,145 +603,140 @@ function Dashboard({ user }) {
         </div>
 
         {/* Search Section */}
-        <div className="row mb-4">
-          <div className="col-md-8 mx-auto">
-            <div className="position-relative">
+        <div className="row mb-5">
+          <div className="col-md-10 col-lg-8 mx-auto">
+            <div className="position-relative shadow-xl" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
               <i className="bi bi-search position-absolute" style={{ 
-                left: '1rem', 
+                left: '1.25rem', 
                 top: '50%', 
                 transform: 'translateY(-50%)',
-                color: 'var(--text-secondary)',
-                fontSize: '1.1rem'
+                color: 'var(--text-muted)',
+                fontSize: '1.2rem',
+                zIndex: 10
               }}></i>
               <input
                 type="text"
-                className="form-control"
-                placeholder="Search properties..."
+                className="form-control form-control-lg border-0 ps-5 py-4"
+                placeholder="Search by title, city, or district..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ paddingLeft: '2.75rem', borderRadius: '10px' }}
+                style={{ 
+                  paddingLeft: '3.5rem', 
+                  fontSize: '1.1rem',
+                  background: 'var(--surface)',
+                  borderRadius: 'var(--radius-lg)'
+                }}
               />
             </div>
           </div>
         </div>
 
         {/* Results Info */}
-        <div className="row mb-4">
+        <div className="row mb-4 align-items-center">
           <div className="col">
-            <p className="text-muted mb-0" style={{ fontSize: '0.9375rem', fontWeight: 500 }}>
-              <i className="bi bi-house-door me-2"></i>
-              Showing <strong style={{ color: 'var(--text-primary)' }}>{filteredListings.length}</strong> properties
-            </p>
+            <div className="d-flex align-items-center gap-2">
+              <span className="badge bg-primary rounded-pill py-2 px-3" style={{ fontSize: '0.9rem' }}>
+                {filteredListings.length} Results
+              </span>
+              <span className="text-muted" style={{ fontSize: '0.95rem' }}>
+                Properties found in internal database
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Properties Grid */}
-        <div className="row g-4">
+        <div className="row g-4 mb-5">
           {loading ? (
-            <div className="text-center" style={{ padding: '3rem', color: 'var(--text-secondary)' }}>
-              <div className="spinner-border text-primary mb-3" role="status" style={{ width: '3rem', height: '3rem' }}>
+            <div className="col-12 text-center" style={{ padding: '5rem 0' }}>
+              <div className="spinner-border text-primary mb-3" role="status" style={{ width: '3.5rem', height: '3.5rem' }}>
                 <span className="visually-hidden">Loading...</span>
               </div>
-              <p style={{ fontSize: '1.125rem', fontWeight: 500 }}>Loading properties...</p>
+              <p className="text-secondary h5">Fetching listings from database...</p>
             </div>
           ) : filteredListings.length === 0 ? (
-            <div className="text-center" style={{ padding: '3rem', color: 'var(--text-secondary)' }}>
-              <i className="bi bi-inbox fs-1 mb-3 d-block" style={{ color: 'var(--text-secondary)', opacity: 0.5 }}></i>
-              <p style={{ fontSize: '1.125rem', fontWeight: 500 }}>No properties found.</p>
-              <p style={{ fontSize: '0.875rem' }}>Try adjusting your filters or search terms.</p>
+            <div className="col-12 text-center" style={{ padding: '5rem 2rem' }}>
+              <div className="glass-card d-inline-block p-5" style={{ borderRadius: 'var(--radius-xl)' }}>
+                <i className="bi bi-search fs-1 mb-4 d-block text-muted"></i>
+                <h3 className="text-primary mb-2">No Properties Found</h3>
+                <p className="text-secondary mb-0">Try adjusting your filters or search keywords.</p>
+              </div>
             </div>
           ) : paginatedListings.map((listing) => (
             <div className="col-lg-4 col-md-6" key={listing.id}>
               <div 
-                className="card h-100 border-0" 
+                className="glass-card h-100 animate-fade-in" 
                 style={{
-                  boxShadow: 'var(--shadow-md)',
-                  transition: 'all 0.3s ease-in-out',
-                  cursor: 'pointer',
-                  borderRadius: '12px',
+                  borderRadius: 'var(--radius-lg)',
                   overflow: 'hidden',
-                  background: 'var(--surface)'
+                  cursor: 'pointer'
                 }}
                 onClick={() => navigate(`/listing/${listing.id}`)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-8px)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                }}
               >
-                <div className="position-relative">
+                <div className="position-relative overflow-hidden" style={{ height: "260px" }}>
                   <img
                     src={listing.image}
-                    className="card-img-top"
+                    className="w-100 h-100"
                     alt={listing.title}
-                    style={{ height: "250px", objectFit: "cover" }}
+                    style={{ 
+                      objectFit: "cover",
+                      transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                   />
-                  <div className="position-absolute top-0 start-0 m-3">
-                    {/* <span className="badge bg-success">{listing.status}</span> */}
-                  </div>
-                  <div className="position-absolute top-0 end-0 m-3">
-                    {/* <span className="badge bg-primary">{listing.type}</span> */}
+                  <div className="position-absolute bottom-0 start-0 w-100 p-3" style={{ 
+                    background: 'linear-gradient(to top, rgba(2, 6, 23, 0.8), transparent)' 
+                  }}>
+                    <span className="badge bg-primary mb-0">{listing.property_type}</span>
                   </div>
                 </div>
-                <div className="card-body" style={{ padding: '1.25rem' }}>
-                  <h5 className="card-title fw-bold mb-2" style={{ color: 'var(--text-primary)', fontSize: '1.125rem' }}>{listing.title}</h5>
-                  <p className="text-muted mb-2" style={{ fontSize: '0.875rem' }}>
-                    <i className="bi bi-geo-alt me-1" style={{ color: 'var(--primary-color)' }}></i>
-                    {listing.location}
+                
+                <div className="card-body p-4 d-flex flex-column">
+                  <h5 className="h5 fw-bold mb-2" style={{ color: 'var(--text-primary)', lineHeight: '1.4' }}>
+                    {listing.title}
+                  </h5>
+                  
+                  <div className="text-primary fw-bold mb-3" style={{ fontSize: '1.4rem', fontFamily: 'Outfit', letterSpacing: '-0.01em' }}>
+                    {formatIDR(listing.price)}
+                    {listing.property_type === 'Kavling' && <span className="text-muted small ms-1" style={{ fontSize: '0.8rem' }}>/m²</span>}
+                  </div>
+
+                  <p className="text-secondary mb-4 small d-flex align-items-center gap-1">
+                    <i className="bi bi-geo-alt text-accent"></i>
+                    {listing.location}, {listing.district}
                   </p>
-                  <p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
-                    <i className="bi bi-person me-1" style={{ color: 'var(--primary-color)' }}></i>
-                    Owner: <strong>{getOwnerName(listing.owner)}</strong>
-                  </p>
-                  {listing.property_type === 'Kavling' ? (
-                    <div className="row text-center mb-3">
-                      <div className="col-12">
-                        <div className="fw-bold">{listing.lt}</div>
-                        <small className="text-muted">Total Luas (m²)</small>
+
+                  <div className="d-flex align-items-center justify-content-between py-3 border-top border-bottom" style={{ borderColor: 'var(--border) !important' }}>
+                    {listing.property_type === 'Kavling' ? (
+                      <div className="d-flex align-items-center gap-2">
+                        <span className="text-primary fw-bold">{listing.lt}</span>
+                        <span className="text-muted small">Total Area (m²)</span>
                       </div>
-                    </div>
-                  ) : (
-                    <div className="row text-center mb-3">
-                      <div className="col-3">
-                        <div className="fw-bold">{listing.beds}</div>
-                        <div className="d-flex align-items-center justify-content-center mb-1">
-                          <FaBed className="text-primary me-1" />
+                    ) : (
+                      <div className="d-flex gap-4">
+                        <div className="d-flex align-items-center gap-1 text-secondary small">
+                          <FaBed className="text-primary" /> <strong>{listing.beds}</strong>
+                        </div>
+                        <div className="d-flex align-items-center gap-1 text-secondary small">
+                          <FaBath className="text-primary" /> <strong>{listing.baths}</strong>
+                        </div>
+                        <div className="d-flex align-items-center gap-1 text-secondary small">
+                           <span className="text-primary fw-bold">LT</span> {listing.lt}
+                        </div>
+                        <div className="d-flex align-items-center gap-1 text-secondary small">
+                           <span className="text-primary fw-bold">LB</span> {listing.lb}
                         </div>
                       </div>
-                      <div className="col-3">
-                        <div className="fw-bold">{listing.baths}</div>
-                        <div className="d-flex align-items-center justify-content-center mb-1">
-                          <FaBath className="text-primary me-1" />
-                        </div>
-                      </div>
-                      <div className="col-3">
-                        <div className="fw-bold">{listing.lt}</div>
-                        <small className="text-muted">LT</small>
-                      </div>
-                      <div className="col-3">
-                        <div className="fw-bold">{listing.lb}</div>
-                        <small className="text-muted">LB</small>
-                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 d-flex justify-content-between align-items-center">
+                    <div className="small text-muted">
+                      Owner: <span className="text-secondary fw-semibold">{getOwnerName(listing.owner).split(' ')[0]}</span>
                     </div>
-                  )}
-                  <div className="d-flex justify-content-between align-items-center">
-                    <span className="h5 text-primary fw-bold mb-0">
-                      {formatIDR(listing.price)}
-                      {listing.property_type === 'Kavling' && <small className="text-muted">/m²</small>}
-                      {listing.transaction_type === 'Sewa' && <small className="text-muted">/Tahun</small>}
-                    </span>
-                    <button
-                      className="btn btn-outline-primary btn-sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/listing/${listing.id}`);
-                      }}
-                      style={{ borderRadius: '8px', fontWeight: 600 }}
-                    >
-                      View Details
+                    <button className="btn btn-primary py-2 px-3" style={{ fontSize: '0.85rem' }}>
+                      Details <i className="bi bi-arrow-right small"></i>
                     </button>
                   </div>
                 </div>

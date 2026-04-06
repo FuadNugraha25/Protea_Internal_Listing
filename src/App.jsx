@@ -90,20 +90,20 @@ function AdminPage({ user }) {
         showDashboardButton={true}
         user={user}
       />
-      <div style={{ display: 'flex', marginTop: '73px', minHeight: 'calc(100vh - 73px)' }}>
+      <div style={{ display: 'flex', paddingTop: '75px', minHeight: '100vh', background: 'var(--background)' }}>
         {/* Persistent Sidebar */}
         <div
           style={{
             width: '280px',
             background: 'var(--surface)',
-            borderRight: '1px solid var(--border-color)',
+            borderRight: '1px solid var(--border)',
             boxShadow: '2px 0 8px rgba(0, 0, 0, 0.05)',
             display: 'flex',
             flexDirection: 'column',
             position: 'fixed',
-            top: '73px',
+            top: '75px',
             left: 0,
-            height: 'calc(100vh - 73px)',
+            height: 'calc(100vh - 75px)',
             overflowY: 'auto',
             zIndex: 100
           }}
@@ -111,7 +111,7 @@ function AdminPage({ user }) {
           {/* Sidebar Header */}
           <div style={{
             padding: '1.5rem',
-            borderBottom: '1px solid var(--border-color)',
+            borderBottom: '1px solid var(--border)',
             background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)',
             color: '#fff'
           }}>
@@ -151,7 +151,7 @@ function AdminPage({ user }) {
                   padding: '0.875rem 1rem',
                   background: 'transparent',
                   color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
@@ -169,7 +169,7 @@ function AdminPage({ user }) {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border-color)';
+                  e.target.style.borderColor = 'var(--border)';
                   e.target.style.transform = 'translateX(0)';
                 }}
               >
@@ -184,7 +184,7 @@ function AdminPage({ user }) {
                   padding: '0.875rem 1rem',
                   background: 'transparent',
                   color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
@@ -202,7 +202,7 @@ function AdminPage({ user }) {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border-color)';
+                  e.target.style.borderColor = 'var(--border)';
                   e.target.style.transform = 'translateX(0)';
                 }}
               >
@@ -212,7 +212,7 @@ function AdminPage({ user }) {
             </div>
 
             {/* Backup Button at Bottom */}
-            <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+            <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
               <button
                 onClick={goToBackup}
                 style={{
@@ -220,7 +220,7 @@ function AdminPage({ user }) {
                   padding: '0.875rem 1rem',
                   background: 'transparent',
                   color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
@@ -238,7 +238,7 @@ function AdminPage({ user }) {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border-color)';
+                  e.target.style.borderColor = 'var(--border)';
                   e.target.style.transform = 'translateX(0)';
                 }}
               >
@@ -328,20 +328,20 @@ function ConfirmListingsPage({ user }) {
         showDashboardButton={true}
         user={user}
       />
-      <div style={{ display: 'flex', marginTop: '73px', minHeight: 'calc(100vh - 73px)' }}>
+      <div style={{ display: 'flex', paddingTop: '75px', minHeight: '100vh', background: 'var(--background)' }}>
         {/* Persistent Sidebar */}
         <div
           style={{
             width: '280px',
             background: 'var(--surface)',
-            borderRight: '1px solid var(--border-color)',
+            borderRight: '1px solid var(--border)',
             boxShadow: '2px 0 8px rgba(0, 0, 0, 0.05)',
             display: 'flex',
             flexDirection: 'column',
             position: 'fixed',
-            top: '73px',
+            top: '75px',
             left: 0,
-            height: 'calc(100vh - 73px)',
+            height: 'calc(100vh - 75px)',
             overflowY: 'auto',
             zIndex: 100
           }}
@@ -349,7 +349,7 @@ function ConfirmListingsPage({ user }) {
           {/* Sidebar Header */}
           <div style={{
             padding: '1.5rem',
-            borderBottom: '1px solid var(--border-color)',
+            borderBottom: '1px solid var(--border)',
             background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)',
             color: '#fff'
           }}>
@@ -366,7 +366,7 @@ function ConfirmListingsPage({ user }) {
                   padding: '0.875rem 1rem',
                   background: 'transparent',
                   color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
@@ -384,7 +384,7 @@ function ConfirmListingsPage({ user }) {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border-color)';
+                  e.target.style.borderColor = 'var(--border)';
                   e.target.style.transform = 'translateX(0)';
                 }}
               >
@@ -422,7 +422,7 @@ function ConfirmListingsPage({ user }) {
                   padding: '0.875rem 1rem',
                   background: 'transparent',
                   color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
@@ -440,7 +440,7 @@ function ConfirmListingsPage({ user }) {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border-color)';
+                  e.target.style.borderColor = 'var(--border)';
                   e.target.style.transform = 'translateX(0)';
                 }}
               >
@@ -450,7 +450,7 @@ function ConfirmListingsPage({ user }) {
             </div>
 
             {/* Backup Button at Bottom */}
-            <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+            <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
               <button
                 onClick={goToBackup}
                 style={{
@@ -458,7 +458,7 @@ function ConfirmListingsPage({ user }) {
                   padding: '0.875rem 1rem',
                   background: 'transparent',
                   color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
@@ -476,7 +476,7 @@ function ConfirmListingsPage({ user }) {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border-color)';
+                  e.target.style.borderColor = 'var(--border)';
                   e.target.style.transform = 'translateX(0)';
                 }}
               >
@@ -523,20 +523,20 @@ function TotalListingsPage({ user }) {
         showDashboardButton={true}
         user={user}
       />
-      <div style={{ display: 'flex', marginTop: '73px', minHeight: 'calc(100vh - 73px)' }}>
+      <div style={{ display: 'flex', paddingTop: '75px', minHeight: '100vh', background: 'var(--background)' }}>
         {/* Persistent Sidebar */}
         <div
           style={{
             width: '280px',
             background: 'var(--surface)',
-            borderRight: '1px solid var(--border-color)',
+            borderRight: '1px solid var(--border)',
             boxShadow: '2px 0 8px rgba(0, 0, 0, 0.05)',
             display: 'flex',
             flexDirection: 'column',
             position: 'fixed',
-            top: '73px',
+            top: '75px',
             left: 0,
-            height: 'calc(100vh - 73px)',
+            height: 'calc(100vh - 75px)',
             overflowY: 'auto',
             zIndex: 100
           }}
@@ -544,7 +544,7 @@ function TotalListingsPage({ user }) {
           {/* Sidebar Header */}
           <div style={{
             padding: '1.5rem',
-            borderBottom: '1px solid var(--border-color)',
+            borderBottom: '1px solid var(--border)',
             background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)',
             color: '#fff'
           }}>
@@ -561,7 +561,7 @@ function TotalListingsPage({ user }) {
                   padding: '0.875rem 1rem',
                   background: 'transparent',
                   color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
@@ -579,7 +579,7 @@ function TotalListingsPage({ user }) {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border-color)';
+                  e.target.style.borderColor = 'var(--border)';
                   e.target.style.transform = 'translateX(0)';
                 }}
               >
@@ -594,7 +594,7 @@ function TotalListingsPage({ user }) {
                   padding: '0.875rem 1rem',
                   background: 'transparent',
                   color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
@@ -612,7 +612,7 @@ function TotalListingsPage({ user }) {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border-color)';
+                  e.target.style.borderColor = 'var(--border)';
                   e.target.style.transform = 'translateX(0)';
                 }}
               >
@@ -645,7 +645,7 @@ function TotalListingsPage({ user }) {
             </div>
 
             {/* Backup Button at Bottom */}
-            <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+            <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
               <button
                 onClick={goToBackup}
                 style={{
@@ -653,7 +653,7 @@ function TotalListingsPage({ user }) {
                   padding: '0.875rem 1rem',
                   background: 'transparent',
                   color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
@@ -671,7 +671,7 @@ function TotalListingsPage({ user }) {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border-color)';
+                  e.target.style.borderColor = 'var(--border)';
                   e.target.style.transform = 'translateX(0)';
                 }}
               >
@@ -718,20 +718,20 @@ function BackupListingsPage({ user }) {
         showDashboardButton={true}
         user={user}
       />
-      <div style={{ display: 'flex', marginTop: '73px', minHeight: 'calc(100vh - 73px)' }}>
+      <div style={{ display: 'flex', paddingTop: '75px', minHeight: '100vh', background: 'var(--background)' }}>
         {/* Persistent Sidebar */}
         <div
           style={{
             width: '280px',
             background: 'var(--surface)',
-            borderRight: '1px solid var(--border-color)',
+            borderRight: '1px solid var(--border)',
             boxShadow: '2px 0 8px rgba(0, 0, 0, 0.05)',
             display: 'flex',
             flexDirection: 'column',
             position: 'fixed',
-            top: '73px',
+            top: '75px',
             left: 0,
-            height: 'calc(100vh - 73px)',
+            height: 'calc(100vh - 75px)',
             overflowY: 'auto',
             zIndex: 100
           }}
@@ -739,7 +739,7 @@ function BackupListingsPage({ user }) {
           {/* Sidebar Header */}
           <div style={{
             padding: '1.5rem',
-            borderBottom: '1px solid var(--border-color)',
+            borderBottom: '1px solid var(--border)',
             background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)',
             color: '#fff'
           }}>
@@ -756,7 +756,7 @@ function BackupListingsPage({ user }) {
                   padding: '0.875rem 1rem',
                   background: 'transparent',
                   color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
@@ -774,7 +774,7 @@ function BackupListingsPage({ user }) {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border-color)';
+                  e.target.style.borderColor = 'var(--border)';
                   e.target.style.transform = 'translateX(0)';
                 }}
               >
@@ -789,7 +789,7 @@ function BackupListingsPage({ user }) {
                   padding: '0.875rem 1rem',
                   background: 'transparent',
                   color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
@@ -807,7 +807,7 @@ function BackupListingsPage({ user }) {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border-color)';
+                  e.target.style.borderColor = 'var(--border)';
                   e.target.style.transform = 'translateX(0)';
                 }}
               >
@@ -822,7 +822,7 @@ function BackupListingsPage({ user }) {
                   padding: '0.875rem 1rem',
                   background: 'transparent',
                   color: 'var(--text-primary)',
-                  border: '1px solid var(--border-color)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px',
                   fontSize: '0.9375rem',
                   fontWeight: 600,
@@ -840,7 +840,7 @@ function BackupListingsPage({ user }) {
                 }}
                 onMouseLeave={(e) => {
                   e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border-color)';
+                  e.target.style.borderColor = 'var(--border)';
                   e.target.style.transform = 'translateX(0)';
                 }}
               >
@@ -850,7 +850,7 @@ function BackupListingsPage({ user }) {
             </div>
 
             {/* Backup Button at Bottom */}
-            <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+            <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 style={{

@@ -151,81 +151,50 @@ export default function ListingDetails() {
     <>
       <Toast ref={toast} />
       <Navbar 
-        title="Dashboard" 
+        title="Listing Details" 
+        showDashboardButton={true}
         showAdminButton={user && allowedUserId.includes(user.id)}
-        showTestingButton={user && allowedUserId.includes(user.id)}
-        showTambahListingButton={user && !allowedUserId.includes(user.id)}
-        showListingPribadiButton={user && !allowedUserId.includes(user.id)}
+        showTambahListingButton={true}
+        showListingPribadiButton={true}
         user={user}
       />
-      <FoundationWrapper style={{ paddingTop: '6rem', minHeight: '100vh', background: '#f8f9fa' }}>
-        <div className="grid-container" style={{ maxWidth: '1400px' }}>
-          
-          {/* Welcome Message */}
-          <div className="grid-x grid-margin-x" style={{ marginBottom: '1.5rem' }}>
-            <div className="cell">
-              <h3 style={{ 
-                color: 'var(--text-primary)', 
-                fontSize: '2rem', 
-                fontWeight: 700,
-                margin: 0
-              }}>
-                {agentName ? `Welcome, ${agentName}` : 'Welcome'}
-              </h3>
-            </div>
-          </div>
-          
-          {/* Action Bar */}
-          {user && allowedUserId.includes(user.id) && (
-            <div className="grid-x grid-margin-x" style={{ marginBottom: '1.5rem' }}>
-              <div className="cell">
-                <div className="card" style={{ border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: '10px' }}>
-                  <div className="card-section" style={{ padding: '0.875rem 1.25rem', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.625rem' }}>
-                    <button 
-                      className="button" 
-                      onClick={() => navigate(`/edit-listing/${id}`)}
-                      style={{ 
-                        borderRadius: '6px',
-                        padding: '0.5rem 1rem',
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
-                        background: '#ffae00',
-                        color: '#0a0a0a',
-                        border: 'none',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      ✏️ Edit
-                    </button>
-                    <button 
-                      className="button alert" 
-                      onClick={handleDelete}
-                      style={{ 
-                        borderRadius: '6px',
-                        padding: '0.5rem 1rem',
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      🗑️ Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+      
+      <div className="animate-fade-in" style={{ 
+        minHeight: '100vh', 
+        background: 'var(--background)',
+        paddingTop: '5rem',
+        paddingBottom: '5rem'
+      }}>
+        {/* Navigation / Back Button */}
+        <div className="container mt-4 mb-4" style={{ maxWidth: '1200px' }}>
+          <button 
+            className="btn btn-link text-decoration-none d-inline-flex align-items-center" 
+            onClick={() => navigate('/dashboard')}
+            style={{ color: 'var(--text-secondary)', padding: 0, fontWeight: 500 }}
+          >
+            <i className="bi bi-arrow-left me-2"></i> Back to Dashboard
+          </button>
+        </div>
 
-          {/* Main Content Grid */}
-          <div className="grid-x grid-margin-x grid-margin-y">
+        <div className="container" style={{ maxWidth: '1200px' }}>
+          {/* Main Layout Grid */}
+          <div className="row g-4 lg-row-reverse">
             
-            {/* Left Column - Image */}
-            <div className="cell small-12 large-8">
-              <div className="card" style={{ border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px', overflow: 'hidden' }}>
-                <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%', background: '#e6e6e6', overflow: 'hidden' }}>
+            {/* Left/Top Column: Image Gallery/Hero */}
+            <div className="col-12 col-lg-8">
+              <div className="glass-card p-2" style={{ borderRadius: '24px', overflow: 'hidden' }}>
+                <div style={{ 
+                  position: 'relative', 
+                  width: '100%', 
+                  paddingTop: '65%', // Aspect ratio
+                  borderRadius: '18px',
+                  overflow: 'hidden',
+                  background: 'rgba(255,255,255,0.03)'
+                }}>
                   <img
                     src={listing?.image}
                     alt={listing?.title}
+                    className="animate-zoom-in"
                     style={{ 
                       position: 'absolute',
                       top: 0,
@@ -233,299 +202,227 @@ export default function ListingDetails() {
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',
-                      objectPosition: 'center'
+                      transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
+                    onLoad={(e) => e.target.style.opacity = 1}
                     onError={(e) => {
                       e.target.style.display = 'none';
-                      e.target.parentElement.innerHTML = '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #767676; font-size: 0.9rem;">No Image Available</div>';
+                      e.target.parentElement.innerHTML = '<div class="d-flex flex-column align-items-center justify-content-center h-100"><i class="bi bi-image text-muted display-1"></i><p class="text-muted mt-3">No Image Available</p></div>';
                     }}
                   />
+                  {/* Overlay for Price on Mobile/Small screens */}
+                  <div className="d-lg-none position-absolute bottom-0 start-0 w-100 p-4" style={{ background: 'linear-gradient(transparent, rgba(0,0,0,0.8))' }}>
+                     <div className="h2 fw-bold text-white mb-0">{formatIDR(listing?.price)}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description Section - Moved here for better flow on large screens */}
+              <div className="mt-4">
+                <div className="glass-card p-4 p-md-5" style={{ borderRadius: '24px' }}>
+                  <h4 className="fw-bold mb-4" style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+                    About this listing
+                  </h4>
+                  <div style={{
+                    whiteSpace: 'pre-line',
+                    fontSize: '1.05rem',
+                    color: 'var(--text-secondary)',
+                    lineHeight: 1.8,
+                    fontWeight: 400
+                  }}>
+                    {listing?.description || "No description provided for this property."}
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Column - Key Info */}
-            <div className="cell small-12 large-4">
-              <div className="card" style={{ border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px', height: '100%' }}>
-                <div className="card-section" style={{ padding: '1.25rem' }}>
+            {/* Right/Sidebar Column: Info & Actions */}
+            <div className="col-12 col-lg-4">
+              <div className="sticky-top" style={{ top: '6.5rem' }}>
+                <div className="glass-card p-4 p-md-5 mb-4" style={{ borderRadius: '24px' }}>
+                  {/* Status & Type Badges */}
+                  <div className="d-flex gap-2 mb-4">
+                    <span className="badge px-3 py-1.5 rounded-pill" style={{ background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', fontWeight: 500, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {listing?.transaction_type || 'For Sale'}
+                    </span>
+                    <span className="badge px-3 py-1.5 rounded-pill" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', fontWeight: 500, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {listing?.property_type || 'Property'}
+                    </span>
+                  </div>
+
                   {/* Title */}
-                  <h1 style={{ 
-                    fontSize: '1.5rem', 
-                    fontWeight: 700, 
-                    color: '#0a0a0a',
-                    lineHeight: 1.3,
-                    marginBottom: '0.75rem',
-                    letterSpacing: '-0.01em'
-                  }}>
+                  <h1 className="h2 mb-2" style={{ color: 'var(--text-primary)', fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.25 }}>
                     {isDeleted ? "DELETED" : listing?.title}
                   </h1>
                   
                   {/* Location */}
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.375rem',
-                    marginBottom: '1rem',
-                    color: '#767676',
-                    fontSize: '0.875rem'
-                  }}>
-                    <span style={{ fontSize: '0.9rem' }}>📍</span>
-                    <span>{listing?.location}</span>
-                  </div>
-                  
-                  {/* Price */}
-                  <div style={{ 
-                    padding: '1rem',
-                    background: 'linear-gradient(135deg, #1779ba 0%, #14679e 100%)',
-                    borderRadius: '10px',
-                    marginBottom: '1.25rem',
-                    textAlign: 'center'
-                  }}>
-                    <div style={{ 
-                      fontSize: '0.75rem', 
-                      color: 'rgba(255,255,255,0.9)', 
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.1em',
-                      marginBottom: '0.375rem',
-                      fontWeight: 600
-                    }}>
-                      Price
+                  <p className="mb-5 d-flex align-items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.9rem', fontWeight: 400 }}>
+                    <i className="bi bi-geo-alt-fill text-primary opacity-75"></i>
+                    {listing?.location}
+                  </p>
+
+                  {/* Specs Grid */}
+                  <div className="row g-4 mb-5">
+                    <div className="col-6">
+                      <div className="p-3 rounded-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <div className="uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', fontWeight: 500 }}>Land Area</div>
+                        <div className="d-flex align-items-center gap-2" style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
+                          {listing?.lt} m²
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ 
-                      fontSize: '1.5rem', 
-                      fontWeight: 700, 
-                      color: '#fefefe',
+                    {listing?.property_type !== 'Kavling' && (
+                       <div className="col-6">
+                        <div className="p-3 rounded-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                          <div className="uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', fontWeight: 500 }}>Building</div>
+                          <div className="d-flex align-items-center gap-2" style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
+                            {listing?.lb} m²
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {listing?.property_type !== 'Kavling' && (
+                      <>
+                        <div className="col-6">
+                          <div className="p-3 rounded-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div className="uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', fontWeight: 500 }}>Bedrooms</div>
+                            <div className="d-flex align-items-center gap-2" style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
+                              {listing?.beds}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="col-6">
+                          <div className="p-3 rounded-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div className="uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', fontWeight: 500 }}>Bathrooms</div>
+                            <div className="d-flex align-items-center gap-2" style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
+                              {listing?.baths}
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Price Card */}
+                  <div className="p-4 rounded-4 mb-5 text-center glass-card" style={{ 
+                    border: '1px solid rgba(99, 102, 241, 0.15)',
+                    background: 'rgba(15, 23, 42, 0.4)',
+                    boxShadow: '0 10px 30px -10px rgba(0,0,0,0.3)'
+                  }}>
+                    <div className="uppercase mb-2" style={{ 
+                      color: 'rgba(255,255,255,0.4)', 
+                      fontSize: '0.65rem', 
+                      fontWeight: 500,
+                      letterSpacing: '0.12em' 
+                    }}>
+                      OFFERING PRICE
+                    </div>
+                    <div className="fw-bold mb-0" style={{ 
+                      fontSize: '1.65rem', 
+                      fontWeight: 600,
+                      background: 'linear-gradient(90deg, #6C7BFF, #8B5CF6)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      letterSpacing: '-0.01em',
+                      fontVariantNumeric: 'tabular-nums',
+                      textShadow: '0 0 12px rgba(108, 123, 255, 0.1)',
                       lineHeight: 1.2
                     }}>
                       {formatIDR(listing?.price)}
                     </div>
                   </div>
 
-                  {/* Property Type Badge */}
-                  {listing?.property_type && (
-                    <div style={{ 
-                      display: 'inline-block',
-                      padding: '0.375rem 0.75rem',
-                      background: '#e6e6e6',
-                      borderRadius: '6px',
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      color: '#0a0a0a',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
-                      {listing.property_type}
+                  {/* Admin Actions */}
+                  {user && allowedUserId.includes(user.id) && (
+                    <div className="d-grid gap-3 pt-2">
+                      <button 
+                        className="btn btn-premium-primary py-3 fw-bold" 
+                        onClick={() => navigate(`/edit-listing/${id}`)}
+                      >
+                        <i className="bi bi-pencil-square me-2"></i> Edit Property
+                      </button>
+                      <button 
+                        className="btn btn-premium-danger py-3 fw-bold" 
+                        onClick={handleDelete}
+                      >
+                        <i className="bi bi-trash3 me-2"></i> Delete Listing
+                      </button>
                     </div>
                   )}
                 </div>
+                
+                {/* styles for premium buttons */}
+                <style>{`
+                  .btn-premium-primary {
+                    background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+                    border: none;
+                    color: white;
+                    border-radius: 12px;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    height: 56px;
+                    font-size: 1rem;
+                  }
+                  .btn-premium-primary:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 20px -4px var(--primary-glow);
+                    filter: brightness(1.1);
+                  }
+                  .btn-premium-danger {
+                    background: rgba(239, 68, 68, 0.08);
+                    border: 1px solid rgba(239, 68, 68, 0.25);
+                    color: #ff4d4f;
+                    border-radius: 12px;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    height: 56px;
+                    font-size: 1rem;
+                  }
+                  .btn-premium-danger:hover {
+                    background: rgba(239, 68, 68, 0.15);
+                    border-color: #ff4d4f;
+                    color: #ff4d4f;
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 20px -4px rgba(239, 68, 68, 0.2);
+                  }
+                `}</style>
+                
+                {/* Agent Card / Contact Info */}
+                <div className="glass-card p-4 d-flex align-items-center gap-3" style={{ borderRadius: '24px' }}>
+                   <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: '50px', height: '50px', background: 'rgba(255,255,255,0.05)', fontSize: '1.5rem' }}>
+                      👤
+                   </div>
+                   <div>
+                      <div className="small text-muted">Owned by</div>
+                      <div className="fw-bold text-primary">{listing?.owner || 'Protea Admin'}</div>
+                   </div>
+                </div>
               </div>
             </div>
+
           </div>
-
-          {/* Property Details Cards */}
-          <div className="grid-x grid-margin-x grid-margin-y" style={{ marginTop: '1.5rem' }}>
-            <div className="cell small-12">
-              <div className="card" style={{ border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px' }}>
-                <div className="card-divider" style={{ 
-                  background: 'linear-gradient(135deg, #1779ba 0%, #14679e 100%)',
-                  color: '#fefefe',
-                  padding: '0.875rem 1.25rem',
-                  borderRadius: '12px 12px 0 0'
-                }}>
-                  <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 700 }}>Property Details</h3>
-                </div>
-                <div className="card-section" style={{ padding: '1.25rem' }}>
-                  <div className="grid-x grid-margin-x grid-margin-y">
-                    <div className="cell small-6 medium-3">
-                      <div className="card" style={{ 
-                        border: '1px solid #e6e6e6',
-                        borderRadius: '10px',
-                        textAlign: 'center',
-                        padding: '1rem',
-                        background: '#fefefe',
-                        transition: 'all 0.2s ease'
-                      }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-3px)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                          e.currentTarget.style.borderColor = '#1779ba';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = 'none';
-                          e.currentTarget.style.borderColor = '#e6e6e6';
-                        }}
-                      >
-                        <FaBed style={{ fontSize: '1.5rem', color: '#1779ba', marginBottom: '0.5rem' }} />
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0a0a0a', marginBottom: '0.375rem' }}>
-                          {listing?.beds}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#767676', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-                          Bedrooms
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="cell small-6 medium-3">
-                      <div className="card" style={{ 
-                        border: '1px solid #e6e6e6',
-                        borderRadius: '10px',
-                        textAlign: 'center',
-                        padding: '1rem',
-                        background: '#fefefe',
-                        transition: 'all 0.2s ease'
-                      }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-3px)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                          e.currentTarget.style.borderColor = '#1779ba';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = 'none';
-                          e.currentTarget.style.borderColor = '#e6e6e6';
-                        }}
-                      >
-                        <FaBath style={{ fontSize: '1.5rem', color: '#1779ba', marginBottom: '0.5rem' }} />
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0a0a0a', marginBottom: '0.375rem' }}>
-                          {listing?.baths}
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#767676', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-                          Bathrooms
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="cell small-6 medium-3">
-                      <div className="card" style={{ 
-                        border: '1px solid #e6e6e6',
-                        borderRadius: '10px',
-                        textAlign: 'center',
-                        padding: '1rem',
-                        background: '#fefefe',
-                        transition: 'all 0.2s ease'
-                      }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-3px)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                          e.currentTarget.style.borderColor = '#1779ba';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = 'none';
-                          e.currentTarget.style.borderColor = '#e6e6e6';
-                        }}
-                      >
-                        <FaRulerCombined style={{ fontSize: '1.5rem', color: '#1779ba', marginBottom: '0.5rem' }} />
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0a0a0a', marginBottom: '0.375rem' }}>
-                          {listing?.lt} m²
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#767676', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-                          Land Area
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="cell small-6 medium-3">
-                      <div className="card" style={{ 
-                        border: '1px solid #e6e6e6',
-                        borderRadius: '10px',
-                        textAlign: 'center',
-                        padding: '1rem',
-                        background: '#fefefe',
-                        transition: 'all 0.2s ease'
-                      }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-3px)';
-                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                          e.currentTarget.style.borderColor = '#1779ba';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = 'none';
-                          e.currentTarget.style.borderColor = '#e6e6e6';
-                        }}
-                      >
-                        <FaHome style={{ fontSize: '1.5rem', color: '#1779ba', marginBottom: '0.5rem' }} />
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0a0a0a', marginBottom: '0.375rem' }}>
-                          {listing?.lb} m²
-                        </div>
-                        <div style={{ fontSize: '0.75rem', color: '#767676', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-                          Building Area
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Description Section */}
-          {listing?.description && (
-            <div className="grid-x grid-margin-x" style={{ marginTop: '1.5rem' }}>
-              <div className="cell small-12">
-                <div className="card" style={{ border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px' }}>
-                  <div className="card-divider" style={{ 
-                    background: 'linear-gradient(135deg, #1779ba 0%, #14679e 100%)',
-                    color: '#fefefe',
-                    padding: '0.875rem 1.25rem',
-                    borderRadius: '12px 12px 0 0'
-                  }}>
-                    <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 700 }}>Description</h3>
-                  </div>
-                  <div className="card-section" style={{ padding: '1.25rem' }}>
-                    <div style={{
-                      whiteSpace: 'pre-line',
-                      fontSize: '0.9375rem',
-                      fontWeight: 400,
-                      color: '#4a4a4a',
-                      lineHeight: 1.7,
-                      letterSpacing: '0.01em'
-                    }}>
-                      {listing.description}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
         </div>
-      </FoundationWrapper>
+      </div>
 
-      {/* Delete Confirmation Dialog - PrimeReact */}
+      {/* Delete Confirmation Dialog */}
       <Dialog
         visible={showDeleteConfirm}
         onHide={cancelDelete}
-        header="Confirm Delete"
+        header="Wait! Are you sure?"
         modal
-        style={{ width: '450px' }}
+        className="glass-dialog"
+        style={{ width: '90%', maxWidth: '400px' }}
         footer={
-          <div>
-            <Button
-              label="Cancel"
-              icon="pi pi-times"
-              onClick={cancelDelete}
-              className="p-button-text"
-            />
-            <Button
-              label="Delete"
-              icon="pi pi-trash"
-              onClick={confirmDelete}
-              className="p-button-danger"
-              autoFocus
-            />
+          <div className="d-flex gap-2 justify-content-end p-3 pt-0">
+            <button className="btn btn-link text-white text-decoration-none px-4" onClick={cancelDelete}>Cancel</button>
+            <button className="btn btn-danger px-4 rounded-3 fw-bold" onClick={confirmDelete}>Yes, Delete</button>
           </div>
         }
       >
-        <div className="confirmation-content" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <i className="pi pi-exclamation-triangle" style={{ fontSize: '2rem', color: '#ef4444' }} />
-            <span style={{ fontSize: '1.1rem', fontWeight: 500 }}>Are you sure you want to delete this property?</span>
+        <div className="p-3 text-center">
+          <div className="display-4 text-danger mb-3">
+             <i className="bi bi-exclamation-octagon"></i>
           </div>
-          <p style={{ color: '#6c757d', margin: 0, paddingLeft: '3rem' }}>
-            This action will permanently delete the property and cannot be undone.
+          <p className="text-secondary" style={{ fontSize: '1.05rem' }}>
+            This action will permanently remove <strong>{listing?.title}</strong>. This cannot be undone.
           </p>
         </div>
       </Dialog>
