@@ -1,0 +1,115 @@
+/* src/components/CustomDropdown.css */
+
+.custom-dropdown-container {
+  position: relative;
+  width: 100%;
+}
+
+.custom-dropdown-trigger {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 200ms ease;
+  user-select: none;
+  font-size: 0.95rem;
+}
+
+.custom-dropdown-trigger:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.custom-dropdown-container.is-open .custom-dropdown-trigger,
+.custom-dropdown-trigger:focus {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: #6C7BFF;
+  box-shadow: 0 0 0 2px rgba(108, 123, 255, 0.15);
+  outline: none;
+}
+
+.custom-dropdown-arrow {
+  color: rgba(255, 255, 255, 0.5);
+  transition: transform 200ms ease;
+}
+
+.custom-dropdown-container.is-open .custom-dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.custom-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 100%;
+  background: #0F172A;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px) scale(0.98);
+  transition: all 150ms ease;
+}
+
+.custom-dropdown-container.is-open .custom-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.custom-dropdown-options-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+/* Custom Scrollbar for Dropdown Menu */
+.custom-dropdown-options-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-dropdown-options-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-dropdown-options-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.custom-dropdown-option {
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-size: 0.95rem;
+}
+
+.custom-dropdown-option:hover,
+.custom-dropdown-option.is-highlighted {
+  background: rgba(108, 123, 255, 0.12);
+  color: white;
+}
+
+.custom-dropdown-option.is-selected {
+  background: rgba(108, 123, 255, 0.2);
+  color: white;
+  font-weight: 500;
+}
+
+.custom-dropdown-trigger.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -3,8 +3,10 @@ import { FaBed, FaBath } from "react-icons/fa";
 import { supabase } from "../supabaseClient";
 import { useNavigate } from "react-router-dom";
 import { getOrCreateProfile } from '../utils/profileUtils';
+import CustomDropdown from "../components/CustomDropdown";
 
 function formatIDR(price) {
+  if (price === 0) return 'IDR 0';
   if (!price || isNaN(Number(price))) return '-';
   return 'IDR ' + Number(price).toLocaleString('id-ID');
 }
@@ -305,7 +307,7 @@ function Dashboard({ user }) {
                 <h1 className="display-4 fw-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.04em' }}>
                   {agentName ? `Welcome back, ${agentName}` : 'Welcome back'}
                 </h1>
-                <p className="text-secondary mb-0" style={{ fontSize: '1.1rem', opacity: 0.8 }}>
+                <p className="text-secondary mb-0" style={{ fontSize: '1.1rem' }}>
                   Discover premium internal listings with Protea Realty.
                 </p>
               </div>
@@ -320,43 +322,35 @@ function Dashboard({ user }) {
             </div>
             
             {filtersOpen && (
-            <div className="glass-card mb-5 animate-fade-in" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+            <div className="filter-card mb-5 animate-fade-in" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
               <div className="card-body p-4 p-md-5">
                 {/* Basic Filters */}
                 <div className="row g-3 mb-4">
                   <div className="col-md-2">
                     <label className="form-label fw-semibold">Tipe Properti</label>
-                    <select
-                      className="form-select"
+                    <CustomDropdown
                       value={selectedType}
-                      onChange={(e) => setSelectedType(e.target.value)}
-                    >
-                      <option value="All">Semua Tipe</option>
-                      {propertyTypes.map((type, idx) => (
-                        <option key={idx} value={type}>{type}</option>
-                      ))}
-                    </select>
+                      onChange={(val) => setSelectedType(val)}
+                      options={["All", ...propertyTypes]}
+                      placeholder="Semua Tipe"
+                    />
                   </div>
                   <div className="col-md-2">
                     <label className="form-label fw-semibold">Transaksi</label>
-                    <select
-                      className="form-select"
+                    <CustomDropdown
                       value={selectedTransactionType}
-                      onChange={(e) => setSelectedTransactionType(e.target.value)}
-                    >
-                      <option value="All">Semua</option>
-                      {transactionTypes.map((type, idx) => (
-                        <option key={idx} value={type}>{type}</option>
-                      ))}
-                    </select>
+                      onChange={(val) => setSelectedTransactionType(val)}
+                      options={["All", ...transactionTypes]}
+                      placeholder="Semua"
+                    />
                   </div>
                   <div className="col-md-8">
                     <label className="form-label fw-semibold">Rentang Harga</label>
-                    <div className="d-flex align-items-center">
+                    <div className="range-group-container">
                       <input
                         type="text"
-                        className="form-control me-2"
-                        placeholder="Harga Minimum"
+                        className="form-control form-control-sm-range"
+                        placeholder="Min Price"
                         value={priceInputs[0]}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^\d,]/g, '');
@@ -372,11 +366,11 @@ function Dashboard({ user }) {
                           setPriceRange([numValue, Math.max(numValue, priceRange[1])]);
                         }}
                       />
-                      <span className="mx-2">hingga</span>
+                      <span style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, flexShrink: 0 }}>—</span>
                       <input
                         type="text"
-                        className="form-control"
-                        placeholder="Harga Maksimum"
+                        className="form-control form-control-sm-range"
+                        placeholder="Max Price"
                         value={priceInputs[1]}
                         onChange={(e) => {
                           const value = e.target.value.replace(/[^\d,]/g, '');
@@ -393,8 +387,8 @@ function Dashboard({ user }) {
                         }}
                       />
                     </div>
-                      <small className="text-muted">
-                        {formatIDR(priceRange[0])} - {formatIDR(priceRange[1])}
+                      <small className="text-secondary">
+                        {formatIDR(priceRange[0])} — {formatIDR(priceRange[1])}
                       </small>
                     </div>
                   </div>
@@ -402,72 +396,52 @@ function Dashboard({ user }) {
                 {/* Location Filters */}
                 <div className="row g-3 mb-4">
                   <div className="col-12">
-                    <h6 className="text-muted mb-3">Filter Lokasi</h6>
+                    <h6 className="text-secondary mb-3">Filter Lokasi</h6>
                   </div>
                   <div className="col-md-3">
                     <label className="form-label fw-semibold">Provinsi</label>
-                    <select
-                      className="form-select"
+                    <CustomDropdown
                       value={selectedProvince}
-                      onChange={(e) => {
-                        setSelectedProvince(e.target.value);
+                      onChange={(val) => {
+                        setSelectedProvince(val);
                         // Reset dependent dropdowns when province changes
                         setSelectedLocation("All");
                         setSelectedDistrict("All");
                       }}
-                    >
-                      <option value="All">Semua Provinsi</option>
-                      {uniqueProvinces.map((province, index) => (
-                        <option key={index} value={province}>{province}</option>
-                      ))}
-                    </select>
+                      options={["All", ...uniqueProvinces]}
+                      placeholder="Semua Provinsi"
+                    />
                   </div>
                   <div className="col-md-3">
                     <label className="form-label fw-semibold">Kota</label>
-                    <select
-                      className="form-select"
+                    <CustomDropdown
                       value={selectedLocation}
-                      onChange={(e) => {
-                        setSelectedLocation(e.target.value);
+                      onChange={(val) => {
+                        setSelectedLocation(val);
                         // Reset district when city changes
                         setSelectedDistrict("All");
                       }}
                       disabled={selectedProvince === "All"}
-                      style={{
-                        opacity: selectedProvince === "All" ? 0.6 : 1,
-                        cursor: selectedProvince === "All" ? "not-allowed" : "pointer"
-                      }}
-                    >
-                      <option value="All">Semua Kota</option>
-                      {uniqueLocations.map((location, index) => (
-                        <option key={index} value={location}>{location}</option>
-                      ))}
-                    </select>
+                      options={["All", ...uniqueLocations]}
+                      placeholder="Semua Kota"
+                    />
                     {selectedProvince === "All" && (
-                      <small className="text-muted" style={{ fontSize: '0.75rem' }}>
+                      <small className="text-secondary" style={{ fontSize: '0.75rem' }}>
                         Pilih Provinsi terlebih dahulu
                       </small>
                     )}
                   </div>
                   <div className="col-md-3">
                     <label className="form-label fw-semibold">Kecamatan</label>
-                    <select
-                      className="form-select"
+                    <CustomDropdown
                       value={selectedDistrict}
-                      onChange={(e) => setSelectedDistrict(e.target.value)}
+                      onChange={(val) => setSelectedDistrict(val)}
                       disabled={selectedLocation === "All" || selectedProvince === "All"}
-                      style={{
-                        opacity: (selectedLocation === "All" || selectedProvince === "All") ? 0.6 : 1,
-                        cursor: (selectedLocation === "All" || selectedProvince === "All") ? "not-allowed" : "pointer"
-                      }}
-                    >
-                      <option value="All">Semua Kecamatan</option>
-                      {uniqueDistricts.map((district, index) => (
-                        <option key={index} value={district}>{district}</option>
-                      ))}
-                    </select>
+                      options={["All", ...uniqueDistricts]}
+                      placeholder="Semua Kecamatan"
+                    />
                     {(selectedLocation === "All" || selectedProvince === "All") && (
-                      <small className="text-muted" style={{ fontSize: '0.75rem' }}>
+                      <small className="text-secondary" style={{ fontSize: '0.75rem' }}>
                         Pilih Kota terlebih dahulu
                       </small>
                     )}
@@ -477,101 +451,89 @@ function Dashboard({ user }) {
                 {/* Owner Filter */}
                 <div className="row g-3 mb-4">
                   <div className="col-12">
-                    <h6 className="text-muted mb-3">Filter Owner</h6>
+                    <h6 className="text-secondary mb-3">Filter Owner</h6>
                   </div>
                   <div className="col-md-3">
                     <label className="form-label fw-semibold">Owner Listing</label>
-                    <select
-                      className="form-select"
+                    <CustomDropdown
                       value={selectedOwner}
-                      onChange={(e) => setSelectedOwner(e.target.value)}
-                    >
-                      <option value="All">Semua Owner</option>
-                      {uniqueOwners.map((owner, index) => (
-                        <option key={index} value={owner}>{owner}</option>
-                      ))}
-                    </select>
+                      onChange={(val) => setSelectedOwner(val)}
+                      options={["All", ...uniqueOwners]}
+                      placeholder="Semua Owner"
+                    />
                   </div>
                 </div>
 
                 {/* Property Details Filters */}
                 <div className="row g-3">
                   <div className="col-12">
-                    <h6 className="text-muted mb-3">Detail Properti</h6>
+                    <h6 className="text-secondary mb-3">Detail Properti</h6>
                   </div>
-                  <div className="col-md-2">
+                  <div className="col-md-3">
                     <label className="form-label fw-semibold">Luas Tanah (m²)</label>
-                    <div className="d-flex align-items-center">
+                    <div className="range-group-container">
                       <input
                         type="number"
                         min={0}
                         max={1000}
                         value={ltMin === null ? '' : ltMin}
                         onChange={e => setLtMin(e.target.value === '' ? null : Number(e.target.value))}
-                        className="form-control me-1"
-                        placeholder="Minimum"
+                        className="form-control form-control-sm-range"
+                        placeholder="Min"
                       />
-                      <span className="mx-1">-</span>
+                      <span style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, flexShrink: 0 }}>—</span>
                       <input
                         type="number"
                         min={0}
                         max={1000}
                         value={ltMax === null ? '' : ltMax}
                         onChange={e => setLtMax(e.target.value === '' ? null : Number(e.target.value))}
-                        className="form-control"
-                        placeholder="Maksimum"
+                        className="form-control form-control-sm-range"
+                        placeholder="Max"
                       />
                     </div>
                   </div>
-                  <div className="col-md-2">
+                  <div className="col-md-3">
                     <label className="form-label fw-semibold">Luas Bangunan (m²)</label>
-                    <div className="d-flex align-items-center">
+                    <div className="range-group-container">
                       <input
                         type="number"
                         min={0}
                         max={1000}
                         value={lbMin === null ? '' : lbMin}
                         onChange={e => setLbMin(e.target.value === '' ? null : Number(e.target.value))}
-                        className="form-control me-1"
-                        placeholder="Minimum"
+                        className="form-control form-control-sm-range"
+                        placeholder="Min"
                       />
-                      <span className="mx-1">-</span>
+                      <span style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 500, flexShrink: 0 }}>—</span>
                       <input
                         type="number"
                         min={0}
                         max={1000}
                         value={lbMax === null ? '' : lbMax}
                         onChange={e => setLbMax(e.target.value === '' ? null : Number(e.target.value))}
-                        className="form-control"
-                        placeholder="Maksimum"
+                        className="form-control form-control-sm-range"
+                        placeholder="Max"
                       />
                     </div>
                   </div>
-                  <div className="col-md-2">
+                  <div className="col-md-3">
                     <label className="form-label fw-semibold">Kamar Tidur</label>
-                    <select
-                      className="form-select"
+                    <CustomDropdown
                       value={selectedKT}
-                      onChange={e => setSelectedKT(e.target.value)}
-                    >
-                      <option value="All">Semua</option>
-                      {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                        <option key={n} value={n}>{n}</option>
-                      ))}
-                    </select>
+                      onChange={val => setSelectedKT(val)}
+                      options={["All", ...[1,2,3,4,5,6,7,8,9,10].map(n => String(n))]}
+                      placeholder="Semua"
+                    />
                   </div>
-                  <div className="col-md-2">
+                  <div className="col-md-3">
                     <label className="form-label fw-semibold">Kamar Mandi</label>
-                    <select
-                      className="form-select"
+                    <CustomDropdown
                       value={selectedKM}
-                      onChange={e => setSelectedKM(e.target.value)}
-                    >
-                      <option value="All">Semua</option>
-                      {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                        <option key={n} value={n}>{n}</option>
-                      ))}
-                    </select>
+                      onChange={val => setSelectedKM(val)}
+                      options={["All", ...[1,2,3,4,5,6,7,8,9,10].map(n => String(n))]}
+                      placeholder="Semua"
+                    />
                   </div>
                 </div>
                 
@@ -623,8 +585,6 @@ function Dashboard({ user }) {
                 style={{ 
                   paddingLeft: '3.5rem', 
                   fontSize: '1.1rem',
-                  background: 'var(--surface)',
-                  borderRadius: 'var(--radius-lg)'
                 }}
               />
             </div>
@@ -638,7 +598,7 @@ function Dashboard({ user }) {
               <span className="badge bg-primary rounded-pill py-2 px-3" style={{ fontSize: '0.9rem' }}>
                 {filteredListings.length} Results
               </span>
-              <span className="text-muted" style={{ fontSize: '0.95rem' }}>
+              <span className="text-secondary" style={{ fontSize: '0.95rem' }}>
                 Properties found in internal database
               </span>
             </div>
@@ -657,7 +617,7 @@ function Dashboard({ user }) {
           ) : filteredListings.length === 0 ? (
             <div className="col-12 text-center" style={{ padding: '5rem 2rem' }}>
               <div className="glass-card d-inline-block p-5" style={{ borderRadius: 'var(--radius-xl)' }}>
-                <i className="bi bi-search fs-1 mb-4 d-block text-muted"></i>
+                <i className="bi bi-search fs-1 mb-4 d-block text-secondary"></i>
                 <h3 className="text-primary mb-2">No Properties Found</h3>
                 <p className="text-secondary mb-0">Try adjusting your filters or search keywords.</p>
               </div>
@@ -699,7 +659,7 @@ function Dashboard({ user }) {
                   
                   <div className="text-primary fw-bold mb-3" style={{ fontSize: '1.4rem', fontFamily: 'Outfit', letterSpacing: '-0.01em' }}>
                     {formatIDR(listing.price)}
-                    {listing.property_type === 'Kavling' && <span className="text-muted small ms-1" style={{ fontSize: '0.8rem' }}>/m²</span>}
+                    {listing.property_type === 'Kavling' && <span className="text-secondary small ms-1" style={{ fontSize: '0.8rem' }}>/m²</span>}
                   </div>
 
                   <p className="text-secondary mb-4 small d-flex align-items-center gap-1">
@@ -711,7 +671,7 @@ function Dashboard({ user }) {
                     {listing.property_type === 'Kavling' ? (
                       <div className="d-flex align-items-center gap-2">
                         <span className="text-primary fw-bold">{listing.lt}</span>
-                        <span className="text-muted small">Total Area (m²)</span>
+                        <span className="text-secondary small">Total Area (m²)</span>
                       </div>
                     ) : (
                       <div className="d-flex gap-4">
@@ -732,7 +692,7 @@ function Dashboard({ user }) {
                   </div>
 
                   <div className="mt-4 d-flex justify-content-between align-items-center">
-                    <div className="small text-muted">
+                    <div className="small text-secondary">
                       Owner: <span className="text-secondary fw-semibold">{getOwnerName(listing.owner).split(' ')[0]}</span>
                     </div>
                     <button className="btn btn-primary py-2 px-3" style={{ fontSize: '0.85rem' }}>
@@ -757,7 +717,7 @@ function Dashboard({ user }) {
                 <i className="bi bi-chevron-left me-1"></i>
                 Prev
               </button>
-              <span className="text-muted" style={{ fontWeight: 500, padding: '0 1rem' }}>
+              <span className="text-secondary" style={{ fontWeight: 500, padding: '0 1rem' }}>
                 Page <strong style={{ color: 'var(--text-primary)' }}>{currentPage}</strong> of <strong style={{ color: 'var(--text-primary)' }}>{totalPages}</strong>
               </span>
               <button

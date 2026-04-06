@@ -112,8 +112,8 @@ function AdminPage({ user }) {
           <div style={{
             padding: '1.5rem',
             borderBottom: '1px solid var(--border)',
-            background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)',
-            color: '#fff'
+            background: 'rgba(255, 255, 255, 0.03)',
+            color: 'var(--text-primary)'
           }}>
             <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Admin Panel</h3>
           </div>
@@ -126,7 +126,7 @@ function AdminPage({ user }) {
                 style={{
                   width: '100%',
                   padding: '0.875rem 1rem',
-                  background: 'var(--primary-color)',
+                  background: 'var(--primary)',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '8px',
@@ -163,8 +163,8 @@ function AdminPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
+                  e.target.style.background = 'var(--surface-hover)';
+                  e.target.style.borderColor = 'var(--primary)';
                   e.target.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
@@ -196,8 +196,8 @@ function AdminPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
+                  e.target.style.background = 'var(--surface-hover)';
+                  e.target.style.borderColor = 'var(--primary)';
                   e.target.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
@@ -232,8 +232,8 @@ function AdminPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
+                  e.target.style.background = 'var(--surface-hover)';
+                  e.target.style.borderColor = 'var(--primary)';
                   e.target.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
@@ -350,8 +350,8 @@ function ConfirmListingsPage({ user }) {
           <div style={{
             padding: '1.5rem',
             borderBottom: '1px solid var(--border)',
-            background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)',
-            color: '#fff'
+            background: 'rgba(255, 255, 255, 0.03)',
+            color: 'var(--text-primary)'
           }}>
             <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Admin Panel</h3>
           </div>
@@ -378,8 +378,8 @@ function ConfirmListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
+                  e.target.style.background = 'var(--surface-hover)';
+                  e.target.style.borderColor = 'var(--primary)';
                   e.target.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
@@ -397,7 +397,7 @@ function ConfirmListingsPage({ user }) {
                 style={{
                   width: '100%',
                   padding: '0.875rem 1rem',
-                  background: 'var(--primary-color)',
+                  background: 'var(--primary)',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '8px',
@@ -434,8 +434,8 @@ function ConfirmListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
+                  e.target.style.background = 'var(--surface-hover)';
+                  e.target.style.borderColor = 'var(--primary)';
                   e.target.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
@@ -470,8 +470,8 @@ function ConfirmListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
+                  e.target.style.background = 'var(--surface-hover)';
+                  e.target.style.borderColor = 'var(--primary)';
                   e.target.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
@@ -545,8 +545,8 @@ function TotalListingsPage({ user }) {
           <div style={{
             padding: '1.5rem',
             borderBottom: '1px solid var(--border)',
-            background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)',
-            color: '#fff'
+            background: 'rgba(255, 255, 255, 0.03)',
+            color: 'var(--text-primary)'
           }}>
             <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Admin Panel</h3>
           </div>
@@ -573,8 +573,8 @@ function TotalListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
+                  e.target.style.background = 'var(--surface-hover)';
+                  e.target.style.borderColor = 'var(--primary)';
                   e.target.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
@@ -606,8 +606,8 @@ function TotalListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
+                  e.target.style.background = 'var(--surface-hover)';
+                  e.target.style.borderColor = 'var(--primary)';
                   e.target.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
@@ -625,7 +625,7 @@ function TotalListingsPage({ user }) {
                 style={{
                   width: '100%',
                   padding: '0.875rem 1rem',
-                  background: 'var(--primary-color)',
+                  background: 'var(--primary)',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '8px',
@@ -665,8 +665,8 @@ function TotalListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
+                  e.target.style.background = 'var(--surface-hover)';
+                  e.target.style.borderColor = 'var(--primary)';
                   e.target.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
@@ -740,8 +740,8 @@ function BackupListingsPage({ user }) {
           <div style={{
             padding: '1.5rem',
             borderBottom: '1px solid var(--border)',
-            background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)',
-            color: '#fff'
+            background: 'rgba(255, 255, 255, 0.03)',
+            color: 'var(--text-primary)'
           }}>
             <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Admin Panel</h3>
           </div>
@@ -768,8 +768,8 @@ function BackupListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
+                  e.target.style.background = 'var(--surface-hover)';
+                  e.target.style.borderColor = 'var(--primary)';
                   e.target.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
@@ -801,8 +801,8 @@ function BackupListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
+                  e.target.style.background = 'var(--surface-hover)';
+                  e.target.style.borderColor = 'var(--primary)';
                   e.target.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
@@ -834,8 +834,8 @@ function BackupListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
+                  e.target.style.background = 'var(--surface-hover)';
+                  e.target.style.borderColor = 'var(--primary)';
                   e.target.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
@@ -856,7 +856,7 @@ function BackupListingsPage({ user }) {
                 style={{
                   width: '100%',
                   padding: '0.875rem 1rem',
-                  background: 'var(--primary-color)',
+                  background: 'var(--primary)',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '8px',

@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient';
 import Alert from '@mui/material/Alert';
 import imageCompression from 'browser-image-compression';
 import { getOrCreateProfile } from '../utils/profileUtils';
+import CustomDropdown from './CustomDropdown';
 
 const PropertyForm = ({ user }) => {
   const [formData, setFormData] = useState({
@@ -621,22 +622,12 @@ Property data: ${aiPrompt}`
               <div 
                 className="p-4 rounded-4 position-relative overflow-hidden" 
                 style={{ 
-                  background: 'rgba(99, 102, 241, 0.05)',
-                  border: '1px solid rgba(99, 102, 241, 0.2)',
+                  background: 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(12px)',
                 }}
               >
-                {/* Subtle Glow Effect */}
-                <div style={{
-                  position: 'absolute',
-                  top: '-50px',
-                  right: '-50px',
-                  width: '150px',
-                  height: '150px',
-                  background: 'var(--primary)',
-                  filter: 'blur(80px)',
-                  opacity: 0.15,
-                  pointerEvents: 'none'
-                }}></div>
+
 
                 <div className="d-flex align-items-center gap-2 mb-3">
                   <div className="p-2 rounded-3 bg-primary bg-opacity-10 text-primary">
@@ -658,8 +649,8 @@ Property data: ${aiPrompt}`
                     rows="3"
                     style={{ 
                       resize: 'none', 
-                      background: 'rgba(15, 23, 42, 0.5)',
-                      borderColor: 'rgba(255, 255, 255, 0.05)'
+                      background: 'var(--input-bg)',
+                      borderColor: 'var(--input-border)'
                     }}
                   />
                 </div>
@@ -719,7 +710,7 @@ Property data: ${aiPrompt}`
               </div>
             </div>
 
-            <div className="row g-4 mb-4">
+            <div className="row gy-3 gx-4 mb-4">
               <div className="col-12">
                 <label className="form-label">Property Title</label>
                 <input 
@@ -735,12 +726,9 @@ Property data: ${aiPrompt}`
               <div className="col-md-6">
                 <label className="form-label">Property Owner</label>
                 {isAdmin ? (
-                  <select
-                    name="owner"
-                    className="form-select"
+                  <CustomDropdown
                     value={selectedOwnerId || ''}
-                    onChange={(e) => {
-                      const selectedId = e.target.value;
+                    onChange={(selectedId) => {
                       setSelectedOwnerId(selectedId);
                       if (!selectedId) {
                         setOwnerName('');
@@ -750,78 +738,66 @@ Property data: ${aiPrompt}`
                       setOwnerName(selectedUser?.name || 'Unknown User');
                     }}
                     disabled={usersLoading}
-                    required
-                  >
-                    {usersLoading ? (
-                      <option>Loading users...</option>
-                    ) : (
-                      <>
-                        <option value="">Select Owner</option>
-                        {allUsers.map((userOption) => (
-                          <option key={userOption.id} value={userOption.id}>
-                            {userOption.name}
-                          </option>
-                        ))}
-                      </>
-                    )}
-                  </select>
+                    options={[
+                      { value: '', label: 'Select Owner' },
+                      ...allUsers.map(u => ({ value: u.id, label: u.name }))
+                    ]}
+                    placeholder={usersLoading ? "Loading users..." : "Select Owner"}
+                  />
                 ) : (
                   <input 
                     className="form-control" 
                     value={ownerName} 
                     readOnly 
                     disabled
-                    style={{ background: 'rgba(255, 255, 255, 0.03)', opacity: 0.7 }}
                   />
                 )}
               </div>
 
               <div className="col-md-6">
                 <label className="form-label">Property Type</label>
-                <select
-                  name="property_type"
-                  className="form-select"
+                <CustomDropdown
                   value={formData.property_type}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Type</option>
-                  <option value="Rumah">Rumah</option>
-                  <option value="Kavling">Kavling</option>
-                  <option value="Apartemen">Apartemen</option>
-                </select>
+                  onChange={(val) => setFormData(prev => ({ ...prev, property_type: val }))}
+                  options={[
+                    { value: '', label: 'Select Type' },
+                    { value: 'Rumah', label: 'Rumah' },
+                    { value: 'Kavling', label: 'Kavling' },
+                    { value: 'Apartemen', label: 'Apartemen' }
+                  ]}
+                  placeholder="Select Type"
+                />
               </div>
 
               <div className="col-md-6">
                 <label className="form-label">Transaction Type</label>
-                <select
-                  name="transaction_type"
-                  className="form-select"
+                <CustomDropdown
                   value={formData.transaction_type}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Transaction</option>
-                  <option value="Jual">Jual</option>
-                  <option value="Sewa">Sewa</option>
-                </select>
+                  onChange={(val) => setFormData(prev => ({ ...prev, transaction_type: val }))}
+                  options={[
+                    { value: '', label: 'Select Transaction' },
+                    { value: 'Jual', label: 'Jual' },
+                    { value: 'Sewa', label: 'Sewa' }
+                  ]}
+                  placeholder="Select Transaction"
+                />
               </div>
 
               <div className="col-md-6">
                 <label className="form-label">Price (IDR)</label>
                 <div className="input-group">
-                  <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--border)' }}>Rp</span>
+                  <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--input-border)', color: 'var(--input-placeholder)' }}>Rp</span>
                   <input 
                     name="price" 
                     type="text" 
-                    className="form-control border-start-0 ps-0" 
+                    className="form-control border-start-0 ps-3" 
                     placeholder="0"
                     value={formatPriceWithCommas(formData.price)} 
                     onChange={handlePriceChange} 
                     required
                   />
                   {(formData.property_type === 'Kavling' || formData.transaction_type === 'Sewa') && (
-                    <span className="input-group-text bg-transparent text-muted small" style={{ borderColor: 'var(--border)' }}>
+                    <span className="input-group-text bg-transparent text-muted small" style={{ borderColor: 'var(--input-border)', color: 'var(--input-placeholder)' }}>
                       {formData.property_type === 'Kavling' ? '/m²' : '/Thn'}
                     </span>
                   )}
@@ -881,7 +857,7 @@ Property data: ${aiPrompt}`
                         <i className="bi bi-cloud-arrow-up fs-2"></i>
                       </div>
                       <h6 className="fw-bold" style={{ color: 'var(--text-primary)' }}>Click or drop image here</h6>
-                      <p className="text-muted small mb-0">Original high-res image will be automatically compressed for speed.</p>
+                      <p className="text-secondary small mb-0">Original high-res image will be automatically compressed for speed.</p>
                     </div>
                   )}
                 </div>
@@ -965,49 +941,58 @@ Property data: ${aiPrompt}`
 
               <div className="col-12">
                 <div className="p-4 rounded-4 mt-2" style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                  <h6 className="text-secondary mb-3 small fw-bold">ADDITIONAL FEATURES</h6>
-                  <div className="row g-3">
+                  <h6 className="mb-4 small fw-bold" style={{ color: 'var(--text-muted)', letterSpacing: '0.05em' }}>ADDITIONAL FEATURES</h6>
+                  <div className="row g-4">
                     <div className="col-md-4">
-                      <div className="form-check form-switch">
-                        <input
-                          className="form-check-input custom-switch"
-                          type="checkbox"
-                          id="interiorCheck"
-                          name="has_full_interior_photos"
-                          checked={formData.has_full_interior_photos}
-                          onChange={handleCheckboxChange}
-                        />
-                        <label className="form-check-label text-secondary small" htmlFor="interiorCheck">
+                      <div className="d-flex align-items-center gap-3">
+                        <div className="form-check form-switch mb-0 p-0">
+                          <input
+                            className="form-check-input custom-switch ms-0"
+                            type="checkbox"
+                            id="interiorCheck"
+                            name="has_full_interior_photos"
+                            checked={formData.has_full_interior_photos}
+                            onChange={handleCheckboxChange}
+                            style={{ margin: 0 }}
+                          />
+                        </div>
+                        <label className="form-check-label mb-0" htmlFor="interiorCheck" style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', cursor: 'pointer' }}>
                           Full Interior Photos
                         </label>
                       </div>
                     </div>
                     <div className="col-md-4">
-                      <div className="form-check form-switch">
-                        <input
-                          className="form-check-input custom-switch"
-                          type="checkbox"
-                          id="tiktokCheck"
-                          name="has_tiktok_video"
-                          checked={formData.has_tiktok_video}
-                          onChange={handleCheckboxChange}
-                        />
-                        <label className="form-check-label text-secondary small" htmlFor="tiktokCheck">
+                      <div className="d-flex align-items-center gap-3">
+                        <div className="form-check form-switch mb-0 p-0">
+                          <input
+                            className="form-check-input custom-switch ms-0"
+                            type="checkbox"
+                            id="tiktokCheck"
+                            name="has_tiktok_video"
+                            checked={formData.has_tiktok_video}
+                            onChange={handleCheckboxChange}
+                            style={{ margin: 0 }}
+                          />
+                        </div>
+                        <label className="form-check-label mb-0" htmlFor="tiktokCheck" style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', cursor: 'pointer' }}>
                           TikTok Video Ready
                         </label>
                       </div>
                     </div>
                     <div className="col-md-4">
-                      <div className="form-check form-switch">
-                        <input
-                          className="form-check-input custom-switch"
-                          type="checkbox"
-                          id="youtubeCheck"
-                          name="has_youtube_video"
-                          checked={formData.has_youtube_video}
-                          onChange={handleCheckboxChange}
-                        />
-                        <label className="form-check-label text-secondary small" htmlFor="youtubeCheck">
+                      <div className="d-flex align-items-center gap-3">
+                        <div className="form-check form-switch mb-0 p-0">
+                          <input
+                            className="form-check-input custom-switch ms-0"
+                            type="checkbox"
+                            id="youtubeCheck"
+                            name="has_youtube_video"
+                            checked={formData.has_youtube_video}
+                            onChange={handleCheckboxChange}
+                            style={{ margin: 0 }}
+                          />
+                        </div>
+                        <label className="form-check-label mb-0" htmlFor="youtubeCheck" style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem', cursor: 'pointer' }}>
                           YouTube Tour
                         </label>
                       </div>

@@ -256,7 +256,7 @@ export default function ListingDetails() {
                   </h1>
                   
                   {/* Location */}
-                  <p className="mb-5 d-flex align-items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.9rem', fontWeight: 400 }}>
+                  <p className="mb-5 d-flex align-items-center gap-2" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 400 }}>
                     <i className="bi bi-geo-alt-fill text-primary opacity-75"></i>
                     {listing?.location}
                   </p>
@@ -265,7 +265,7 @@ export default function ListingDetails() {
                   <div className="row g-4 mb-5">
                     <div className="col-6">
                       <div className="p-3 rounded-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div className="uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', fontWeight: 500 }}>Land Area</div>
+                        <div className="uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 500 }}>Land Area</div>
                         <div className="d-flex align-items-center gap-2" style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
                           {listing?.lt} m²
                         </div>
@@ -274,7 +274,7 @@ export default function ListingDetails() {
                     {listing?.property_type !== 'Kavling' && (
                        <div className="col-6">
                         <div className="p-3 rounded-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                          <div className="uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', fontWeight: 500 }}>Building</div>
+                          <div className="uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 500 }}>Building</div>
                           <div className="d-flex align-items-center gap-2" style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
                             {listing?.lb} m²
                           </div>
@@ -285,7 +285,7 @@ export default function ListingDetails() {
                       <>
                         <div className="col-6">
                           <div className="p-3 rounded-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div className="uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', fontWeight: 500 }}>Bedrooms</div>
+                            <div className="uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 500 }}>Bedrooms</div>
                             <div className="d-flex align-items-center gap-2" style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
                               {listing?.beds}
                             </div>
@@ -293,7 +293,7 @@ export default function ListingDetails() {
                         </div>
                         <div className="col-6">
                           <div className="p-3 rounded-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div className="uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', fontWeight: 500 }}>Bathrooms</div>
+                            <div className="uppercase tracking-widest mb-1.5" style={{ color: 'var(--text-muted)', fontSize: '0.65rem', fontWeight: 500 }}>Bathrooms</div>
                             <div className="d-flex align-items-center gap-2" style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
                               {listing?.baths}
                             </div>
@@ -305,8 +305,8 @@ export default function ListingDetails() {
 
                   {/* Price Card */}
                   <div className="p-4 rounded-4 mb-5 text-center glass-card" style={{ 
-                    border: '1px solid rgba(99, 102, 241, 0.15)',
-                    background: 'rgba(15, 23, 42, 0.4)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    background: 'rgba(15, 23, 42, 0.6)',
                     boxShadow: '0 10px 30px -10px rgba(0,0,0,0.3)'
                   }}>
                     <div className="uppercase mb-2" style={{ 
@@ -363,8 +363,8 @@ export default function ListingDetails() {
                     font-size: 1rem;
                   }
                   .btn-premium-primary:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 8px 20px -4px var(--primary-glow);
+                    transform: translateY(-1px);
+                    box-shadow: 0 8px 16px -4px var(--primary-glow);
                     filter: brightness(1.1);
                   }
                   .btn-premium-danger {
@@ -380,8 +380,8 @@ export default function ListingDetails() {
                     background: rgba(239, 68, 68, 0.15);
                     border-color: #ff4d4f;
                     color: #ff4d4f;
-                    transform: translateY(-2px);
-                    box-shadow: 0 8px 20px -4px rgba(239, 68, 68, 0.2);
+                    transform: translateY(-1px);
+                    box-shadow: 0 8px 16px -4px rgba(239, 68, 68, 0.2);
                   }
                 `}</style>
                 

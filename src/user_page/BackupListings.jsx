@@ -124,24 +124,24 @@ function BackupListings() {
   ]);
 
   return (
-    <FoundationWrapper style={{ paddingTop: '1.5rem', minHeight: '100vh', background: '#f8f9fa' }}>
+    <FoundationWrapper style={{ paddingBottom: '4rem', paddingTop: '7rem', minHeight: '100vh', background: 'var(--background)' }}>
       <div className="grid-container" style={{ maxWidth: '1400px' }}>
         {/* Header */}
         <div className="grid-x grid-margin-x" style={{ marginBottom: '2rem' }}>
           <div className="cell">
-            <div className="card" style={{ border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: '10px' }}>
+            <div className="glass-card mb-4" style={{ borderRadius: 'var(--radius-lg)' }}>
               <div className="card-section" style={{ padding: '1.5rem' }}>
-                <h1 style={{ 
-                  fontSize: '2rem', 
-                  fontWeight: 700, 
-                  color: '#0a0a0a',
-                  margin: 0,
-                  marginBottom: '0.5rem'
-                }}>
-                  Backup Listingan
-                </h1>
+                  <h1 style={{ 
+                    fontSize: '2rem', 
+                    fontWeight: 700, 
+                    color: 'var(--text-primary)',
+                    margin: 0,
+                    marginBottom: '0.5rem'
+                  }}>
+                    Backup Listingan
+                  </h1>
                 <p style={{ 
-                  color: '#767676', 
+                  color: 'var(--text-secondary)', 
                   fontSize: '1rem',
                   margin: 0
                 }}>
@@ -155,7 +155,7 @@ function BackupListings() {
         {/* Listings Table */}
         <div className="grid-x grid-margin-x">
           <div className="cell">
-            <div className="card" style={{ border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px', overflow: 'hidden' }}>
+            <div className="glass-card" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
               <div className="card-divider" style={{ 
                 background: 'linear-gradient(135deg, #1779ba 0%, #14679e 100%)',
                 color: '#fefefe',
@@ -175,8 +175,8 @@ function BackupListings() {
                   }}>
                     <thead>
                       <tr style={{ 
-                        background: '#f8f9fa', 
-                        borderBottom: '2px solid #e6e6e6' 
+                        background: 'rgba(255, 255, 255, 0.03)', 
+                        borderBottom: '2px solid var(--border)' 
                       }}>
                         <th style={{ 
                           padding: '1rem 1.5rem', 
@@ -185,7 +185,7 @@ function BackupListings() {
                           fontSize: '0.875rem',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
-                          color: '#767676'
+                          color: 'var(--text-muted)'
                         }}>
                           ID
                         </th>
@@ -196,7 +196,7 @@ function BackupListings() {
                           fontSize: '0.875rem',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
-                          color: '#767676'
+                          color: 'var(--text-muted)'
                         }}>
                           Judul
                         </th>
@@ -207,7 +207,7 @@ function BackupListings() {
                           fontSize: '0.875rem',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
-                          color: '#767676'
+                          color: 'var(--text-muted)'
                         }}>
                           Tipe
                         </th>
@@ -218,7 +218,7 @@ function BackupListings() {
                           fontSize: '0.875rem',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
-                          color: '#767676'
+                          color: 'var(--text-muted)'
                         }}>
                           Transaksi
                         </th>
@@ -229,7 +229,7 @@ function BackupListings() {
                           fontSize: '0.875rem',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
-                          color: '#767676'
+                          color: 'var(--text-muted)'
                         }}>
                           Lokasi
                         </th>
@@ -240,7 +240,7 @@ function BackupListings() {
                           fontSize: '0.875rem',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
-                          color: '#767676'
+                          color: 'var(--text-muted)'
                         }}>
                           Harga
                         </th>
@@ -251,7 +251,7 @@ function BackupListings() {
                           fontSize: '0.875rem',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
-                          color: '#767676'
+                          color: 'var(--text-muted)'
                         }}>
                           Spesifikasi
                         </th>
@@ -262,7 +262,7 @@ function BackupListings() {
                           fontSize: '0.875rem',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
-                          color: '#767676'
+                          color: 'var(--text-muted)'
                         }}>
                           Status
                         </th>
@@ -273,17 +273,17 @@ function BackupListings() {
                         <tr 
                           key={listing.id} 
                           style={{ 
-                            borderBottom: '1px solid #e6e6e6',
+                            borderBottom: '1px solid var(--border)',
                             transition: 'background 0.2s ease'
                           }}
-                          onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'}
                           onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                         >
-                          <td style={{ padding: '1rem 1.5rem', color: '#767676', fontSize: '0.875rem' }}>
+                          <td style={{ padding: '1rem 1.5rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
                             #{listing.id}
                           </td>
                           <td style={{ padding: '1rem 1.5rem' }}>
-                            <div style={{ fontWeight: 600, color: '#0a0a0a' }}>
+                            <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                               {listing.title}
                             </div>
                           </td>
@@ -291,19 +291,19 @@ function BackupListings() {
                             <span style={{ 
                               display: 'inline-block',
                               padding: '0.375rem 0.75rem',
-                              background: '#e6e6e6',
+                              background: 'var(--surface-hover)',
                               borderRadius: '6px',
                               fontSize: '0.875rem',
                               fontWeight: 600,
-                              color: '#0a0a0a'
+                              color: 'var(--text-primary)'
                             }}>
                               {listing.property_type}
                             </span>
                           </td>
-                          <td style={{ padding: '1rem 1.5rem', color: '#767676' }}>
+                          <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>
                             {listing.transaction_type}
                           </td>
-                          <td style={{ padding: '1rem 1.5rem', color: '#767676' }}>
+                          <td style={{ padding: '1rem 1.5rem', color: 'var(--text-secondary)' }}>
                             <div>{listing.city}</div>
                             <div style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>
                               {listing.province}
@@ -318,7 +318,7 @@ function BackupListings() {
                             {formatIDR(listing.price)}
                           </td>
                           <td style={{ padding: '1rem 1.5rem', textAlign: 'center' }}>
-                            <div style={{ fontSize: '0.875rem', color: '#767676', lineHeight: '1.6' }}>
+                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
                               {listing.lt && <div>LT: {listing.lt} m²</div>}
                               {listing.lb && <div>LB: {listing.lb} m²</div>}
                               {listing.kt && <div>KT: {listing.kt}</div>}
