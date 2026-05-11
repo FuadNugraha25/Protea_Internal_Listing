@@ -26,6 +26,10 @@ export default function ListingDetails() {
   const toast = useRef(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
   }, []);
 
@@ -147,28 +151,44 @@ export default function ListingDetails() {
     setShowDeleteConfirm(false);
   };
 
+  const SkeletonBlock = ({ width = '100%', height = '1rem', radius = '8px', className = '' }) => (
+    <div className={className} style={{
+      width, height,
+      borderRadius: radius,
+      background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%)',
+      backgroundSize: '200% 100%',
+      animation: 'skeletonShimmer 2.5s infinite'
+    }} />
+  );
+
   return (
     <>
+      <style>{`
+        @keyframes skeletonShimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}</style>
       <Toast ref={toast} />
-      <Navbar 
-        title="Listing Details" 
+      <Navbar
+        title="Listing Details"
         showDashboardButton={true}
         showAdminButton={user && allowedUserId.includes(user.id)}
         showTambahListingButton={true}
         showListingPribadiButton={true}
         user={user}
       />
-      
-      <div className="animate-fade-in" style={{ 
-        minHeight: '100vh', 
+
+      <div className="animate-fade-in" style={{
+        minHeight: '100vh',
         background: 'var(--background)',
         paddingTop: '5rem',
         paddingBottom: '5rem'
       }}>
         {/* Navigation / Back Button */}
         <div className="container mt-4 mb-4" style={{ maxWidth: '1200px' }}>
-          <button 
-            className="btn btn-link text-decoration-none d-inline-flex align-items-center" 
+          <button
+            className="btn btn-link text-decoration-none d-inline-flex align-items-center"
             onClick={() => navigate('/dashboard')}
             style={{ color: 'var(--text-secondary)', padding: 0, fontWeight: 500 }}
           >
@@ -177,11 +197,53 @@ export default function ListingDetails() {
         </div>
 
         <div className="container" style={{ maxWidth: '1200px' }}>
+          {!listing && (
+            <div className="row g-4">
+              {/* Skeleton: Right column (image + description) */}
+              <div className="col-12 col-lg-8 order-2 order-lg-2">
+                <div className="glass-card p-2" style={{ borderRadius: '24px', overflow: 'hidden' }}>
+                  <SkeletonBlock height="420px" radius="18px" />
+                </div>
+                <div className="mt-4 glass-card p-4 p-md-5" style={{ borderRadius: '24px' }}>
+                  <SkeletonBlock width="40%" height="1.4rem" className="mb-4" />
+                  <SkeletonBlock height="1rem" className="mb-2" />
+                  <SkeletonBlock height="1rem" className="mb-2" />
+                  <SkeletonBlock width="75%" height="1rem" className="mb-2" />
+                  <SkeletonBlock width="60%" height="1rem" />
+                </div>
+              </div>
+              {/* Skeleton: Left column (info panel) */}
+              <div className="col-12 col-lg-4 order-1 order-lg-1">
+                <div className="glass-card p-4 p-md-5 mb-4" style={{ borderRadius: '24px' }}>
+                  <div className="d-flex gap-2 mb-4">
+                    <SkeletonBlock width="80px" height="1.6rem" radius="999px" />
+                    <SkeletonBlock width="80px" height="1.6rem" radius="999px" />
+                  </div>
+                  <SkeletonBlock width="90%" height="2rem" radius="8px" className="mb-2" />
+                  <SkeletonBlock width="60%" height="1rem" radius="8px" className="mb-5" />
+                  <div className="row g-3 mb-5">
+                    {[1,2,3,4].map(i => (
+                      <div className="col-6" key={i}>
+                        <SkeletonBlock height="72px" radius="12px" />
+                      </div>
+                    ))}
+                  </div>
+                  <SkeletonBlock height="90px" radius="16px" className="mb-4" />
+                  <SkeletonBlock height="52px" radius="12px" className="mb-3" />
+                  <SkeletonBlock height="52px" radius="12px" />
+                </div>
+                <SkeletonBlock height="80px" radius="24px" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="container" style={{ maxWidth: '1200px' }}>
           {/* Main Layout Grid */}
-          <div className="row g-4 lg-row-reverse">
-            
-            {/* Left/Top Column: Image Gallery/Hero */}
-            <div className="col-12 col-lg-8">
+          {listing && <div className="row g-4">
+
+            {/* Right Column: Image + Description */}
+            <div className="col-12 col-lg-8 order-2 order-lg-2">
               <div className="glass-card p-2" style={{ borderRadius: '24px', overflow: 'hidden' }}>
                 <div style={{ 
                   position: 'relative', 
@@ -236,22 +298,22 @@ export default function ListingDetails() {
               </div>
             </div>
 
-            {/* Right/Sidebar Column: Info & Actions */}
-            <div className="col-12 col-lg-4">
-              <div className="sticky-top" style={{ top: '6.5rem' }}>
+            {/* Left Column: Info & Actions */}
+            <div className="col-12 col-lg-4 order-1 order-lg-1">
+              <div>
                 <div className="glass-card p-4 p-md-5 mb-4" style={{ borderRadius: '24px' }}>
                   {/* Status & Type Badges */}
                   <div className="d-flex gap-2 mb-4">
-                    <span className="badge px-3 py-1.5 rounded-pill" style={{ background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', fontWeight: 500, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <span className="badge px-3 rounded-pill" style={{ background: 'rgba(99, 102, 241, 0.15)', color: '#818cf8', fontWeight: 500, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0.4rem 0.75rem' }}>
                       {listing?.transaction_type || 'For Sale'}
                     </span>
-                    <span className="badge px-3 py-1.5 rounded-pill" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', fontWeight: 500, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <span className="badge px-3 rounded-pill" style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--text-secondary)', fontWeight: 500, fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '0.4rem 0.75rem' }}>
                       {listing?.property_type || 'Property'}
                     </span>
                   </div>
 
                   {/* Title */}
-                  <h1 className="h2 mb-2" style={{ color: 'var(--text-primary)', fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1.25 }}>
+                  <h1 className="mb-2" style={{ color: 'var(--text-primary)', fontWeight: 700, fontSize: '1.75rem', letterSpacing: '-0.02em', lineHeight: 1.25 }}>
                     {isDeleted ? "DELETED" : listing?.title}
                   </h1>
                   
@@ -265,7 +327,7 @@ export default function ListingDetails() {
                   <div className="row g-4 mb-5">
                     <div className="col-6">
                       <div className="p-3 rounded-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div className="uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', fontWeight: 500 }}>Land Area</div>
+                        <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.7rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.375rem' }}>Land Area</div>
                         <div className="d-flex align-items-center gap-2" style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
                           {listing?.lt} m²
                         </div>
@@ -274,7 +336,7 @@ export default function ListingDetails() {
                     {listing?.property_type !== 'Kavling' && (
                        <div className="col-6">
                         <div className="p-3 rounded-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                          <div className="uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', fontWeight: 500 }}>Building</div>
+                          <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.7rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.375rem' }}>Building</div>
                           <div className="d-flex align-items-center gap-2" style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
                             {listing?.lb} m²
                           </div>
@@ -285,7 +347,7 @@ export default function ListingDetails() {
                       <>
                         <div className="col-6">
                           <div className="p-3 rounded-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div className="uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', fontWeight: 500 }}>Bedrooms</div>
+                            <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.7rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.375rem' }}>Bedrooms</div>
                             <div className="d-flex align-items-center gap-2" style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
                               {listing?.beds}
                             </div>
@@ -293,7 +355,7 @@ export default function ListingDetails() {
                         </div>
                         <div className="col-6">
                           <div className="p-3 rounded-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div className="uppercase tracking-widest mb-1.5" style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.65rem', fontWeight: 500 }}>Bathrooms</div>
+                            <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.7rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.375rem' }}>Bathrooms</div>
                             <div className="d-flex align-items-center gap-2" style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 600 }}>
                               {listing?.baths}
                             </div>
@@ -309,26 +371,34 @@ export default function ListingDetails() {
                     background: 'rgba(15, 23, 42, 0.4)',
                     boxShadow: '0 10px 30px -10px rgba(0,0,0,0.3)'
                   }}>
-                    <div className="uppercase mb-2" style={{ 
-                      color: 'rgba(255,255,255,0.4)', 
-                      fontSize: '0.65rem', 
+                    <div className="mb-2" style={{
+                      color: 'rgba(255,255,255,0.4)',
+                      fontSize: '0.65rem',
                       fontWeight: 500,
-                      letterSpacing: '0.12em' 
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase'
                     }}>
                       OFFERING PRICE
                     </div>
-                    <div className="fw-bold mb-0" style={{ 
-                      fontSize: '1.65rem', 
-                      fontWeight: 600,
-                      background: 'linear-gradient(90deg, #6C7BFF, #8B5CF6)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      letterSpacing: '-0.01em',
-                      fontVariantNumeric: 'tabular-nums',
-                      textShadow: '0 0 12px rgba(108, 123, 255, 0.1)',
-                      lineHeight: 1.2
-                    }}>
-                      {formatIDR(listing?.price)}
+                    <div className="d-flex align-items-baseline justify-content-center gap-2">
+                      <span style={{
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        color: 'rgba(108, 123, 255, 0.7)',
+                        letterSpacing: '0.08em'
+                      }}>IDR</span>
+                      <span style={{
+                        fontSize: '2rem',
+                        fontWeight: 700,
+                        background: 'linear-gradient(90deg, #6C7BFF, #8B5CF6)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        letterSpacing: '-0.02em',
+                        fontVariantNumeric: 'tabular-nums',
+                        lineHeight: 1.2
+                      }}>
+                        {listing?.price ? Number(listing.price).toLocaleString('id-ID') : '-'}
+                      </span>
                     </div>
                   </div>
 
@@ -392,13 +462,13 @@ export default function ListingDetails() {
                    </div>
                    <div>
                       <div className="small text-muted">Owned by</div>
-                      <div className="fw-bold text-primary">{listing?.owner || 'Protea Admin'}</div>
+                      <div className="fw-bold" style={{ color: 'var(--primary)' }}>{listing?.owner || 'Protea Admin'}</div>
                    </div>
                 </div>
               </div>
             </div>
 
-          </div>
+          </div>}
         </div>
       </div>
 

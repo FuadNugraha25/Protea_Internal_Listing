@@ -6,6 +6,8 @@
   --surface: #0f172a;
   --surface-hover: #1e293b;
   --primary: #6366f1;
+  --primary-color: #6366f1;
+  --primary-dark: #4f46e5;
   --primary-glow: rgba(99, 102, 241, 0.4);
   --accent: #0ea5e9;
   --success: #10b981;
@@ -14,6 +16,7 @@
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --border: rgba(255, 255, 255, 0.1);
+  --border-color: rgba(255, 255, 255, 0.1);
   --border-focus: rgba(99, 102, 241, 0.5);
   
   /* Shadows & Depth */
@@ -33,6 +36,22 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* Override Bootstrap's text-muted to be readable on the dark theme */
+.text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* Make placeholder text visible on dark backgrounds */
+::placeholder {
+  color: var(--text-secondary) !important;
+  opacity: 1 !important;
+}
+
+/* Ensure input text itself is also visible */
+.form-control {
+  color: var(--text-primary) !important;
 }
 
 body {
@@ -76,8 +95,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Inputs & Forms */
 .form-control, .form-select {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--surface-hover);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: var(--text-primary);
   border-radius: var(--radius-md);
   padding: 0.75rem 1rem;
@@ -86,11 +105,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .form-control:focus, .form-select:focus {
-  background: var(--surface-hover);
+  background: #263348;
   border-color: var(--primary);
   box-shadow: 0 0 0 4px var(--primary-glow);
   outline: none;
   color: var(--text-primary);
+}
+
+.form-control:disabled, .form-select:disabled,
+.form-control[readonly], .form-select[disabled] {
+  background: var(--surface-hover) !important;
+  color: var(--text-muted) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  opacity: 0.7;
 }
 
 .form-label {

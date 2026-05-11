@@ -9,7 +9,9 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTamb
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef(null);
-  
+  const mobileToggleRef = useRef(null);
+  const mobileDrawerRef = useRef(null);
+
   // Default profile picture (light silhouette for dark theme)
   const defaultProfilePicture = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='35' r='20' fill='%2394a3b8'/%3E%3Cpath d='M 20 70 Q 20 55 50 55 Q 80 55 80 70 L 80 100 L 20 100 Z' fill='%2394a3b8'/%3E%3C/svg%3E";
   
@@ -35,6 +37,10 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTamb
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowProfileDropdown(false);
+      }
+      const outsideToggle = !mobileToggleRef.current || !mobileToggleRef.current.contains(event.target);
+      const outsideDrawer = !mobileDrawerRef.current || !mobileDrawerRef.current.contains(event.target);
+      if (outsideToggle && outsideDrawer) {
         setShowMobileMenu(false);
       }
     };
@@ -134,10 +140,13 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTamb
               </button>
               
               {showProfileDropdown && (
-                <div className="glass-card position-absolute end-0 mt-2 p-2 animate-fade-in" style={{ 
-                  minWidth: '200px', 
+                <div className="position-absolute end-0 mt-2 p-2 animate-fade-in" style={{
+                  minWidth: '200px',
                   borderRadius: 'var(--radius-lg)',
-                  boxShadow: 'var(--shadow-xl)'
+                  boxShadow: 'var(--shadow-xl)',
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  zIndex: 1200
                 }}>
                   <button
                     onClick={() => { setShowProfileDropdown(false); navigate('/profile'); }}
@@ -167,7 +176,7 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTamb
         </div>
 
         {/* Mobile Menu Toggle */}
-        <div className="d-md-none d-flex align-items-center gap-3">
+        <div ref={mobileToggleRef} className="d-md-none d-flex align-items-center gap-3">
           <button 
             onClick={() => setShowMobileMenu(!showMobileMenu)}
             className="btn btn-sm btn-outline-secondary p-2"
@@ -179,7 +188,7 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTamb
 
       {/* Mobile Menu Drawer */}
       {showMobileMenu && (
-        <div className="glass animate-fade-in position-fixed w-100 shadow-xl" style={{ 
+        <div ref={mobileDrawerRef} className="glass animate-fade-in position-fixed w-100 shadow-xl" style={{
           top: '75px', 
           zIndex: 1050,
           borderBottom: '1px solid var(--border)',

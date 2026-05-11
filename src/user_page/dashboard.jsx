@@ -64,6 +64,16 @@ function Dashboard({ user }) {
     setCurrentPage(1);
   }, [appliedFilters]);
 
+  // Sync search term to applied filters in real-time
+  useEffect(() => {
+    setAppliedFilters(prev => ({ ...prev, searchTerm }));
+  }, [searchTerm]);
+
+  // Sync location filters to applied filters in real-time
+  useEffect(() => {
+    setAppliedFilters(prev => ({ ...prev, selectedProvince, selectedLocation, selectedDistrict }));
+  }, [selectedProvince, selectedLocation, selectedDistrict]);
+
   const applyFilters = () => {
     setAppliedFilters({
       searchTerm,
@@ -429,13 +439,7 @@ function Dashboard({ user }) {
                       value={selectedLocation}
                       onChange={(e) => {
                         setSelectedLocation(e.target.value);
-                        // Reset district when city changes
                         setSelectedDistrict("All");
-                      }}
-                      disabled={selectedProvince === "All"}
-                      style={{
-                        opacity: selectedProvince === "All" ? 0.6 : 1,
-                        cursor: selectedProvince === "All" ? "not-allowed" : "pointer"
                       }}
                     >
                       <option value="All">Semua Kota</option>
@@ -443,11 +447,6 @@ function Dashboard({ user }) {
                         <option key={index} value={location}>{location}</option>
                       ))}
                     </select>
-                    {selectedProvince === "All" && (
-                      <small className="text-muted" style={{ fontSize: '0.75rem' }}>
-                        Pilih Provinsi terlebih dahulu
-                      </small>
-                    )}
                   </div>
                   <div className="col-md-3">
                     <label className="form-label fw-semibold">Kecamatan</label>
@@ -455,22 +454,12 @@ function Dashboard({ user }) {
                       className="form-select"
                       value={selectedDistrict}
                       onChange={(e) => setSelectedDistrict(e.target.value)}
-                      disabled={selectedLocation === "All" || selectedProvince === "All"}
-                      style={{
-                        opacity: (selectedLocation === "All" || selectedProvince === "All") ? 0.6 : 1,
-                        cursor: (selectedLocation === "All" || selectedProvince === "All") ? "not-allowed" : "pointer"
-                      }}
                     >
                       <option value="All">Semua Kecamatan</option>
                       {uniqueDistricts.map((district, index) => (
                         <option key={index} value={district}>{district}</option>
                       ))}
                     </select>
-                    {(selectedLocation === "All" || selectedProvince === "All") && (
-                      <small className="text-muted" style={{ fontSize: '0.75rem' }}>
-                        Pilih Kota terlebih dahulu
-                      </small>
-                    )}
                   </div>
                 </div>
 
@@ -693,40 +682,39 @@ function Dashboard({ user }) {
                 </div>
                 
                 <div className="card-body p-4 d-flex flex-column">
-                  <h5 className="h5 fw-bold mb-2" style={{ color: 'var(--text-primary)', lineHeight: '1.4' }}>
+                  <h5 className="fw-bold mb-2" style={{ color: 'var(--text-primary)', lineHeight: '1.4', fontSize: '1.05rem' }}>
                     {listing.title}
                   </h5>
-                  
-                  <div className="text-primary fw-bold mb-3" style={{ fontSize: '1.4rem', fontFamily: 'Outfit', letterSpacing: '-0.01em' }}>
+
+                  <div className="fw-semibold mb-3" style={{ fontSize: '1.1rem', fontFamily: 'Outfit', letterSpacing: '-0.01em', color: 'var(--accent)' }}>
                     {formatIDR(listing.price)}
-                    {listing.property_type === 'Kavling' && <span className="text-muted small ms-1" style={{ fontSize: '0.8rem' }}>/m²</span>}
+                    {listing.property_type === 'Kavling' && <span className="ms-1" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 400 }}>/m²</span>}
                   </div>
 
-                  <p className="text-secondary mb-4 small d-flex align-items-center gap-1">
-                    <i className="bi bi-geo-alt text-accent"></i>
+                  <p className="mb-4 d-flex align-items-center gap-1" style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+                    <i className="bi bi-geo-alt" style={{ color: 'var(--accent)', fontSize: '0.75rem' }}></i>
                     {listing.location}, {listing.district}
                   </p>
 
                   <div className="d-flex align-items-center justify-content-between py-3 border-top border-bottom" style={{ borderColor: 'var(--border) !important' }}>
                     {listing.property_type === 'Kavling' ? (
                       <div className="d-flex align-items-center gap-2">
-                        <span className="text-primary fw-bold">{listing.lt}</span>
-                        <span className="text-muted small">Total Area (m²)</span>
+                        <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{listing.lt}</span>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>Total Area (m²)</span>
                       </div>
                     ) : (
-                      <div className="d-flex gap-4">
-                        <div className="d-flex align-items-center gap-1 text-secondary small">
-                          <FaBed className="text-primary" /> <strong>{listing.beds}</strong>
-                        </div>
-                        <div className="d-flex align-items-center gap-1 text-secondary small">
-                          <FaBath className="text-primary" /> <strong>{listing.baths}</strong>
-                        </div>
-                        <div className="d-flex align-items-center gap-1 text-secondary small">
-                           <span className="text-primary fw-bold">LT</span> {listing.lt}
-                        </div>
-                        <div className="d-flex align-items-center gap-1 text-secondary small">
-                           <span className="text-primary fw-bold">LB</span> {listing.lb}
-                        </div>
+                      <div className="d-flex align-items-center" style={{ gap: '0.6rem', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
+                        <span className="d-flex align-items-center gap-1">
+                          <FaBed style={{ color: 'var(--text-secondary)' }} /> <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{listing.beds}</span>
+                        </span>
+                        <span style={{ color: 'var(--border)', margin: '0 2px' }}>·</span>
+                        <span className="d-flex align-items-center gap-1">
+                          <FaBath style={{ color: 'var(--text-secondary)' }} /> <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{listing.baths}</span>
+                        </span>
+                        <span style={{ color: 'var(--border)', margin: '0 2px' }}>·</span>
+                        <span>LT <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{listing.lt}</span></span>
+                        <span style={{ color: 'var(--border)', margin: '0 2px' }}>·</span>
+                        <span>LB <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{listing.lb}</span></span>
                       </div>
                     )}
                   </div>

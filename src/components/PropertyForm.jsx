@@ -88,7 +88,7 @@ const PropertyForm = ({ user }) => {
         } else {
           console.log('Fetched users from database:', data);
           console.log('Number of users fetched:', data?.length || 0);
-          
+
           // Map profiles to a format suitable for dropdown
           const usersList = (data || []).map(profile => {
             const name = profile.name || profile.full_name || profile.email || 'Unknown User';
@@ -98,7 +98,7 @@ const PropertyForm = ({ user }) => {
               email: profile.email || ''
             };
           });
-          
+
           // Sort by name alphabetically
           usersList.sort((a, b) => {
             const nameA = a.name.toLowerCase();
@@ -107,7 +107,7 @@ const PropertyForm = ({ user }) => {
             if (nameA > nameB) return 1;
             return 0;
           });
-          
+
           console.log('Mapped and sorted users list:', usersList);
           setAllUsers(usersList);
         }
@@ -136,7 +136,7 @@ const PropertyForm = ({ user }) => {
         setSelectedOwnerId('');
         return;
       }
-      
+
       try {
         const profile = await getOrCreateProfile(user);
         if (profile) {
@@ -152,7 +152,7 @@ const PropertyForm = ({ user }) => {
         setSelectedOwnerId(user.id);
       }
     }
-    
+
     fetchOwnerName();
   }, [user, isAdmin]);
 
@@ -225,10 +225,10 @@ const PropertyForm = ({ user }) => {
     try {
       // Only take the first file
       const file = files[0];
-      
+
       // Store original file size
       setOriginalFileSize(file.size);
-      
+
       // Compress image options
       const options = {
         maxSizeMB: 1, // Maximum size in MB (1MB)
@@ -236,13 +236,13 @@ const PropertyForm = ({ user }) => {
         useWebWorker: true, // Use web worker for better performance
         fileType: file.type, // Keep original file type
       };
-      
+
       // Compress the image
       const compressedFile = await imageCompression(file, options);
-      
+
       // Store compressed file size
       setImageFileSize(compressedFile.size);
-      
+
       // Upload compressed image
       const publicUrl = await uploadImageToSupabase(compressedFile);
       setUploadedImage(publicUrl);
@@ -366,7 +366,7 @@ Property data: ${aiPrompt}`
 
       const data = await response.json();
       console.log('AI Response:', data); // Debug log
-      
+
       if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
         const aiText = data.candidates[0].content.parts[0].text;
         setAiResponse(aiText);
@@ -394,7 +394,7 @@ Property data: ${aiPrompt}`
       // Parse AI response to extract form data
       const lines = aiResponse.split('\n');
       const extractedData = {};
-      
+
       lines.forEach(line => {
         const [key, value] = line.split(':').map(s => s.trim());
         if (key && value && value !== 'Not specified') {
@@ -435,21 +435,21 @@ Property data: ${aiPrompt}`
           }
         }
       });
-      
+
       // Update form data with extracted values
       setFormData(prev => ({
         ...prev,
         ...extractedData,
         description: aiPrompt
       }));
-      
+
       setAlert({ message: '✅ AI extracted data applied to form fields!', severity: 'success' });
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-  
+
     // Ensure user profile exists before creating listing
     if (user) {
       try {
@@ -459,10 +459,10 @@ Property data: ${aiPrompt}`
         // Continue anyway, profile creation is not critical for listing creation
       }
     }
-  
+
     // Generate a random UUID for the listing ID (primary key)
     const listingId = crypto.randomUUID();
-    
+
     // Helper function to convert string to number or null
     const convertToNumberOrNull = (value) => {
       if (!value || value === '' || value === 'Not specified') return null;
@@ -516,16 +516,16 @@ Property data: ${aiPrompt}`
       has_tiktok_video: formData.has_tiktok_video,
       has_youtube_video: formData.has_youtube_video,
     }
-  
+
     console.log('Submitting data:', submission);
     console.log('Original formData:', formData);
     console.log('Price conversion:', {
       original: formData.price,
       converted: convertPriceToNumberOrNull(formData.price)
     });
-  
+
     const { data, error } = await supabase.from('listings').insert(submission).select()
-  
+
     if (error) {
       console.error('Supabase error details:', error);
       console.error('Error code:', error.code);
@@ -563,11 +563,11 @@ Property data: ${aiPrompt}`
   }
 
   return (
-    <div className="animate-fade-in" style={{ 
-      minHeight: '100vh', 
-      padding: '7rem 1rem 4rem 1rem', 
+    <div className="animate-fade-in" style={{
+      minHeight: '100vh',
+      padding: '7rem 1rem 4rem 1rem',
       background: 'var(--background)',
-      width: '100%' 
+      width: '100%'
     }}>
       <div className="container" style={{ maxWidth: '800px' }}>
         <div className="text-center mb-5">
@@ -578,7 +578,7 @@ Property data: ${aiPrompt}`
         </div>
 
         {alert.message && (
-          <div 
+          <div
             className="position-fixed"
             style={{
               bottom: '30px',
@@ -589,11 +589,11 @@ Property data: ${aiPrompt}`
               opacity: showNotification ? 1 : 0,
             }}
           >
-            <div 
+            <div
               className="p-4 rounded-4 shadow-xl glass"
               style={{
-                background: alert.severity === 'success' 
-                  ? 'rgba(16, 185, 129, 0.15)' 
+                background: alert.severity === 'success'
+                  ? 'rgba(16, 185, 129, 0.15)'
                   : 'rgba(239, 68, 68, 0.15)',
                 borderLeft: `4px solid ${alert.severity === 'success' ? 'var(--success)' : 'var(--danger)'}`,
                 color: 'var(--text-primary)',
@@ -618,9 +618,9 @@ Property data: ${aiPrompt}`
           <form onSubmit={handleSubmit}>
             {/* AI Assistant Section */}
             <div className="mb-5 position-relative">
-              <div 
-                className="p-4 rounded-4 position-relative overflow-hidden" 
-                style={{ 
+              <div
+                className="p-4 rounded-4 position-relative overflow-hidden"
+                style={{
                   background: 'rgba(99, 102, 241, 0.05)',
                   border: '1px solid rgba(99, 102, 241, 0.2)',
                 }}
@@ -644,7 +644,7 @@ Property data: ${aiPrompt}`
                   </div>
                   <h5 className="mb-0 fw-bold" style={{ color: 'var(--text-primary)' }}>AI Smart Extract</h5>
                 </div>
-                
+
                 <p className="text-secondary small mb-3">
                   Paste property descriptions from WhatsApp or other sources. AI will automatically fill the form for you.
                 </p>
@@ -656,14 +656,10 @@ Property data: ${aiPrompt}`
                     value={aiPrompt}
                     onChange={(e) => setAiPrompt(e.target.value)}
                     rows="3"
-                    style={{ 
-                      resize: 'none', 
-                      background: 'rgba(15, 23, 42, 0.5)',
-                      borderColor: 'rgba(255, 255, 255, 0.05)'
-                    }}
+                    style={{ resize: 'none' }}
                   />
                 </div>
-                
+
                 <button
                   type="button"
                   className="btn btn-primary w-100"
@@ -686,7 +682,7 @@ Property data: ${aiPrompt}`
 
                 {aiResponse && (
                   <div className="mt-4 animate-fade-in">
-                    <div className="p-3 rounded-3" style={{ 
+                    <div className="p-3 rounded-3" style={{
                       background: 'rgba(15, 23, 42, 0.8)',
                       border: '1px solid rgba(255, 255, 255, 0.1)'
                     }}>
@@ -701,7 +697,7 @@ Property data: ${aiPrompt}`
                           <i className="bi bi-check2-all me-1"></i> Apply to Form
                         </button>
                       </div>
-                      <div 
+                      <div
                         style={{
                           whiteSpace: 'pre-wrap',
                           fontSize: '0.875rem',
@@ -722,12 +718,12 @@ Property data: ${aiPrompt}`
             <div className="row g-4 mb-4">
               <div className="col-12">
                 <label className="form-label">Property Title</label>
-                <input 
-                  name="title" 
-                  className="form-control form-control-lg" 
+                <input
+                  name="title"
+                  className="form-control form-control-lg"
                   placeholder="e.g. Modern Villa with Pool in Sanur"
-                  value={formData.title} 
-                  onChange={handleChange} 
+                  value={formData.title}
+                  onChange={handleChange}
                   required
                 />
               </div>
@@ -766,12 +762,12 @@ Property data: ${aiPrompt}`
                     )}
                   </select>
                 ) : (
-                  <input 
-                    className="form-control" 
-                    value={ownerName} 
-                    readOnly 
+                  <input
+                    className="form-control"
+                    value={ownerName}
+                    readOnly
                     disabled
-                    style={{ background: 'rgba(255, 255, 255, 0.03)', opacity: 0.7 }}
+                    style={{ opacity: 0.6 }}
                   />
                 )}
               </div>
@@ -811,13 +807,13 @@ Property data: ${aiPrompt}`
                 <label className="form-label">Price (IDR)</label>
                 <div className="input-group">
                   <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--border)' }}>Rp</span>
-                  <input 
-                    name="price" 
-                    type="text" 
-                    className="form-control border-start-0 ps-0" 
+                  <input
+                    name="price"
+                    type="text"
+                    className="form-control border-start-0 ps-0"
                     placeholder="0"
-                    value={formatPriceWithCommas(formData.price)} 
-                    onChange={handlePriceChange} 
+                    value={formatPriceWithCommas(formData.price)}
+                    onChange={handlePriceChange}
                     required
                   />
                   {(formData.property_type === 'Kavling' || formData.transaction_type === 'Sewa') && (
@@ -843,10 +839,10 @@ Property data: ${aiPrompt}`
 
               <div className="col-12">
                 <label className="form-label">Property Photos</label>
-                <div 
+                <div
                   className="p-5 text-center rounded-4 border-2"
-                  style={{ 
-                    borderStyle: 'dashed', 
+                  style={{
+                    borderStyle: 'dashed',
                     borderColor: 'rgba(99, 102, 241, 0.3)',
                     background: 'rgba(99, 102, 241, 0.02)',
                     cursor: 'pointer',
@@ -889,17 +885,17 @@ Property data: ${aiPrompt}`
                 {uploadedImage && (
                   <div className="mt-4 animate-fade-in">
                     <div className="d-flex justify-content-between align-items-end mb-2">
-                       <span className="badge bg-success-subtle text-success">Image Uploaded Successfully</span>
-                       {imageFileSize && (
-                         <span className="text-secondary" style={{ fontSize: '0.75rem' }}>
-                            {formatFileSize(imageFileSize)} 
-                            {originalFileSize && <span className="text-success ms-1">({Math.round((1 - imageFileSize/originalFileSize) * 100)}% saved)</span>}
-                         </span>
-                       )}
+                      <span className="badge bg-success-subtle text-success">Image Uploaded Successfully</span>
+                      {imageFileSize && (
+                        <span className="text-secondary" style={{ fontSize: '0.75rem' }}>
+                          {formatFileSize(imageFileSize)}
+                          {originalFileSize && <span className="text-success ms-1">({Math.round((1 - imageFileSize / originalFileSize) * 100)}% saved)</span>}
+                        </span>
+                      )}
                     </div>
                     <div className="position-relative rounded-4 overflow-hidden border border-white border-opacity-10 shadow-lg">
-                      <img 
-                        src={uploadedImage} 
+                      <img
+                        src={uploadedImage}
                         alt="Preview"
                         className="w-100"
                         style={{ height: 'auto', maxHeight: '450px', objectFit: 'cover' }}
@@ -1017,10 +1013,10 @@ Property data: ${aiPrompt}`
               </div>
 
               <div className="col-12 pt-3">
-                <button 
-                  className="btn btn-primary w-100 py-3 shadow-lg" 
-                  disabled={isUploading} 
-                  style={{ 
+                <button
+                  className="btn btn-primary w-100 py-3 shadow-lg"
+                  disabled={isUploading}
+                  style={{
                     borderRadius: '12px',
                     fontSize: '1.1rem',
                     background: 'linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%)',

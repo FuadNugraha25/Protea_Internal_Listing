@@ -163,14 +163,16 @@ function AdminPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border)';
-                  e.target.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
                 <span>📊</span>
@@ -196,14 +198,16 @@ function AdminPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border)';
-                  e.target.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
                 <span>📊</span>
@@ -232,14 +236,16 @@ function AdminPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border)';
-                  e.target.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
                 <span>💾</span>
@@ -378,14 +384,16 @@ function ConfirmListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border)';
-                  e.target.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
                 <span>📝</span>
@@ -434,14 +442,16 @@ function ConfirmListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border)';
-                  e.target.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
                 <span>📊</span>
@@ -470,14 +480,16 @@ function ConfirmListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border)';
-                  e.target.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
                 <span>💾</span>
@@ -573,14 +585,16 @@ function TotalListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border)';
-                  e.target.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
                 <span>📝</span>
@@ -606,14 +620,16 @@ function TotalListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border)';
-                  e.target.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
                 <span>📊</span>
@@ -665,14 +681,16 @@ function TotalListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border)';
-                  e.target.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
                 <span>💾</span>
@@ -768,14 +786,16 @@ function BackupListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border)';
-                  e.target.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
                 <span>📝</span>
@@ -801,14 +821,16 @@ function BackupListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border)';
-                  e.target.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
                 <span>📊</span>
@@ -834,14 +856,16 @@ function BackupListingsPage({ user }) {
                   gap: '0.5rem'
                 }}
                 onMouseEnter={(e) => {
-                  e.target.style.background = 'var(--background)';
-                  e.target.style.borderColor = 'var(--primary-color)';
-                  e.target.style.transform = 'translateX(4px)';
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
                 }}
                 onMouseLeave={(e) => {
-                  e.target.style.background = 'transparent';
-                  e.target.style.borderColor = 'var(--border)';
-                  e.target.style.transform = 'translateX(0)';
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
                 }}
               >
                 <span>📊</span>
