@@ -151,7 +151,7 @@ function ListingPribadi({ user }) {
               <h3 className="fw-bold mb-0" style={{ color: 'var(--text-primary)', fontSize: '2rem' }}>
                 {agentName ? `Welcome, ${agentName}` : 'Welcome'}
               </h3>
-              <p className="text-muted mt-2" style={{ fontSize: '1rem' }}>
+              <p className="text-secondary mt-2" style={{ fontSize: '1rem' }}>
                 Listing Pribadi - Your Personal Listings
               </p>
             </div>
@@ -160,7 +160,7 @@ function ListingPribadi({ user }) {
           {/* Results Info */}
           <div className="row mb-4">
             <div className="col">
-              <p className="text-muted mb-0" style={{ fontSize: '0.9375rem', fontWeight: 500 }}>
+              <p className="text-secondary mb-0" style={{ fontSize: '0.9375rem', fontWeight: 500 }}>
                 <i className="bi bi-house-door me-2"></i>
                 Showing <strong style={{ color: 'var(--text-primary)' }}>{filteredListings.length}</strong> of your properties
               </p>
@@ -185,24 +185,14 @@ function ListingPribadi({ user }) {
             ) : paginatedListings.map((listing) => (
               <div className="col-lg-4 col-md-6" key={listing.id}>
                 <div 
-                  className="card h-100 border-0" 
+                  className="glass-card h-100 border-0" 
                   style={{
                     boxShadow: 'var(--shadow-md)',
-                    transition: 'all 0.3s ease-in-out',
                     cursor: 'pointer',
                     borderRadius: '12px',
                     overflow: 'hidden',
-                    background: 'var(--surface)'
                   }}
                   onClick={() => navigate(`/listing/${listing.id}`)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-8px)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-xl)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                  }}
                 >
                   <div className="position-relative">
                     <img
@@ -214,11 +204,11 @@ function ListingPribadi({ user }) {
                   </div>
                   <div className="card-body" style={{ padding: '1.25rem' }}>
                     <h5 className="card-title fw-bold mb-2" style={{ color: 'var(--text-primary)', fontSize: '1.125rem' }}>{listing.title}</h5>
-                    <p className="text-muted mb-2" style={{ fontSize: '0.875rem' }}>
+                    <p className="text-secondary mb-2" style={{ fontSize: '0.875rem' }}>
                       <i className="bi bi-geo-alt me-1" style={{ color: 'var(--primary-color)' }}></i>
                       {listing.location}
                     </p>
-                    <p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
+                    <p className="text-secondary mb-3" style={{ fontSize: '0.875rem' }}>
                       <i className="bi bi-person me-1" style={{ color: 'var(--primary-color)' }}></i>
                       Owner: <strong>{getOwnerName(listing.owner)}</strong>
                     </p>
@@ -226,7 +216,7 @@ function ListingPribadi({ user }) {
                       <div className="row text-center mb-3">
                         <div className="col-12">
                           <div className="fw-bold">{listing.lt}</div>
-                          <small className="text-muted">Total Luas (m²)</small>
+                          <small className="text-secondary">Total Luas (m²)</small>
                         </div>
                       </div>
                     ) : (
@@ -249,15 +239,15 @@ function ListingPribadi({ user }) {
                         </div>
                         <div className="col-3">
                           <div className="fw-bold">{listing.lb}</div>
-                          <small className="text-muted">LB</small>
+                          <small className="text-secondary">LB</small>
                         </div>
                       </div>
                     )}
                     <div className="d-flex justify-content-between align-items-center">
                       <span className="h5 text-primary fw-bold mb-0">
                         {formatIDR(listing.price)}
-                        {listing.property_type === 'Kavling' && <small className="text-muted">/m²</small>}
-                        {listing.transaction_type === 'Sewa' && <small className="text-muted">/Tahun</small>}
+                        {listing.property_type === 'Kavling' && <small className="text-secondary">/m²</small>}
+                        {listing.transaction_type === 'Sewa' && <small className="text-secondary">/Tahun</small>}
                       </span>
                       <button
                         className="btn btn-outline-primary btn-sm"
@@ -289,7 +279,7 @@ function ListingPribadi({ user }) {
                   <i className="bi bi-chevron-left me-1"></i>
                   Prev
                 </button>
-                <span className="text-muted" style={{ fontWeight: 500, padding: '0 1rem' }}>
+                <span className="text-secondary" style={{ fontWeight: 500, padding: '0 1rem' }}>
                   Page <strong style={{ color: 'var(--text-primary)' }}>{currentPage}</strong> of <strong style={{ color: 'var(--text-primary)' }}>{totalPages}</strong>
                 </span>
                 <button

@@ -238,24 +238,24 @@ function ConfirmListings() {
   }, []);
 
   return (
-    <FoundationWrapper style={{ paddingTop: '1.5rem', minHeight: '100vh', background: '#f8f9fa' }}>
+    <FoundationWrapper style={{ paddingBottom: '4rem', paddingTop: '7rem', minHeight: '100vh', background: 'var(--background)' }}>
       <div className="grid-container" style={{ maxWidth: '1400px' }}>
         {/* Header */}
         <div className="grid-x grid-margin-x" style={{ marginBottom: '2rem' }}>
           <div className="cell">
-            <div className="card" style={{ border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: '10px' }}>
+            <div className="glass-card mb-4" style={{ borderRadius: 'var(--radius-lg)' }}>
               <div className="card-section" style={{ padding: '1.5rem' }}>
-                <h1 style={{ 
-                  fontSize: '2rem', 
-                  fontWeight: 700, 
-                  color: '#0a0a0a',
-                  margin: 0,
-                  marginBottom: '0.5rem'
-                }}>
-                  Listingan Log
-                </h1>
+                  <h1 style={{ 
+                    fontSize: '2rem', 
+                    fontWeight: 700, 
+                    color: 'var(--text-primary)',
+                    margin: 0,
+                    marginBottom: '0.5rem'
+                  }}>
+                    Listingan Log
+                  </h1>
                 <p style={{ 
-                  color: '#767676', 
+                  color: 'var(--text-secondary)', 
                   fontSize: '1rem',
                   margin: 0
                 }}>
@@ -269,7 +269,7 @@ function ConfirmListings() {
         {/* Table Card */}
         <div className="grid-x grid-margin-x">
           <div className="cell">
-            <div className="card" style={{ border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px', overflow: 'hidden' }}>
+            <div className="glass-card" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
               <div className="card-divider" style={{ 
                 background: 'linear-gradient(135deg, #1779ba 0%, #14679e 100%)',
                 color: '#fefefe',
@@ -308,10 +308,10 @@ function ConfirmListings() {
                         key={listing.id}
                         style={{
                           padding: '1.25rem',
-                          borderBottom: index < listings.length - 1 ? '1px solid #e6e6e6' : 'none',
+                          borderBottom: index < listings.length - 1 ? '1px solid var(--border)' : 'none',
                           transition: 'background 0.2s ease'
                         }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
                         onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                       >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
@@ -324,7 +324,7 @@ function ConfirmListings() {
                             }}>
                               <div style={{ 
                                 fontWeight: 600, 
-                                color: '#0a0a0a',
+                                color: 'var(--text-primary)',
                                 fontSize: '1.125rem'
                               }}>
                                 {listing.title}
@@ -354,7 +354,7 @@ function ConfirmListings() {
                               gap: '1rem',
                               marginBottom: '0.75rem',
                               fontSize: '0.875rem',
-                              color: '#767676'
+                              color: 'var(--text-secondary)'
                             }}>
                               <span>
                                 <strong>Tipe:</strong> {listing.property_type} • {listing.transaction_type}
@@ -371,7 +371,7 @@ function ConfirmListings() {
                               flexWrap: 'wrap',
                               gap: '1rem',
                               fontSize: '0.875rem',
-                              color: '#767676'
+                              color: 'var(--text-muted)'
                             }}>
                               {listing.lt && <span>LT: {listing.lt} m²</span>}
                               {listing.lb && <span>LB: {listing.lb} m²</span>}

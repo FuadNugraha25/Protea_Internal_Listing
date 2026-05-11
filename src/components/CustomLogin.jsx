@@ -31,19 +31,17 @@ export default function CustomLogin() {
 
   
   return (
-    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '2rem 1rem' }}>
-      <div className="card shadow-lg p-4" style={{ 
-        maxWidth: '400px', 
+    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', background: 'var(--background)', padding: '2rem 1rem' }}>
+      <div className="card glass-card shadow-xl p-4 p-md-5" style={{ 
+        maxWidth: '430px', 
         width: '100%', 
-        borderRadius: '16px',
-        border: 'none',
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)',
-        WebkitBackdropFilter: 'blur(10px)'
+        borderRadius: 'var(--radius-xl)',
+        border: '1px solid var(--border)',
+        background: 'var(--surface)'
       }}>
         <div className="text-center mb-4">
           <h3 className="fw-bold mb-2" style={{ color: 'var(--text-primary)', fontSize: '1.75rem' }}>Hi! Login dulu yuk</h3>
-          <small className="text-muted" style={{ fontSize: '0.875rem' }}>Masuknya pakai email protea yaa 😊</small>
+          <small className="text-secondary" style={{ fontSize: '0.875rem' }}>Masuknya pakai email protea yaa 😊</small>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">

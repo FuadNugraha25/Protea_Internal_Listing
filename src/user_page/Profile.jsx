@@ -152,15 +152,15 @@ export default function Profile() {
         <div className="container" style={{ maxWidth: '800px', marginTop: '2rem' }}>
           <div className="card shadow-lg" style={{ border: 'none', borderRadius: '12px' }}>
             <div className="card-header" style={{ 
-              background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)',
-              border: 'none',
+              background: 'rgba(255, 255, 255, 0.03)',
+              borderBottom: '1px solid var(--border)',
               borderRadius: '12px 12px 0 0',
               padding: '1.5rem',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center'
             }}>
-              <h3 className="mb-0" style={{ color: '#fff', fontWeight: 700 }}>Profile</h3>
+              <h3 className="mb-0" style={{ color: 'var(--text-primary)', fontWeight: 700 }}>Profile</h3>
             </div>
             <div className="card-body" style={{ padding: '2rem' }}>
               {/* Alert Message */}
@@ -184,8 +184,8 @@ export default function Profile() {
                     borderRadius: '50%',
                     objectFit: 'cover',
                     margin: '0 auto 1.5rem',
-                    border: '2px solid var(--border-color)',
-                    background: '#fff'
+                    border: '2px solid var(--border)',
+                    background: 'var(--surface-hover)'
                   }}
                 />
                 <h4 style={{ color: 'var(--text-primary)', fontWeight: 700, marginBottom: '0.5rem' }}>
@@ -210,7 +210,6 @@ export default function Profile() {
                       disabled={isAdmin}
                       readOnly={isAdmin}
                       style={{ 
-                        background: isAdmin ? 'var(--background)' : '#fff',
                         cursor: isAdmin ? 'not-allowed' : 'text'
                       }}
                     />
@@ -242,7 +241,6 @@ export default function Profile() {
                       disabled={isAdmin}
                       readOnly={isAdmin}
                       style={{ 
-                        background: isAdmin ? 'var(--background)' : '#fff',
                         cursor: isAdmin ? 'not-allowed' : 'text'
                       }}
                     />
@@ -272,7 +270,6 @@ export default function Profile() {
                       value={formData.agent_code} 
                       onChange={handleInputChange}
                       placeholder="Enter your agent code"
-                      style={{ background: '#fff' }}
                     />
                   ) : (
                     <div style={{ 
@@ -298,7 +295,7 @@ export default function Profile() {
                       className="form-control" 
                       value={user?.email || profile?.email || ''} 
                       readOnly
-                      style={{ background: 'var(--background)', fontSize: '0.875rem' }}
+                      style={{ fontSize: '0.875rem' }}
                     />
                   </div>
 
@@ -309,7 +306,7 @@ export default function Profile() {
                       className="form-control" 
                       value={user?.id || ''} 
                       readOnly
-                      style={{ background: 'var(--background)', fontSize: '0.875rem' }}
+                      style={{ fontSize: '0.875rem' }}
                     />
                   </div>
 
@@ -321,7 +318,7 @@ export default function Profile() {
                         className="form-control" 
                         value={new Date(profile.created_at).toLocaleString()} 
                         readOnly
-                        style={{ background: 'var(--background)', fontSize: '0.875rem' }}
+                        style={{ fontSize: '0.875rem' }}
                       />
                     </div>
                   )}
@@ -334,7 +331,7 @@ export default function Profile() {
                         className="form-control" 
                         value={new Date(profile.updated_at).toLocaleString()} 
                         readOnly
-                        style={{ background: 'var(--background)', fontSize: '0.875rem' }}
+                        style={{ fontSize: '0.875rem' }}
                       />
                     </div>
                   )}

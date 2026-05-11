@@ -121,7 +121,7 @@ function TotalListings() {
 
   if (loading) {
     return (
-      <FoundationWrapper style={{ paddingTop: '1.5rem', minHeight: '100vh', background: '#f8f9fa' }}>
+    <FoundationWrapper style={{ paddingBottom: '4rem', paddingTop: '7rem', minHeight: '100vh', background: 'var(--background)' }}>
         <div className="grid-container" style={{ maxWidth: '1400px' }}>
           <div className="grid-x grid-margin-x">
             <div className="cell text-center" style={{ padding: '4rem 0' }}>
@@ -149,24 +149,24 @@ function TotalListings() {
   }
 
   return (
-    <FoundationWrapper style={{ paddingTop: '1.5rem', minHeight: '100vh', background: '#f8f9fa' }}>
+    <FoundationWrapper style={{ paddingBottom: '4rem', paddingTop: '7rem', minHeight: '100vh', background: 'var(--background)' }}>
       <div className="grid-container" style={{ maxWidth: '1400px' }}>
         {/* Header */}
         <div className="grid-x grid-margin-x" style={{ marginBottom: '2rem' }}>
           <div className="cell">
-            <div className="card" style={{ border: 'none', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', borderRadius: '10px' }}>
+            <div className="glass-card mb-4" style={{ borderRadius: 'var(--radius-lg)' }}>
               <div className="card-section" style={{ padding: '1.5rem' }}>
-                <h1 style={{ 
-                  fontSize: '2rem', 
-                  fontWeight: 700, 
-                  color: '#0a0a0a',
-                  margin: 0,
-                  marginBottom: '0.5rem'
-                }}>
-                  Total Listingan
-                </h1>
+                  <h1 style={{ 
+                    fontSize: '2rem', 
+                    fontWeight: 700, 
+                    color: 'var(--text-primary)',
+                    margin: 0,
+                    marginBottom: '0.5rem'
+                  }}>
+                    Total Listingan
+                  </h1>
                 <p style={{ 
-                  color: '#767676', 
+                  color: 'var(--text-secondary)', 
                   fontSize: '1rem',
                   margin: 0
                 }}>
@@ -202,7 +202,7 @@ function TotalListings() {
         {/* Agents Table */}
         <div className="grid-x grid-margin-x">
           <div className="cell">
-            <div className="card" style={{ border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '12px', overflow: 'hidden' }}>
+            <div className="glass-card" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
               <div className="card-divider" style={{ 
                 background: 'linear-gradient(135deg, #1779ba 0%, #14679e 100%)',
                 color: '#fefefe',
@@ -222,8 +222,8 @@ function TotalListings() {
                   }}>
                     <thead>
                       <tr style={{ 
-                        background: '#f8f9fa', 
-                        borderBottom: '2px solid #e6e6e6' 
+                        background: 'rgba(255, 255, 255, 0.03)', 
+                        borderBottom: '2px solid var(--border)' 
                       }}>
                         <th style={{ 
                           padding: '1rem 1.5rem', 
@@ -232,7 +232,7 @@ function TotalListings() {
                           fontSize: '0.875rem',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
-                          color: '#767676'
+                          color: 'var(--text-muted)'
                         }}>
                           Agent
                         </th>
@@ -243,7 +243,7 @@ function TotalListings() {
                           fontSize: '0.875rem',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
-                          color: '#767676'
+                          color: 'var(--text-muted)'
                         }}>
                           Kontak
                         </th>
@@ -254,7 +254,7 @@ function TotalListings() {
                           fontSize: '0.875rem',
                           textTransform: 'uppercase',
                           letterSpacing: '0.05em',
-                          color: '#767676'
+                          color: 'var(--text-muted)'
                         }}>
                           Total Listingan
                         </th>
@@ -272,22 +272,22 @@ function TotalListings() {
                         <tr 
                           key={agent.id} 
                           style={{ 
-                            borderBottom: '1px solid #e6e6e6',
+                            borderBottom: '1px solid var(--border)',
                             transition: 'background 0.2s ease'
                           }}
-                          onMouseEnter={(e) => e.currentTarget.style.background = '#f8f9fa'}
+                          onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'}
                           onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                         >
                           <td style={{ padding: '1rem 1.5rem' }}>
-                            <div style={{ fontWeight: 600, color: '#0a0a0a', marginBottom: '0.25rem' }}>
+                            <div style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
                               {agent.name}
                             </div>
-                            <div style={{ fontSize: '0.75rem', color: '#767676', wordBreak: 'break-all' }}>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>
                               ID: {agent.id}
                             </div>
                           </td>
                           <td style={{ padding: '1rem 1.5rem' }}>
-                            <div style={{ color: '#767676', fontSize: '0.875rem' }}>
+                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
                               {agent.email !== 'N/A' ? agent.email : 'No email'}
                             </div>
                           </td>

@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import Navbar from './Navbar';
 import { getOrCreateProfile } from '../utils/profileUtils';
+import CustomDropdown from './CustomDropdown';
 
 const EditPropertyForm = () => {
   const { id } = useParams();
@@ -34,6 +35,9 @@ const EditPropertyForm = () => {
     price: '',
     transaction_type: '',
     property_type: '',
+    has_full_interior_photos: false,
+    has_tiktok_video: false,
+    has_youtube_video: false,
   });
 
   const allowedUserId = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136'];
@@ -137,6 +141,9 @@ const EditPropertyForm = () => {
         price: data.price || '',
         transaction_type: data.transaction_type || '',
         property_type: data.property_type || '',
+        has_full_interior_photos: data.has_full_interior_photos || false,
+        has_tiktok_video: data.has_tiktok_video || false,
+        has_youtube_video: data.has_youtube_video || false,
       });
 
       // Set owner name from listing data if it exists, otherwise fetch from profile
@@ -220,6 +227,14 @@ const EditPropertyForm = () => {
     }));
   };
 
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -240,6 +255,9 @@ const EditPropertyForm = () => {
         price: formData.price || null,
         transaction_type: formData.transaction_type,
         property_type: formData.property_type,
+        has_full_interior_photos: formData.has_full_interior_photos,
+        has_tiktok_video: formData.has_tiktok_video,
+        has_youtube_video: formData.has_youtube_video,
       };
 
       const { error } = await supabase
@@ -365,7 +383,7 @@ const EditPropertyForm = () => {
 
           <div className="glass-card p-4 p-md-5" style={{ borderRadius: 'var(--radius-xl)' }}>
             <form onSubmit={handleSubmit}>
-              <div className="row g-4">
+              <div className="row gy-3 gx-4">
                 <div className="col-12">
                   <label className="form-label">Property Title</label>
                   <input 
@@ -379,74 +397,61 @@ const EditPropertyForm = () => {
 
                 <div className="col-md-6">
                   <label className="form-label">Property Owner</label>
-                  <select
-                    name="owner"
-                    className="form-select"
+                  <CustomDropdown
                     value={ownerName}
-                    onChange={(e) => setOwnerName(e.target.value)}
+                    onChange={(val) => setOwnerName(val)}
                     disabled={usersLoading}
-                    required
-                  >
-                    {usersLoading ? (
-                      <option>Loading users...</option>
-                    ) : (
-                      <>
-                        <option value="">Select Owner</option>
-                        {allUsers.map((user) => (
-                          <option key={user.id} value={user.name}>
-                            {user.name}
-                          </option>
-                        ))}
-                      </>
-                    )}
-                  </select>
+                    options={[
+                      { value: '', label: 'Select Owner' },
+                      ...allUsers.map(u => ({ value: u.name, label: u.name }))
+                    ]}
+                    placeholder={usersLoading ? "Loading users..." : "Select Owner"}
+                  />
                 </div>
 
                 <div className="col-md-6">
                   <label className="form-label">Property Type</label>
-                  <select
-                    name="property_type"
-                    className="form-select"
+                  <CustomDropdown
                     value={formData.property_type}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="">Select Type</option>
-                    <option value="Rumah">Rumah</option>
-                    <option value="Kavling">Kavling</option>
-                    <option value="Apartemen">Apartemen</option>
-                  </select>
+                    onChange={(val) => setFormData(prev => ({ ...prev, property_type: val }))}
+                    options={[
+                      { value: '', label: 'Select Type' },
+                      { value: 'Rumah', label: 'Rumah' },
+                      { value: 'Kavling', label: 'Kavling' },
+                      { value: 'Apartemen', label: 'Apartemen' }
+                    ]}
+                    placeholder="Select Type"
+                  />
                 </div>
 
                 <div className="col-md-6">
                   <label className="form-label">Transaction Type</label>
-                  <select
-                    name="transaction_type"
-                    className="form-select"
+                  <CustomDropdown
                     value={formData.transaction_type}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="">Select Transaction</option>
-                    <option value="Jual">Jual</option>
-                    <option value="Sewa">Sewa</option>
-                  </select>
+                    onChange={(val) => setFormData(prev => ({ ...prev, transaction_type: val }))}
+                    options={[
+                      { value: '', label: 'Select Transaction' },
+                      { value: 'Jual', label: 'Jual' },
+                      { value: 'Sewa', label: 'Sewa' }
+                    ]}
+                    placeholder="Select Transaction"
+                  />
                 </div>
 
                 <div className="col-md-6">
                   <label className="form-label">Price (IDR)</label>
                   <div className="input-group">
-                    <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--border)' }}>Rp</span>
+                    <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--input-border)', color: 'var(--input-placeholder)' }}>Rp</span>
                     <input 
                       name="price" 
                       type="text" 
-                      className="form-control border-start-0 ps-0" 
+                      className="form-control border-start-0 ps-3" 
                       value={formatPriceWithCommas(formData.price)} 
                       onChange={handlePriceChange}
                       required
                     />
                     {(formData.property_type === 'Kavling' || formData.transaction_type === 'Sewa') && (
-                      <span className="input-group-text bg-transparent text-muted small" style={{ borderColor: 'var(--border)' }}>
+                      <span className="input-group-text bg-transparent text-muted small" style={{ borderColor: 'var(--input-border)', color: 'var(--input-placeholder)' }}>
                         {formData.property_type === 'Kavling' ? '/m²' : '/Thn'}
                       </span>
                     )}
@@ -463,7 +468,7 @@ const EditPropertyForm = () => {
                     onChange={e => {
                       handleChange(e);
                     }}
-                    style={{ overflow: 'hidden', resize: 'none', minHeight: '120px' }}
+                    style={{ overflow: 'hidden', resize: 'none' }}
                     placeholder="Enter property description"
                   />
                 </div>
@@ -472,7 +477,7 @@ const EditPropertyForm = () => {
                   <h6 className="text-primary fw-bold mb-4 d-flex align-items-center gap-2">
                     <i className="bi bi-geo-alt fs-5"></i> Location Details
                   </h6>
-                  <div className="row g-4">
+                  <div className="row gy-3 gx-4">
                     <div className="col-md-4">
                       <label className="form-label">Province</label>
                       <div className="input-group">
@@ -538,7 +543,7 @@ const EditPropertyForm = () => {
                   <h6 className="text-primary fw-bold mb-4 d-flex align-items-center gap-2">
                     <i className="bi bi-building-gear fs-5"></i> Specification Details
                   </h6>
-                  <div className="row g-4">
+                  <div className="row gy-3 gx-4">
                     <div className="col-md-3">
                       <label className="form-label">LT (m²)</label>
                       <input name="lt" type="number" className="form-control" placeholder="0" value={formData.lt} onChange={handleChange} />
@@ -563,6 +568,68 @@ const EditPropertyForm = () => {
                 </div>
 
                 <div className="col-12 mt-5">
+                  <div className="p-4 rounded-4" style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <h6 className="mb-4 small fw-bold" style={{ color: 'var(--text-muted)', letterSpacing: '0.05em' }}>ADDITIONAL FEATURES</h6>
+                    <div className="row g-4">
+                      <div className="col-md-4">
+                        <div className="d-flex align-items-center gap-3">
+                          <div className="form-check form-switch mb-0 p-0">
+                            <input
+                              className="form-check-input custom-switch ms-0"
+                              type="checkbox"
+                              id="interiorCheck"
+                              name="has_full_interior_photos"
+                              checked={formData.has_full_interior_photos}
+                              onChange={handleCheckboxChange}
+                              style={{ margin: 0, width: '3em', height: '1.5em' }}
+                            />
+                          </div>
+                          <label className="form-check-label mb-0" htmlFor="interiorCheck" style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', cursor: 'pointer' }}>
+                            Full Interior Photos
+                          </label>
+                        </div>
+                      </div>
+                      <div className="col-md-4">
+                        <div className="d-flex align-items-center gap-3">
+                          <div className="form-check form-switch mb-0 p-0">
+                            <input
+                              className="form-check-input custom-switch ms-0"
+                              type="checkbox"
+                              id="tiktokCheck"
+                              name="has_tiktok_video"
+                              checked={formData.has_tiktok_video}
+                              onChange={handleCheckboxChange}
+                              style={{ margin: 0, width: '3em', height: '1.5em' }}
+                            />
+                          </div>
+                          <label className="form-check-label mb-0" htmlFor="tiktokCheck" style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', cursor: 'pointer' }}>
+                            TikTok Video Ready
+                          </label>
+                        </div>
+                      </div>
+                      <div className="col-md-4">
+                        <div className="d-flex align-items-center gap-3">
+                          <div className="form-check form-switch mb-0 p-0">
+                            <input
+                              className="form-check-input custom-switch ms-0"
+                              type="checkbox"
+                              id="youtubeCheck"
+                              name="has_youtube_video"
+                              checked={formData.has_youtube_video}
+                              onChange={handleCheckboxChange}
+                              style={{ margin: 0, width: '3em', height: '1.5em' }}
+                            />
+                          </div>
+                          <label className="form-check-label mb-0" htmlFor="youtubeCheck" style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', cursor: 'pointer' }}>
+                            YouTube Tour
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="col-12 mt-5">
                   <div className="d-flex gap-3">
                     <button 
                       type="submit" 
@@ -575,7 +642,7 @@ const EditPropertyForm = () => {
                         background: 'linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%)',
                         border: 'none'
                       }}
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-1px)'}
                       onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
                     >
                       {saving ? (
@@ -606,25 +673,27 @@ const EditPropertyForm = () => {
         </div>
       </div>
 
-      <style>{`
-        .form-label {
-          margin-bottom: 0.75rem;
-          color: var(--text-secondary);
-          font-weight: 500;
-        }
-        .input-group-text {
-          border-color: var(--border);
-          color: var(--text-muted);
-        }
-        .shadow-xl {
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-        }
-        .form-control:focus, .form-select:focus {
-           background: var(--surface-hover);
-        }
-      `}</style>
     </>
   );
 };
 
-export default EditPropertyForm;
+const styles = `
+  .custom-switch {
+    width: 3em !important;
+    height: 1.5em !important;
+    cursor: pointer;
+  }
+  .custom-switch:checked {
+    background-color: var(--primary) !important;
+    border-color: var(--primary) !important;
+  }
+`;
+
+const StyleTag = () => <style>{styles}</style>;
+
+export default () => (
+  <>
+    <EditPropertyForm />
+    <StyleTag />
+  </>
+);
