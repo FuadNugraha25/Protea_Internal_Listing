@@ -13,19 +13,22 @@ import './CustomDropdown.css';
  * @param {string} props.className - Additional class names
  * @param {Object} props.style - Inline styles for the container
  */
-const CustomDropdown = ({ 
-  options = [], 
-  value, 
-  onChange, 
-  placeholder = "Select...", 
+const CustomDropdown = ({
+  options = [],
+  value,
+  onChange,
+  placeholder = "Select...",
   disabled = false,
   className = "",
-  style = {}
+  style = {},
+  searchable = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [searchQuery, setSearchQuery] = useState('');
   const containerRef = useRef(null);
   const listRef = useRef(null);
+  const searchRef = useRef(null);
 
   // Normalize options to [{ value, label }]
   const normalizedOptions = options.map(opt => {
@@ -33,11 +36,18 @@ const CustomDropdown = ({
     return opt;
   });
 
+  const filteredOptions = searchable && searchQuery
+    ? normalizedOptions.filter(opt => opt.label.toLowerCase().includes(searchQuery.toLowerCase()))
+    : normalizedOptions;
+
   const selectedOption = normalizedOptions.find(opt => opt.value === value);
 
   const toggleDropdown = () => {
     if (!disabled) {
-      setIsOpen(!isOpen);
+      setIsOpen(prev => {
+        if (!prev) setSearchQuery('');
+        return !prev;
+      });
     }
   };
 
@@ -100,12 +110,18 @@ const CustomDropdown = ({
   // Reset highlighted index when opening
   useEffect(() => {
     if (isOpen) {
-      const selectedIdx = normalizedOptions.findIndex(opt => opt.value === value);
+      const selectedIdx = filteredOptions.findIndex(opt => opt.value === value);
       setHighlightedIndex(selectedIdx >= 0 ? selectedIdx : 0);
+      if (searchable) setTimeout(() => searchRef.current?.focus(), 50);
     } else {
       setHighlightedIndex(-1);
     }
-  }, [isOpen, value, normalizedOptions.length]);
+  }, [isOpen]);
+
+  // Reset highlight when search changes
+  useEffect(() => {
+    setHighlightedIndex(0);
+  }, [searchQuery]);
 
   return (
     <div 
@@ -134,12 +150,27 @@ const CustomDropdown = ({
 
       {isOpen && (
         <div className="custom-dropdown-menu">
-          <ul 
-            className="custom-dropdown-options-list" 
+          {searchable && (
+            <div className="custom-dropdown-search">
+              <input
+                ref={searchRef}
+                type="text"
+                className="custom-dropdown-search-input"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onClick={e => e.stopPropagation()}
+              />
+            </div>
+          )}
+          <ul
+            className="custom-dropdown-options-list"
             ref={listRef}
             role="listbox"
           >
-            {normalizedOptions.map((option, index) => (
+            {filteredOptions.length === 0 ? (
+              <li className="custom-dropdown-option" style={{ opacity: 0.4, cursor: 'default' }}>No results</li>
+            ) : filteredOptions.map((option, index) => (
               <li
                 key={option.value}
                 className={`custom-dropdown-option ${value === option.value ? 'is-selected' : ''} ${highlightedIndex === index ? 'is-highlighted' : ''}`}

@@ -108,10 +108,14 @@ const EditPropertyForm = () => {
     fetchExistingListings();
   }, []);
 
-  // Extract unique values for dropdowns
-  const uniqueProvinces = [...new Set(existingListings.map(listing => listing.province).filter(Boolean))].sort();
-  const uniqueCities = [...new Set(existingListings.map(listing => listing.city).filter(Boolean))].sort();
-  const uniqueDistricts = [...new Set(existingListings.map(listing => listing.district).filter(Boolean))].sort();
+  // Extract unique values for dropdowns (cascading)
+  const uniqueProvinces = [...new Set(existingListings.map(l => l.province).filter(Boolean))].sort();
+  const uniqueCities = [...new Set(
+    existingListings.filter(l => !formData.province || l.province === formData.province).map(l => l.city).filter(Boolean)
+  )].sort();
+  const uniqueDistricts = [...new Set(
+    existingListings.filter(l => !formData.city || l.city === formData.city).map(l => l.district).filter(Boolean)
+  )].sort();
 
   const fetchListingData = async () => {
     try {
@@ -227,13 +231,6 @@ const EditPropertyForm = () => {
     }));
   };
 
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: checked,
-    }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -321,6 +318,42 @@ const EditPropertyForm = () => {
         showListingPribadiButton={true}
         user={user}
       />
+      {alert.message && (
+        <div 
+          className="position-fixed"
+          style={{
+            bottom: '30px',
+            right: '30px',
+            zIndex: 9999,
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: showNotification ? 'translateX(0)' : 'translateX(120%)',
+            opacity: showNotification ? 1 : 0,
+          }}
+        >
+          <div 
+            className="p-4 rounded-4 shadow-xl glass"
+            style={{
+              background: alert.severity === 'success' 
+                ? 'rgba(16, 185, 129, 0.15)' 
+                : 'rgba(239, 68, 68, 0.15)',
+              borderLeft: `4px solid ${alert.severity === 'success' ? 'var(--success)' : 'var(--danger)'}`,
+              color: 'var(--text-primary)',
+              minWidth: '320px',
+              maxWidth: '450px',
+              backdropFilter: 'blur(16px)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+            }}
+          >
+            <div className="d-flex align-items-center gap-3">
+              <i className={`bi ${alert.severity === 'success' ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-danger'} fs-4`}></i>
+              <div>
+                <div className="fw-bold mb-1">{alert.severity === 'success' ? 'Success' : 'Notification'}</div>
+                <div className="small opacity-90">{alert.message}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="animate-fade-in" style={{ 
         minHeight: '100vh', 
         padding: '7rem 1rem 4rem 1rem', 
@@ -343,43 +376,6 @@ const EditPropertyForm = () => {
               <i className="bi bi-arrow-left me-2"></i> Back to Listing
             </button>
           </div>
-        
-          {alert.message && (
-            <div 
-              className="position-fixed"
-              style={{
-                bottom: '30px',
-                right: '30px',
-                zIndex: 9999,
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                transform: showNotification ? 'translateX(0)' : 'translateX(120%)',
-                opacity: showNotification ? 1 : 0,
-              }}
-            >
-              <div 
-                className="p-4 rounded-4 shadow-xl glass"
-                style={{
-                  background: alert.severity === 'success' 
-                    ? 'rgba(16, 185, 129, 0.15)' 
-                    : 'rgba(239, 68, 68, 0.15)',
-                  borderLeft: `4px solid ${alert.severity === 'success' ? 'var(--success)' : 'var(--danger)'}`,
-                  color: 'var(--text-primary)',
-                  minWidth: '320px',
-                  maxWidth: '450px',
-                  backdropFilter: 'blur(16px)',
-                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-                }}
-              >
-                <div className="d-flex align-items-center gap-3">
-                  <i className={`bi ${alert.severity === 'success' ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-danger'} fs-4`}></i>
-                  <div>
-                    <div className="fw-bold mb-1">{alert.severity === 'success' ? 'Success' : 'Notification'}</div>
-                    <div className="small opacity-90">{alert.message}</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="glass-card p-4 p-md-5" style={{ borderRadius: 'var(--radius-xl)' }}>
             <form onSubmit={handleSubmit}>
@@ -480,60 +476,33 @@ const EditPropertyForm = () => {
                   <div className="row gy-3 gx-4">
                     <div className="col-md-4">
                       <label className="form-label">Province</label>
-                      <div className="input-group">
-                        <input
-                          list="provinces-list"
-                          name="province"
-                          className="form-control"
-                          placeholder="Type province..."
-                          value={formData.province}
-                          onChange={handleChange}
-                        />
-                        <datalist id="provinces-list">
-                          {uniqueProvinces.map((province, index) => (
-                            <option key={index} value={province} />
-                          ))}
-                        </datalist>
-                      </div>
+                      <CustomDropdown
+                        options={uniqueProvinces}
+                        value={formData.province}
+                        onChange={(val) => setFormData(prev => ({ ...prev, province: val, city: '', district: '' }))}
+                        placeholder="Pilih Provinsi"
+                        searchable={true}
+                      />
                     </div>
-                    
                     <div className="col-md-4">
                       <label className="form-label">City</label>
-                      <div className="input-group">
-                        <input
-                          list="cities-list"
-                          name="city"
-                          className="form-control"
-                          placeholder="Type city..."
-                          value={formData.city}
-                          onChange={handleChange}
-                          required
-                        />
-                        <datalist id="cities-list">
-                          {uniqueCities.map((city, index) => (
-                            <option key={index} value={city} />
-                          ))}
-                        </datalist>
-                      </div>
+                      <CustomDropdown
+                        options={uniqueCities}
+                        value={formData.city}
+                        onChange={(val) => setFormData(prev => ({ ...prev, city: val, district: '' }))}
+                        placeholder="Pilih Kota"
+                        searchable={true}
+                      />
                     </div>
-                    
                     <div className="col-md-4">
                       <label className="form-label">District</label>
-                      <div className="input-group">
-                        <input
-                          list="districts-list"
-                          name="district"
-                          className="form-control"
-                          placeholder="Type district..."
-                          value={formData.district}
-                          onChange={handleChange}
-                        />
-                        <datalist id="districts-list">
-                          {uniqueDistricts.map((district, index) => (
-                            <option key={index} value={district} />
-                          ))}
-                        </datalist>
-                      </div>
+                      <CustomDropdown
+                        options={uniqueDistricts}
+                        value={formData.district}
+                        onChange={(val) => setFormData(prev => ({ ...prev, district: val }))}
+                        placeholder="Pilih Kecamatan"
+                        searchable={true}
+                      />
                     </div>
                   </div>
                   {locationLoading && <small className="text-muted mt-2 d-block">Loading existing location data...</small>}
@@ -567,67 +536,6 @@ const EditPropertyForm = () => {
                   </div>
                 </div>
 
-                <div className="col-12 mt-5">
-                  <div className="p-4 rounded-4" style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                    <h6 className="mb-4 small fw-bold" style={{ color: 'var(--text-muted)', letterSpacing: '0.05em' }}>ADDITIONAL FEATURES</h6>
-                    <div className="row g-4">
-                      <div className="col-md-4">
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="form-check form-switch mb-0 p-0">
-                            <input
-                              className="form-check-input custom-switch ms-0"
-                              type="checkbox"
-                              id="interiorCheck"
-                              name="has_full_interior_photos"
-                              checked={formData.has_full_interior_photos}
-                              onChange={handleCheckboxChange}
-                              style={{ margin: 0, width: '3em', height: '1.5em' }}
-                            />
-                          </div>
-                          <label className="form-check-label mb-0" htmlFor="interiorCheck" style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', cursor: 'pointer' }}>
-                            Full Interior Photos
-                          </label>
-                        </div>
-                      </div>
-                      <div className="col-md-4">
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="form-check form-switch mb-0 p-0">
-                            <input
-                              className="form-check-input custom-switch ms-0"
-                              type="checkbox"
-                              id="tiktokCheck"
-                              name="has_tiktok_video"
-                              checked={formData.has_tiktok_video}
-                              onChange={handleCheckboxChange}
-                              style={{ margin: 0, width: '3em', height: '1.5em' }}
-                            />
-                          </div>
-                          <label className="form-check-label mb-0" htmlFor="tiktokCheck" style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', cursor: 'pointer' }}>
-                            TikTok Video Ready
-                          </label>
-                        </div>
-                      </div>
-                      <div className="col-md-4">
-                        <div className="d-flex align-items-center gap-3">
-                          <div className="form-check form-switch mb-0 p-0">
-                            <input
-                              className="form-check-input custom-switch ms-0"
-                              type="checkbox"
-                              id="youtubeCheck"
-                              name="has_youtube_video"
-                              checked={formData.has_youtube_video}
-                              onChange={handleCheckboxChange}
-                              style={{ margin: 0, width: '3em', height: '1.5em' }}
-                            />
-                          </div>
-                          <label className="form-check-label mb-0" htmlFor="youtubeCheck" style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.875rem', cursor: 'pointer' }}>
-                            YouTube Tour
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
                 <div className="col-12 mt-5">
                   <div className="d-flex gap-3">

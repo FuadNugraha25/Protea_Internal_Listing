@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient';
 import Alert from '@mui/material/Alert';
 import imageCompression from 'browser-image-compression';
 import { getOrCreateProfile } from '../utils/profileUtils';
+import CustomDropdown from './CustomDropdown';
 
 const PropertyForm = ({ user }) => {
   const [formData, setFormData] = useState({
@@ -40,6 +41,7 @@ const PropertyForm = ({ user }) => {
   const [allUsers, setAllUsers] = useState([]); // Store all users for dropdown
   const [usersLoading, setUsersLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [existingListings, setExistingListings] = useState([]);
   const descriptionRef = useRef(null);
 
   // Admin user IDs
@@ -121,6 +123,27 @@ const PropertyForm = ({ user }) => {
     fetchAllUsers();
   }, [isAdmin]);
 
+  // Fetch existing listings for location dropdowns
+  useEffect(() => {
+    async function fetchLocations() {
+      const { data } = await supabase.from('listings').select('province, city, district');
+      setExistingListings(data || []);
+    }
+    fetchLocations();
+  }, []);
+
+  const uniqueProvinces = [...new Set(existingListings.map(l => l.province).filter(Boolean))].sort();
+  const uniqueCities = [...new Set(
+    existingListings
+      .filter(l => !formData.province || l.province === formData.province)
+      .map(l => l.city).filter(Boolean)
+  )].sort();
+  const uniqueDistricts = [...new Set(
+    existingListings
+      .filter(l => !formData.city || l.city === formData.city)
+      .map(l => l.district).filter(Boolean)
+  )].sort();
+
   // Fetch owner name (current user's profile) when not admin
   useEffect(() => {
     async function fetchOwnerName() {
@@ -192,13 +215,6 @@ const PropertyForm = ({ user }) => {
     setFormData(updatedForm);
   };
 
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: checked,
-    }));
-  };
 
   const uploadImageToSupabase = async (file) => {
     const fileExt = file.name.split('.').pop();
@@ -308,7 +324,7 @@ const PropertyForm = ({ user }) => {
         throw new Error('API key not configured. Please set VITE_GEMINI_API_KEY in your .env file.');
       }
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -563,56 +579,57 @@ Property data: ${aiPrompt}`
   }
 
   return (
-    <div className="animate-fade-in" style={{
-      minHeight: '100vh',
-      padding: '7rem 1rem 4rem 1rem',
-      background: 'var(--background)',
-      width: '100%'
-    }}>
-      <div className="container" style={{ maxWidth: '800px' }}>
-        <div className="text-center mb-5">
-          <h1 className="display-5 fw-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
-            Add New Property
-          </h1>
-          <p className="text-secondary" style={{ fontSize: '1.1rem' }}>Create a high-quality internal property listing</p>
-        </div>
-
-        {alert.message && (
+    <>
+      {alert.message && (
+        <div
+          className="position-fixed"
+          style={{
+            bottom: '30px',
+            right: '30px',
+            zIndex: 9999,
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: showNotification ? 'translateX(0)' : 'translateX(120%)',
+            opacity: showNotification ? 1 : 0,
+          }}
+        >
           <div
-            className="position-fixed"
+            className="p-4 rounded-4 shadow-xl glass"
             style={{
-              bottom: '30px',
-              right: '30px',
-              zIndex: 9999,
-              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: showNotification ? 'translateX(0)' : 'translateX(120%)',
-              opacity: showNotification ? 1 : 0,
+              background: alert.severity === 'success'
+                ? 'rgba(16, 185, 129, 0.15)'
+                : 'rgba(239, 68, 68, 0.15)',
+              borderLeft: `4px solid ${alert.severity === 'success' ? 'var(--success)' : 'var(--danger)'}`,
+              color: 'var(--text-primary)',
+              minWidth: '320px',
+              maxWidth: '450px',
+              backdropFilter: 'blur(16px)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
             }}
           >
-            <div
-              className="p-4 rounded-4 shadow-xl glass"
-              style={{
-                background: alert.severity === 'success'
-                  ? 'rgba(16, 185, 129, 0.15)'
-                  : 'rgba(239, 68, 68, 0.15)',
-                borderLeft: `4px solid ${alert.severity === 'success' ? 'var(--success)' : 'var(--danger)'}`,
-                color: 'var(--text-primary)',
-                minWidth: '320px',
-                maxWidth: '450px',
-                backdropFilter: 'blur(16px)',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
-              }}
-            >
-              <div className="d-flex align-items-center gap-3">
-                <i className={`bi ${alert.severity === 'success' ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-danger'} fs-4`}></i>
-                <div>
-                  <div className="fw-bold mb-1">{alert.severity === 'success' ? 'Success' : 'Notification'}</div>
-                  <div className="small opacity-90">{alert.message}</div>
-                </div>
+            <div className="d-flex align-items-center gap-3">
+              <i className={`bi ${alert.severity === 'success' ? 'bi-check-circle-fill text-success' : 'bi-exclamation-triangle-fill text-danger'} fs-4`}></i>
+              <div>
+                <div className="fw-bold mb-1">{alert.severity === 'success' ? 'Success' : 'Notification'}</div>
+                <div className="small opacity-90">{alert.message}</div>
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
+
+      <div className="animate-fade-in" style={{
+        minHeight: '100vh',
+        padding: '7rem 1rem 4rem 1rem',
+        background: 'var(--background)',
+        width: '100%'
+      }}>
+        <div className="container" style={{ maxWidth: '800px' }}>
+          <div className="text-center mb-5">
+            <h1 className="display-5 fw-bold mb-2" style={{ color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+              Add New Property
+            </h1>
+            <p className="text-secondary" style={{ fontSize: '1.1rem' }}>Create a high-quality internal property listing</p>
+          </div>
 
         <div className="glass-card p-4 p-md-5" style={{ borderRadius: 'var(--radius-xl)' }}>
           <form onSubmit={handleSubmit}>
@@ -806,11 +823,11 @@ Property data: ${aiPrompt}`
               <div className="col-md-6">
                 <label className="form-label">Price (IDR)</label>
                 <div className="input-group">
-                  <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--border)' }}>Rp</span>
+                  <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--border)', paddingRight: '0' }}>Rp</span>
                   <input
                     name="price"
                     type="text"
-                    className="form-control border-start-0 ps-0"
+                    className="form-control border-start-0"
                     placeholder="0"
                     value={formatPriceWithCommas(formData.price)}
                     onChange={handlePriceChange}
@@ -902,11 +919,11 @@ Property data: ${aiPrompt}`
                       />
                       <button
                         type="button"
-                        className="btn btn-danger btn-sm m-3 position-absolute top-0 end-0 rounded-circle shadow"
-                        style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        className="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-pill shadow"
+                        style={{ margin: '12px', padding: '6px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '5px' }}
                         onClick={removeImage}
                       >
-                        <i className="bi bi-trash-fill"></i>
+                        <i className="bi bi-trash-fill"></i> Hapus
                       </button>
                     </div>
                   </div>
@@ -917,15 +934,33 @@ Property data: ${aiPrompt}`
                 <div className="row g-4">
                   <div className="col-md-4">
                     <label className="form-label">Provinsi</label>
-                    <input name="province" className="form-control" placeholder="e.g. Jawa Barat" value={formData.province} onChange={handleChange} />
+                    <CustomDropdown
+                      options={uniqueProvinces}
+                      value={formData.province}
+                      onChange={(val) => setFormData(prev => ({ ...prev, province: val, city: '', district: '' }))}
+                      placeholder="Pilih Provinsi"
+                      searchable={true}
+                    />
                   </div>
                   <div className="col-md-4">
                     <label className="form-label">Kota / Kabupaten</label>
-                    <input name="city" className="form-control" placeholder="e.g. Bandung" value={formData.city} onChange={handleChange} />
+                    <CustomDropdown
+                      options={uniqueCities}
+                      value={formData.city}
+                      onChange={(val) => setFormData(prev => ({ ...prev, city: val, district: '' }))}
+                      placeholder="Pilih Kota"
+                      searchable={true}
+                    />
                   </div>
                   <div className="col-md-4">
                     <label className="form-label">Kecamatan</label>
-                    <input name="district" className="form-control" placeholder="e.g. Coblong" value={formData.district} onChange={handleChange} />
+                    <CustomDropdown
+                      options={uniqueDistricts}
+                      value={formData.district}
+                      onChange={(val) => setFormData(prev => ({ ...prev, district: val }))}
+                      placeholder="Pilih Kecamatan"
+                      searchable={true}
+                    />
                   </div>
                 </div>
               </div>
@@ -959,58 +994,6 @@ Property data: ${aiPrompt}`
                 </div>
               </div>
 
-              <div className="col-12">
-                <div className="p-4 rounded-4 mt-2" style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                  <h6 className="text-secondary mb-3 small fw-bold">ADDITIONAL FEATURES</h6>
-                  <div className="row g-3">
-                    <div className="col-md-4">
-                      <div className="form-check form-switch">
-                        <input
-                          className="form-check-input custom-switch"
-                          type="checkbox"
-                          id="interiorCheck"
-                          name="has_full_interior_photos"
-                          checked={formData.has_full_interior_photos}
-                          onChange={handleCheckboxChange}
-                        />
-                        <label className="form-check-label text-secondary small" htmlFor="interiorCheck">
-                          Full Interior Photos
-                        </label>
-                      </div>
-                    </div>
-                    <div className="col-md-4">
-                      <div className="form-check form-switch">
-                        <input
-                          className="form-check-input custom-switch"
-                          type="checkbox"
-                          id="tiktokCheck"
-                          name="has_tiktok_video"
-                          checked={formData.has_tiktok_video}
-                          onChange={handleCheckboxChange}
-                        />
-                        <label className="form-check-label text-secondary small" htmlFor="tiktokCheck">
-                          TikTok Video Ready
-                        </label>
-                      </div>
-                    </div>
-                    <div className="col-md-4">
-                      <div className="form-check form-switch">
-                        <input
-                          className="form-check-input custom-switch"
-                          type="checkbox"
-                          id="youtubeCheck"
-                          name="has_youtube_video"
-                          checked={formData.has_youtube_video}
-                          onChange={handleCheckboxChange}
-                        />
-                        <label className="form-check-label text-secondary small" htmlFor="youtubeCheck">
-                          YouTube Tour
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
               <div className="col-12 pt-3">
                 <button
@@ -1069,6 +1052,7 @@ Property data: ${aiPrompt}`
         }
       `}</style>
     </div>
+  </>
   );
 };
 

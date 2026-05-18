@@ -113,3 +113,25 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.custom-dropdown-search {
+  padding: 4px 4px 8px 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 4px;
+}
+
+.custom-dropdown-search-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 150ms ease;
+}
+
+.custom-dropdown-search-input:focus {
+  border-color: rgba(108, 123, 255, 0.5);
+}

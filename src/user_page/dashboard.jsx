@@ -64,17 +64,8 @@ function Dashboard({ user }) {
     setCurrentPage(1);
   }, [appliedFilters]);
 
-  // Sync search term to applied filters in real-time
+  // Sync all filters to appliedFilters in real-time
   useEffect(() => {
-    setAppliedFilters(prev => ({ ...prev, searchTerm }));
-  }, [searchTerm]);
-
-  // Sync location filters to applied filters in real-time
-  useEffect(() => {
-    setAppliedFilters(prev => ({ ...prev, selectedProvince, selectedLocation, selectedDistrict }));
-  }, [selectedProvince, selectedLocation, selectedDistrict]);
-
-  const applyFilters = () => {
     setAppliedFilters({
       searchTerm,
       selectedType,
@@ -91,7 +82,7 @@ function Dashboard({ user }) {
       selectedOwner,
       selectedTransactionType
     });
-  };
+  }, [searchTerm, selectedType, selectedLocation, selectedProvince, selectedDistrict, priceRange, ltMin, ltMax, lbMin, lbMax, selectedKM, selectedKT, selectedOwner, selectedTransactionType]);
 
   const resetFilters = () => {
     setSearchTerm("");
@@ -332,259 +323,141 @@ function Dashboard({ user }) {
             {filtersOpen && (
             <div className="glass-card mb-5 animate-fade-in" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
               <div className="card-body p-4 p-md-5">
-                {/* Basic Filters */}
+
+                {/* Section 1: Tipe & Transaksi & Harga */}
+                <h6 className="text-muted mb-3" style={{ fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Tipe & Harga</h6>
                 <div className="row g-3 mb-4">
                   <div className="col-md-2">
                     <label className="form-label fw-semibold">Tipe Properti</label>
-                    <select
-                      className="form-select"
-                      value={selectedType}
-                      onChange={(e) => setSelectedType(e.target.value)}
-                    >
+                    <select className="form-select" value={selectedType} onChange={(e) => setSelectedType(e.target.value)}>
                       <option value="All">Semua Tipe</option>
-                      {propertyTypes.map((type, idx) => (
-                        <option key={idx} value={type}>{type}</option>
-                      ))}
+                      {propertyTypes.map((type, idx) => <option key={idx} value={type}>{type}</option>)}
                     </select>
                   </div>
                   <div className="col-md-2">
                     <label className="form-label fw-semibold">Transaksi</label>
-                    <select
-                      className="form-select"
-                      value={selectedTransactionType}
-                      onChange={(e) => setSelectedTransactionType(e.target.value)}
-                    >
+                    <select className="form-select" value={selectedTransactionType} onChange={(e) => setSelectedTransactionType(e.target.value)}>
                       <option value="All">Semua</option>
-                      {transactionTypes.map((type, idx) => (
-                        <option key={idx} value={type}>{type}</option>
-                      ))}
+                      {transactionTypes.map((type, idx) => <option key={idx} value={type}>{type}</option>)}
                     </select>
                   </div>
-                  <div className="col-md-8">
-                    <label className="form-label fw-semibold">Rentang Harga</label>
-                    <div className="d-flex align-items-center">
-                      <input
-                        type="text"
-                        className="form-control me-2"
-                        placeholder="Harga Minimum"
-                        value={priceInputs[0]}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^\d,]/g, '');
-                          setPriceInputs([value, priceInputs[1]]);
-                          const numValue = value.replace(/,/g, '') ? Number(value.replace(/,/g, '')) : 0;
-                          setPriceRange([numValue, Math.max(numValue, priceRange[1])]);
-                        }}
-                        onBlur={(e) => {
-                          const value = e.target.value.replace(/,/g, '');
-                          const numValue = value ? Number(value) : 0;
-                          const formattedValue = numValue.toLocaleString('id-ID');
-                          setPriceInputs([formattedValue, priceInputs[1]]);
-                          setPriceRange([numValue, Math.max(numValue, priceRange[1])]);
-                        }}
-                      />
-                      <span className="mx-2">hingga</span>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Harga Maksimum"
-                        value={priceInputs[1]}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/[^\d,]/g, '');
-                          setPriceInputs([priceInputs[0], value]);
-                          const numValue = value.replace(/,/g, '') ? Number(value.replace(/,/g, '')) : 20_000_000_000;
-                          setPriceRange([Math.min(numValue, priceRange[0]), numValue]);
-                        }}
-                        onBlur={(e) => {
-                          const value = e.target.value.replace(/,/g, '');
-                          const numValue = value ? Number(value) : 20_000_000_000;
-                          const formattedValue = numValue.toLocaleString('id-ID');
-                          setPriceInputs([priceInputs[0], formattedValue]);
-                          setPriceRange([Math.min(numValue, priceRange[0]), numValue]);
-                        }}
-                      />
-                    </div>
-                      <small className="text-muted">
-                        {formatIDR(priceRange[0])} - {formatIDR(priceRange[1])}
-                      </small>
-                    </div>
+                  <div className="col-md-4">
+                    <label className="form-label fw-semibold">Harga Minimum</label>
+                    <input
+                      type="text" className="form-control" placeholder="0"
+                      value={priceInputs[0]}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^\d,]/g, '');
+                        setPriceInputs([value, priceInputs[1]]);
+                        const numValue = value.replace(/,/g, '') ? Number(value.replace(/,/g, '')) : 0;
+                        setPriceRange([numValue, Math.max(numValue, priceRange[1])]);
+                      }}
+                      onBlur={(e) => {
+                        const numValue = e.target.value.replace(/,/g, '') ? Number(e.target.value.replace(/,/g, '')) : 0;
+                        setPriceInputs([numValue.toLocaleString('id-ID'), priceInputs[1]]);
+                        setPriceRange([numValue, Math.max(numValue, priceRange[1])]);
+                      }}
+                    />
                   </div>
+                  <div className="col-md-4">
+                    <label className="form-label fw-semibold">Harga Maksimum</label>
+                    <input
+                      type="text" className="form-control" placeholder="20.000.000.000"
+                      value={priceInputs[1]}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^\d,]/g, '');
+                        setPriceInputs([priceInputs[0], value]);
+                        const numValue = value.replace(/,/g, '') ? Number(value.replace(/,/g, '')) : 20_000_000_000;
+                        setPriceRange([Math.min(numValue, priceRange[0]), numValue]);
+                      }}
+                      onBlur={(e) => {
+                        const numValue = e.target.value.replace(/,/g, '') ? Number(e.target.value.replace(/,/g, '')) : 20_000_000_000;
+                        setPriceInputs([priceInputs[0], numValue.toLocaleString('id-ID')]);
+                        setPriceRange([Math.min(numValue, priceRange[0]), numValue]);
+                      }}
+                    />
+                  </div>
+                </div>
 
-                {/* Location Filters */}
+                <hr style={{ borderColor: 'var(--border)', opacity: 1, marginBottom: '1.25rem' }} />
+
+                {/* Section 2: Lokasi & Owner */}
+                <h6 className="text-muted mb-3" style={{ fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Lokasi & Owner</h6>
                 <div className="row g-3 mb-4">
-                  <div className="col-12">
-                    <h6 className="text-muted mb-3">Filter Lokasi</h6>
-                  </div>
                   <div className="col-md-3">
                     <label className="form-label fw-semibold">Provinsi</label>
-                    <select
-                      className="form-select"
-                      value={selectedProvince}
-                      onChange={(e) => {
-                        setSelectedProvince(e.target.value);
-                        // Reset dependent dropdowns when province changes
-                        setSelectedLocation("All");
-                        setSelectedDistrict("All");
-                      }}
-                    >
+                    <select className="form-select" value={selectedProvince} onChange={(e) => { setSelectedProvince(e.target.value); setSelectedLocation("All"); setSelectedDistrict("All"); }}>
                       <option value="All">Semua Provinsi</option>
-                      {uniqueProvinces.map((province, index) => (
-                        <option key={index} value={province}>{province}</option>
-                      ))}
+                      {uniqueProvinces.map((p, i) => <option key={i} value={p}>{p}</option>)}
                     </select>
                   </div>
                   <div className="col-md-3">
                     <label className="form-label fw-semibold">Kota</label>
-                    <select
-                      className="form-select"
-                      value={selectedLocation}
-                      onChange={(e) => {
-                        setSelectedLocation(e.target.value);
-                        setSelectedDistrict("All");
-                      }}
-                    >
+                    <select className="form-select" value={selectedLocation} onChange={(e) => { setSelectedLocation(e.target.value); setSelectedDistrict("All"); }}>
                       <option value="All">Semua Kota</option>
-                      {uniqueLocations.map((location, index) => (
-                        <option key={index} value={location}>{location}</option>
-                      ))}
+                      {uniqueLocations.map((l, i) => <option key={i} value={l}>{l}</option>)}
                     </select>
                   </div>
                   <div className="col-md-3">
                     <label className="form-label fw-semibold">Kecamatan</label>
-                    <select
-                      className="form-select"
-                      value={selectedDistrict}
-                      onChange={(e) => setSelectedDistrict(e.target.value)}
-                    >
+                    <select className="form-select" value={selectedDistrict} onChange={(e) => setSelectedDistrict(e.target.value)}>
                       <option value="All">Semua Kecamatan</option>
-                      {uniqueDistricts.map((district, index) => (
-                        <option key={index} value={district}>{district}</option>
-                      ))}
+                      {uniqueDistricts.map((d, i) => <option key={i} value={d}>{d}</option>)}
                     </select>
-                  </div>
-                </div>
-
-                {/* Owner Filter */}
-                <div className="row g-3 mb-4">
-                  <div className="col-12">
-                    <h6 className="text-muted mb-3">Filter Owner</h6>
                   </div>
                   <div className="col-md-3">
-                    <label className="form-label fw-semibold">Owner Listing</label>
-                    <select
-                      className="form-select"
-                      value={selectedOwner}
-                      onChange={(e) => setSelectedOwner(e.target.value)}
-                    >
+                    <label className="form-label fw-semibold">Owner</label>
+                    <select className="form-select" value={selectedOwner} onChange={(e) => setSelectedOwner(e.target.value)}>
                       <option value="All">Semua Owner</option>
-                      {uniqueOwners.map((owner, index) => (
-                        <option key={index} value={owner}>{owner}</option>
-                      ))}
+                      {uniqueOwners.map((o, i) => <option key={i} value={o}>{o}</option>)}
                     </select>
                   </div>
                 </div>
 
-                {/* Property Details Filters */}
-                <div className="row g-3">
-                  <div className="col-12">
-                    <h6 className="text-muted mb-3">Detail Properti</h6>
-                  </div>
-                  <div className="col-md-2">
+                <hr style={{ borderColor: 'var(--border)', opacity: 1, marginBottom: '1.25rem' }} />
+
+                {/* Section 3: Detail Properti */}
+                <h6 className="text-muted mb-3" style={{ fontSize: '0.75rem', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Detail Properti</h6>
+                <div className="row g-3 mb-4">
+                  <div className="col-md-3">
                     <label className="form-label fw-semibold">Luas Tanah (m²)</label>
-                    <div className="d-flex align-items-center">
-                      <input
-                        type="number"
-                        min={0}
-                        max={1000}
-                        value={ltMin === null ? '' : ltMin}
-                        onChange={e => setLtMin(e.target.value === '' ? null : Number(e.target.value))}
-                        className="form-control me-1"
-                        placeholder="Minimum"
-                      />
-                      <span className="mx-1">-</span>
-                      <input
-                        type="number"
-                        min={0}
-                        max={1000}
-                        value={ltMax === null ? '' : ltMax}
-                        onChange={e => setLtMax(e.target.value === '' ? null : Number(e.target.value))}
-                        className="form-control"
-                        placeholder="Maksimum"
-                      />
+                    <div className="d-flex align-items-center gap-2">
+                      <input type="number" min={0} value={ltMin ?? ''} onChange={e => setLtMin(e.target.value === '' ? null : Number(e.target.value))} className="form-control" placeholder="Min" />
+                      <span className="text-muted">–</span>
+                      <input type="number" min={0} value={ltMax ?? ''} onChange={e => setLtMax(e.target.value === '' ? null : Number(e.target.value))} className="form-control" placeholder="Max" />
                     </div>
                   </div>
-                  <div className="col-md-2">
+                  <div className="col-md-3">
                     <label className="form-label fw-semibold">Luas Bangunan (m²)</label>
-                    <div className="d-flex align-items-center">
-                      <input
-                        type="number"
-                        min={0}
-                        max={1000}
-                        value={lbMin === null ? '' : lbMin}
-                        onChange={e => setLbMin(e.target.value === '' ? null : Number(e.target.value))}
-                        className="form-control me-1"
-                        placeholder="Minimum"
-                      />
-                      <span className="mx-1">-</span>
-                      <input
-                        type="number"
-                        min={0}
-                        max={1000}
-                        value={lbMax === null ? '' : lbMax}
-                        onChange={e => setLbMax(e.target.value === '' ? null : Number(e.target.value))}
-                        className="form-control"
-                        placeholder="Maksimum"
-                      />
+                    <div className="d-flex align-items-center gap-2">
+                      <input type="number" min={0} value={lbMin ?? ''} onChange={e => setLbMin(e.target.value === '' ? null : Number(e.target.value))} className="form-control" placeholder="Min" />
+                      <span className="text-muted">–</span>
+                      <input type="number" min={0} value={lbMax ?? ''} onChange={e => setLbMax(e.target.value === '' ? null : Number(e.target.value))} className="form-control" placeholder="Max" />
                     </div>
                   </div>
                   <div className="col-md-2">
                     <label className="form-label fw-semibold">Kamar Tidur</label>
-                    <select
-                      className="form-select"
-                      value={selectedKT}
-                      onChange={e => setSelectedKT(e.target.value)}
-                    >
+                    <select className="form-select" value={selectedKT} onChange={e => setSelectedKT(e.target.value)}>
                       <option value="All">Semua</option>
-                      {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                        <option key={n} value={n}>{n}</option>
-                      ))}
+                      {[1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n}>{n}</option>)}
                     </select>
                   </div>
                   <div className="col-md-2">
                     <label className="form-label fw-semibold">Kamar Mandi</label>
-                    <select
-                      className="form-select"
-                      value={selectedKM}
-                      onChange={e => setSelectedKM(e.target.value)}
-                    >
+                    <select className="form-select" value={selectedKM} onChange={e => setSelectedKM(e.target.value)}>
                       <option value="All">Semua</option>
-                      {[1,2,3,4,5,6,7,8,9,10].map(n => (
-                        <option key={n} value={n}>{n}</option>
-                      ))}
+                      {[1,2,3,4,5,6,7,8,9,10].map(n => <option key={n} value={n}>{n}</option>)}
                     </select>
                   </div>
                 </div>
-                
-                {/* Filter Action Buttons */}
-                <div className="row mt-3">
-                  <div className="col-12 d-flex gap-2">
-                    <button 
-                      className="btn btn-primary px-4 py-2"
-                      onClick={applyFilters}
-                      style={{ borderRadius: '8px' }}
-                    >
-                      <i className="bi bi-funnel me-2"></i>
-                      Terapkan Filter
-                    </button>
-                    <button 
-                      className="btn btn-outline-secondary px-4 py-2"
-                      onClick={resetFilters}
-                      style={{ borderRadius: '8px' }}
-                    >
-                      <i className="bi bi-arrow-clockwise me-2"></i>
-                      Atur Ulang Filter
-                    </button>
-                  </div>
+
+                {/* Reset only */}
+                <div className="d-flex justify-content-end">
+                  <button className="btn btn-outline-secondary px-4 py-2" onClick={resetFilters} style={{ borderRadius: '8px' }}>
+                    <i className="bi bi-arrow-clockwise me-2"></i>Atur Ulang Filter
+                  </button>
                 </div>
+
               </div>
             </div>
             )}
