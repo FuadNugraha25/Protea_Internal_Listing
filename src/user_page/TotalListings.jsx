@@ -121,26 +121,44 @@ function TotalListings() {
 
   if (loading) {
     return (
-    <FoundationWrapper style={{ paddingBottom: '4rem', paddingTop: '7rem', minHeight: '100vh', background: 'var(--background)' }}>
+      <FoundationWrapper style={{ paddingBottom: '4rem', paddingTop: '7rem', minHeight: '100vh', background: 'var(--background)' }}>
         <div className="grid-container" style={{ maxWidth: '1400px' }}>
+          {/* Header skeleton */}
+          <div className="grid-x grid-margin-x" style={{ marginBottom: '2rem' }}>
+            <div className="cell">
+              <div className="glass-card mb-4" style={{ borderRadius: 'var(--radius-lg)', padding: '1.5rem' }}>
+                <div className="skeleton-block" style={{ width: '220px', height: '2rem', marginBottom: '0.75rem' }} />
+                <div className="skeleton-block" style={{ width: '340px', height: '1rem' }} />
+              </div>
+            </div>
+          </div>
+          {/* Stats card skeleton */}
+          <div className="grid-x grid-margin-x grid-margin-y" style={{ marginBottom: '2rem' }}>
+            <div className="cell small-12 medium-6 large-4">
+              <div style={{ borderRadius: '12px', padding: '1.5rem', background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                <div className="skeleton-block" style={{ width: '120px', height: '0.875rem', marginBottom: '0.75rem' }} />
+                <div className="skeleton-block" style={{ width: '80px', height: '2.5rem' }} />
+              </div>
+            </div>
+          </div>
+          {/* Table skeleton */}
           <div className="grid-x grid-margin-x">
-            <div className="cell text-center" style={{ padding: '4rem 0' }}>
-              <div style={{ 
-                width: '3rem', 
-                height: '3rem', 
-                border: '4px solid #e6e6e6',
-                borderTop: '4px solid #1779ba',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite',
-                margin: '0 auto'
-              }}></div>
-              <p style={{ marginTop: '1rem', color: '#767676' }}>Loading data...</p>
-              <style>{`
-                @keyframes spin {
-                  0% { transform: rotate(0deg); }
-                  100% { transform: rotate(360deg); }
-                }
-              `}</style>
+            <div className="cell">
+              <div className="glass-card" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+                <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
+                  <div className="skeleton-block" style={{ width: '200px', height: '1.125rem' }} />
+                </div>
+                <div style={{ padding: '0' }}>
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
+                      <div className="skeleton-block" style={{ width: '28px', height: '1rem', flexShrink: 0 }} />
+                      <div className="skeleton-block" style={{ flex: 1, height: '1rem' }} />
+                      <div className="skeleton-block" style={{ width: '100px', height: '1rem', flexShrink: 0 }} />
+                      <div className="skeleton-block" style={{ width: '60px', height: '1rem', flexShrink: 0 }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>

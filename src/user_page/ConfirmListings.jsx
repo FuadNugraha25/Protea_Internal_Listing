@@ -282,14 +282,20 @@ function ConfirmListings() {
               </div>
               <div className="card-section" style={{ padding: 0 }}>
                 {loading ? (
-                  <div style={{ 
-                    padding: '3rem', 
-                    textAlign: 'center', 
-                    color: '#767676' 
-                  }}>
-                    <p style={{ fontSize: '1.125rem', margin: 0 }}>
-                      Memuat data...
-                    </p>
+                  <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0' }}>
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} style={{ padding: '1.25rem', borderBottom: '1px solid var(--border)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem', marginBottom: '0.5rem' }}>
+                          <div className="skeleton-block" style={{ width: '55%', height: '1.125rem' }} />
+                          <div className="skeleton-block" style={{ width: '100px', height: '1rem', flexShrink: 0 }} />
+                        </div>
+                        <div className="skeleton-block" style={{ width: '180px', height: '0.875rem', marginBottom: '0.5rem' }} />
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <div className="skeleton-block" style={{ width: '70px', height: '1.4rem', borderRadius: '999px' }} />
+                          <div className="skeleton-block" style={{ width: '60px', height: '1.4rem', borderRadius: '999px' }} />
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : listings.length === 0 ? (
                   <div style={{ 

@@ -12,6 +12,8 @@ import TotalListings from './user_page/TotalListings';
 import BackupListings from './user_page/BackupListings';
 import Profile from './user_page/Profile';
 import ListingPribadi from './user_page/ListingPribadi';
+import UserManagement from './user_page/UserManagement';
+import MapPage from './user_page/MapPage';
 
 function App() {
   const [user, setUser] = useState(null)
@@ -54,6 +56,8 @@ function App() {
         <Route path="/confirm-listings" element={<ConfirmListingsPage user={user} />} />
         <Route path="/total-listings" element={<TotalListingsPage user={user} />} />
         <Route path="/backup" element={<BackupListingsPage user={user} />} />
+        <Route path="/user-management" element={<UserManagementPage user={user} />} />
+        <Route path="/map" element={<MapPageWrapper user={user} />} />
         <Route path="/listing/:id" element={<ListingDetails />} />
         <Route path="/edit-listing/:id" element={<EditPropertyForm />} />
         <Route path="/profile" element={<Profile />} />
@@ -84,9 +88,13 @@ function AdminPage({ user }) {
     navigate('/backup');
   };
 
+  const goToUserManagement = () => {
+    navigate('/user-management');
+  };
+
   return (
     <>
-      <Navbar 
+      <Navbar
         showDashboardButton={true}
         user={user}
       />
@@ -212,6 +220,41 @@ function AdminPage({ user }) {
               >
                 <span>📊</span>
                 <span>Total Listingan</span>
+              </button>
+
+              <button
+                onClick={goToUserManagement}
+                style={{
+                  width: '100%',
+                  padding: '0.875rem 1rem',
+                  background: 'transparent',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <span>👥</span>
+                <span>Kelola User</span>
               </button>
             </div>
 
@@ -328,9 +371,13 @@ function ConfirmListingsPage({ user }) {
     navigate('/backup');
   };
 
+  const goToUserManagement = () => {
+    navigate('/user-management');
+  };
+
   return (
     <>
-      <Navbar 
+      <Navbar
         showDashboardButton={true}
         user={user}
       />
@@ -456,6 +503,41 @@ function ConfirmListingsPage({ user }) {
               >
                 <span>📊</span>
                 <span>Total Listingan</span>
+              </button>
+
+              <button
+                onClick={goToUserManagement}
+                style={{
+                  width: '100%',
+                  padding: '0.875rem 1rem',
+                  background: 'transparent',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <span>👥</span>
+                <span>Kelola User</span>
               </button>
             </div>
 
@@ -529,9 +611,13 @@ function TotalListingsPage({ user }) {
     navigate('/backup');
   };
 
+  const goToUserManagement = () => {
+    navigate('/user-management');
+  };
+
   return (
     <>
-      <Navbar 
+      <Navbar
         showDashboardButton={true}
         user={user}
       />
@@ -658,6 +744,41 @@ function TotalListingsPage({ user }) {
                 <span>📊</span>
                 <span>Total Listingan</span>
               </button>
+
+              <button
+                onClick={goToUserManagement}
+                style={{
+                  width: '100%',
+                  padding: '0.875rem 1rem',
+                  background: 'transparent',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <span>👥</span>
+                <span>Kelola User</span>
+              </button>
             </div>
 
             {/* Backup Button at Bottom */}
@@ -730,9 +851,13 @@ function BackupListingsPage({ user }) {
     navigate('/total-listings');
   };
 
+  const goToUserManagement = () => {
+    navigate('/user-management');
+  };
+
   return (
     <>
-      <Navbar 
+      <Navbar
         showDashboardButton={true}
         user={user}
       />
@@ -871,6 +996,41 @@ function BackupListingsPage({ user }) {
                 <span>📊</span>
                 <span>Total Listingan</span>
               </button>
+
+              <button
+                onClick={goToUserManagement}
+                style={{
+                  width: '100%',
+                  padding: '0.875rem 1rem',
+                  background: 'transparent',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <span>👥</span>
+                <span>Kelola User</span>
+              </button>
             </div>
 
             {/* Backup Button at Bottom */}
@@ -906,6 +1066,241 @@ function BackupListingsPage({ user }) {
           <BackupListings />
         </div>
       </div>
+    </>
+  )
+}
+
+// User Management Page Component
+function UserManagementPage({ user }) {
+  const navigate = useNavigate();
+  const allowedUserIds = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136']
+
+  if (!allowedUserIds.includes(user.id)) {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  return (
+    <>
+      <Navbar
+        showDashboardButton={true}
+        user={user}
+      />
+      <div style={{ display: 'flex', paddingTop: '75px', minHeight: '100vh', background: 'var(--background)' }}>
+        {/* Persistent Sidebar */}
+        <div
+          style={{
+            width: '280px',
+            background: 'var(--surface)',
+            borderRight: '1px solid var(--border)',
+            boxShadow: '2px 0 8px rgba(0, 0, 0, 0.05)',
+            display: 'flex',
+            flexDirection: 'column',
+            position: 'fixed',
+            top: '75px',
+            left: 0,
+            height: 'calc(100vh - 75px)',
+            overflowY: 'auto',
+            zIndex: 100
+          }}
+        >
+          {/* Sidebar Header */}
+          <div style={{
+            padding: '1.5rem',
+            borderBottom: '1px solid var(--border)',
+            background: 'linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%)',
+            color: '#fff'
+          }}>
+            <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>Admin Panel</h3>
+          </div>
+
+          {/* Sidebar Content */}
+          <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <button
+                onClick={() => navigate('/admin')}
+                style={{
+                  width: '100%',
+                  padding: '0.875rem 1rem',
+                  background: 'transparent',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <span>📝</span>
+                <span>Buat Listingan</span>
+              </button>
+
+              <button
+                onClick={() => navigate('/confirm-listings')}
+                style={{
+                  width: '100%',
+                  padding: '0.875rem 1rem',
+                  background: 'transparent',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <span>📊</span>
+                <span>Listingan Log</span>
+              </button>
+
+              <button
+                onClick={() => navigate('/total-listings')}
+                style={{
+                  width: '100%',
+                  padding: '0.875rem 1rem',
+                  background: 'transparent',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <span>📊</span>
+                <span>Total Listingan</span>
+              </button>
+
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                style={{
+                  width: '100%',
+                  padding: '0.875rem 1rem',
+                  background: 'var(--primary-color)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                <span>👥</span>
+                <span>Kelola User</span>
+              </button>
+            </div>
+
+            {/* Backup Button at Bottom */}
+            <div style={{ marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+              <button
+                onClick={() => navigate('/backup')}
+                style={{
+                  width: '100%',
+                  padding: '0.875rem 1rem',
+                  background: 'transparent',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '8px',
+                  fontSize: '0.9375rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--surface-hover)';
+                  e.currentTarget.style.borderColor = 'var(--primary-color)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.borderColor = 'var(--border)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <span>💾</span>
+                <span>Backup</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content Area */}
+        <div style={{ marginLeft: '280px', flex: 1, width: 'calc(100% - 280px)' }}>
+          <UserManagement />
+        </div>
+      </div>
+    </>
+  )
+}
+
+// Map Page Wrapper
+function MapPageWrapper({ user }) {
+  const allowedUserIds = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136']
+  const isAdmin = allowedUserIds.includes(user.id);
+
+  return (
+    <>
+      <Navbar
+        showDashboardButton={true}
+        showAdminButton={isAdmin}
+        showTambahListingButton={!isAdmin}
+        showListingPribadiButton={!isAdmin}
+        user={user}
+      />
+      <MapPage />
     </>
   )
 }

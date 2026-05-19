@@ -437,17 +437,18 @@ const EditPropertyForm = () => {
                 <div className="col-md-6">
                   <label className="form-label">Price (IDR)</label>
                   <div className="input-group">
-                    <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--input-border)', color: 'var(--input-placeholder)' }}>Rp</span>
-                    <input 
-                      name="price" 
-                      type="text" 
-                      className="form-control border-start-0 ps-3" 
-                      value={formatPriceWithCommas(formData.price)} 
+                    <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--border)', paddingRight: '0' }}>Rp</span>
+                    <input
+                      name="price"
+                      type="text"
+                      className="form-control border-start-0"
+                      placeholder="0"
+                      value={formatPriceWithCommas(formData.price)}
                       onChange={handlePriceChange}
                       required
                     />
                     {(formData.property_type === 'Kavling' || formData.transaction_type === 'Sewa') && (
-                      <span className="input-group-text bg-transparent text-muted small" style={{ borderColor: 'var(--input-border)', color: 'var(--input-placeholder)' }}>
+                      <span className="input-group-text bg-transparent text-muted small" style={{ borderColor: 'var(--border)' }}>
                         {formData.property_type === 'Kavling' ? '/m²' : '/Thn'}
                       </span>
                     )}

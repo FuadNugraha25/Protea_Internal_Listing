@@ -66,6 +66,7 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTamb
   const tambahListingActive = location.pathname === '/tambah-listing';
   const listingPribadiActive = location.pathname === '/listing-pribadi';
   const adminActive = location.pathname.startsWith('/admin');
+  const mapActive = location.pathname === '/map';
 
   return (
     <>
@@ -121,7 +122,10 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTamb
               My Listings
             </button>
           )}
-          
+          <button onClick={() => navigate('/map')} style={{...navItemStyle(mapActive), width: 'auto'}}>
+            Map
+          </button>
+
           <div className="ms-3 ps-3 border-start" style={{ borderColor: 'var(--border) !important' }}>
             <div ref={dropdownRef} className="position-relative">
               <button 
@@ -220,13 +224,19 @@ const Navbar = ({ showAdminButton = false, showDashboardButton = false, showTamb
               </button>
             )}
             {(isAdmin || showListingPribadiButton) && (
-              <button 
-                onClick={() => { navigate('/listing-pribadi'); setShowMobileMenu(false); }} 
+              <button
+                onClick={() => { navigate('/listing-pribadi'); setShowMobileMenu(false); }}
                 style={navItemStyle(listingPribadiActive)}
               >
                 <i className="bi bi-collection me-2"></i> My Listings
               </button>
             )}
+            <button
+              onClick={() => { navigate('/map'); setShowMobileMenu(false); }}
+              style={navItemStyle(mapActive)}
+            >
+              <i className="bi bi-map me-2"></i> Map
+            </button>
             <div className="my-2 border-top" style={{ borderColor: 'var(--border) !important' }}></div>
             <button 
               onClick={() => { navigate('/profile'); setShowMobileMenu(false); }} 

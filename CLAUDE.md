@@ -40,6 +40,15 @@ Accepts boolean props to control which nav buttons appear: `showDashboardButton`
 - `.glass` and `.glass-card` are custom glassmorphism classes defined in `src/index.css`
 - Bootstrap's `.text-primary` resolves to Bootstrap blue (`#0d6efd`), NOT the app's indigo `var(--primary)`. Always use `style={{ color: 'var(--primary)' }}` for the app's brand color
 - Disabled/readonly inputs must get their background from CSS — browser defaults will flash white otherwise
+- `.glass-card` transition is intentionally limited to `background` and `border-color` only — do NOT change it back to `transition: all`, as that causes an oval rendering artifact on page load due to `backdrop-filter` animating from its initial state
+
+### Skeleton Loading
+All loading states in admin pages use skeleton blocks, not spinners. The keyframe and utility class are global in `src/index.css`:
+```css
+@keyframes skeletonShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.skeleton-block { background: linear-gradient(...); background-size: 200% 100%; animation: skeletonShimmer 2.5s infinite; border-radius: 8px; }
+```
+Use `<div className="skeleton-block" style={{ width, height }} />` for skeleton blocks. Shape them to match the actual content layout.
 
 ### Property Types
 `property_type` can be `"Rumah"`, `"Kavling"`, or `"Apartemen"`. Kavling listings hide LB/KT/KM fields throughout the UI.
@@ -49,6 +58,19 @@ Images are compressed client-side with `browser-image-compression` before upload
 
 ### AI Extract Feature (`src/components/PropertyForm.jsx`)
 Uses Gemini API (`VITE_GEMINI_API_KEY` in `.env`) with model `gemini-2.5-flash` via endpoint `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent`. Parses pasted property descriptions and auto-fills the form.
+
+### Admin Pages & Routing
+All admin routes are in `src/App.jsx` as inline page components. Each page has a persistent 280px sidebar with the same 5 nav items. Routes and their active sidebar button:
+- `/admin` → Buat Listingan (active) — renders `<PropertyForm />`
+- `/confirm-listings` → Listingan Log (active) — renders `<ConfirmListings />`
+- `/total-listings` → Total Listingan (active) — renders `<TotalListings />`
+- `/user-management` → Kelola User (active) — renders `<UserManagement />`
+- `/backup` → Backup (active, pinned at bottom) — renders `<BackupListings />`
+
+When adding a new admin page: add a new route + page component in `App.jsx`, add the "Kelola User"-style button to the sidebar of ALL existing admin page components, and mark the new page's own button as active (primary background, no border).
+
+### User Management (`src/user_page/UserManagement.jsx`)
+Admin-only page at `/user-management`. Displays all users from the `profiles` table (read-only). Shows avatar initials, full name, email, and Admin badge. No password operations — changing passwords requires a Supabase Edge Function with the service role key (not yet implemented).
 
 ### CustomDropdown (`src/components/CustomDropdown.jsx`)
 Reusable dark-themed dropdown with optional `searchable` prop. Used for location fields (Provinsi → Kota → Kecamatan) in both `PropertyForm` and `EditPropertyForm`. Options are fetched from existing listings in Supabase and cascade: selecting a province filters the city list, selecting a city filters the district list. Accepts `options` (string array or `{value, label}[]`), `value`, `onChange`, `placeholder`, `searchable`, `disabled`.
