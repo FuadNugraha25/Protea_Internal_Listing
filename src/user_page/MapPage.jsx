@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { supabase } from '../supabaseClient'
 
-// Module-level cache — persists across re-renders in the same session
 const geocodeCache = new Map()
 
 async function geocodeCity(city, province) {
   const key = `${city}||${province}`
   if (geocodeCache.has(key)) return geocodeCache.get(key)
 
-  // Respect Nominatim rate limit: 1 req/sec
   await new Promise(r => setTimeout(r, 1100))
 
   const q = [city, province, 'Indonesia'].filter(Boolean).join(', ')
@@ -39,8 +38,23 @@ function formatPrice(price) {
   return `Rp ${num.toLocaleString('id-ID')}`
 }
 
-function createMarkerIcon(count) {
-  const size = count > 9 ? 40 : 36
+const pinIcon = L.divIcon({
+  className: '',
+  html: `<div style="
+    width:36px;height:36px;border-radius:50%;
+    background:#6366f1;border:2.5px solid #fff;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:13px;font-family:sans-serif;
+    box-shadow:0 3px 10px rgba(0,0,0,0.5);
+  ">1</div>`,
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+  popupAnchor: [0, -22]
+})
+
+function createClusterIcon(cluster) {
+  const count = cluster.getChildCount()
+  const size = count > 99 ? 44 : count > 9 ? 40 : 36
   return L.divIcon({
     className: '',
     html: `<div style="
@@ -52,12 +66,11 @@ function createMarkerIcon(count) {
     ">${count > 99 ? '99+' : count}</div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
-    popupAnchor: [0, -(size / 2 + 4)]
   })
 }
 
 export default function MapPage() {
-  const [cityGroups, setCityGroups] = useState([])
+  const [markers, setMarkers] = useState([])
   const [loading, setLoading] = useState(true)
   const [geocodingTotal, setGeocodingTotal] = useState(0)
   const [geocodingDone, setGeocodingDone] = useState(0)
@@ -73,7 +86,7 @@ export default function MapPage() {
 
       if (error || !data || cancelled) { setLoading(false); return }
 
-      // Group by city + province
+      // Group by city+province for geocoding (1 API call per city)
       const groups = {}
       data.forEach(l => {
         if (!l.city) return
@@ -87,24 +100,37 @@ export default function MapPage() {
       setGeocodingTotal(groupList.length)
       setGeocodingDone(0)
 
-      // Geocode sequentially, update markers progressively
+      // Geocode each city, then add all its listings as individual markers
       for (let i = 0; i < groupList.length; i++) {
         if (cancelled) break
         const g = groupList[i]
         const coords = await geocodeCity(g.city, g.province)
-        if (!cancelled) {
-          setCityGroups(prev => [...prev, { ...g, coords }])
-          setGeocodingDone(i + 1)
+        if (!cancelled && coords) {
+          // Spread listings from same city with tiny random offsets so they cluster cleanly
+          const newMarkers = g.listings.map(l => ({
+            id: l.id,
+            title: l.title,
+            price: l.price,
+            property_type: l.property_type,
+            transaction_type: l.transaction_type,
+            city: g.city,
+            province: g.province,
+            coords: [
+              coords[0] + (Math.random() - 0.5) * 0.005,
+              coords[1] + (Math.random() - 0.5) * 0.005,
+            ]
+          }))
+          setMarkers(prev => [...prev, ...newMarkers])
         }
+        if (!cancelled) setGeocodingDone(i + 1)
       }
     }
 
-    setCityGroups([])
+    setMarkers([])
     load()
     return () => { cancelled = true }
   }, [])
 
-  const total = cityGroups.reduce((s, g) => s + g.listings.length, 0)
   const isGeocoding = geocodingDone < geocodingTotal && geocodingTotal > 0
 
   return (
@@ -122,7 +148,7 @@ export default function MapPage() {
         {!loading && (
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.5rem 1rem', textAlign: 'center', minWidth: '80px' }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>{total}</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>{markers.length}</div>
               <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Properti</div>
             </div>
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.5rem 1rem', textAlign: 'center', minWidth: '80px' }}>
@@ -133,7 +159,7 @@ export default function MapPage() {
         )}
       </div>
 
-      {/* Map container — flex: 1 + minHeight: 0 to fill remaining space */}
+      {/* Map */}
       <div style={{ flex: 1, minHeight: 0, margin: '0 2rem 2rem', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border)', position: 'relative' }}>
         {loading ? (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface)' }}>
@@ -154,41 +180,29 @@ export default function MapPage() {
               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             />
-            {cityGroups.filter(g => g.coords).map(g => (
-              <Marker
-                key={`${g.city}||${g.province}`}
-                position={g.coords}
-                icon={createMarkerIcon(g.listings.length)}
-              >
-                <Popup minWidth={220} maxWidth={280}>
-                  <div style={{ fontFamily: 'inherit' }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.25rem', color: '#1e293b' }}>
-                      {g.city}
+            <MarkerClusterGroup iconCreateFunction={createClusterIcon} chunkedLoading>
+              {markers.map(m => (
+                <Marker key={m.id} position={m.coords} icon={pinIcon}>
+                  <Popup minWidth={220} maxWidth={280}>
+                    <div style={{ fontFamily: 'inherit' }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.25rem', color: '#1e293b' }}>
+                        {m.title}
+                      </div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                        {m.city}, {m.province}
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                        <span style={{ color: '#64748b' }}>{m.property_type} &bull; {m.transaction_type}</span>
+                        <span style={{ fontWeight: 700, color: '#6366f1' }}>{formatPrice(m.price)}</span>
+                      </div>
                     </div>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.75rem' }}>
-                      {g.province} &bull; {g.listings.length} properti
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '200px', overflowY: 'auto' }}>
-                      {g.listings.map(l => (
-                        <div key={l.id} style={{ padding: '0.5rem', background: '#f8fafc', borderRadius: '8px', fontSize: '0.8rem' }}>
-                          <div style={{ fontWeight: 600, color: '#1e293b', marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {l.title}
-                          </div>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
-                            <span>{l.property_type} &bull; {l.transaction_type}</span>
-                            <span style={{ fontWeight: 600, color: '#6366f1' }}>{formatPrice(l.price)}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+                  </Popup>
+                </Marker>
+              ))}
+            </MarkerClusterGroup>
           </MapContainer>
         )}
 
-        {/* Geocoding progress badge */}
         {isGeocoding && (
           <div style={{
             position: 'absolute', bottom: '1rem', left: '50%', transform: 'translateX(-50%)',
