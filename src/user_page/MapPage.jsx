@@ -1,34 +1,9 @@
 import { useEffect, useState } from 'react'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import MarkerClusterGroup from 'react-leaflet-cluster'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { supabase } from '../supabaseClient'
-
-const geocodeCache = new Map()
-
-async function geocodeCity(city, province) {
-  const key = `${city}||${province}`
-  if (geocodeCache.has(key)) return geocodeCache.get(key)
-
-  await new Promise(r => setTimeout(r, 1100))
-
-  const q = [city, province, 'Indonesia'].filter(Boolean).join(', ')
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`,
-      { headers: { 'User-Agent': 'ProteaRealtyApp/1.0' } }
-    )
-    const data = await res.json()
-    if (data[0]) {
-      const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)]
-      geocodeCache.set(key, coords)
-      return coords
-    }
-  } catch {}
-  geocodeCache.set(key, null)
-  return null
-}
 
 function formatPrice(price) {
   if (!price) return '-'
@@ -52,6 +27,39 @@ const pinIcon = L.divIcon({
   popupAnchor: [0, -22]
 })
 
+function MarkersList({ markers }) {
+  const map = useMap()
+  return (
+    <MarkerClusterGroup iconCreateFunction={createClusterIcon} chunkedLoading>
+      {markers.map(m => (
+        <Marker
+          key={m.id}
+          position={m.coords}
+          icon={pinIcon}
+          eventHandlers={{
+            click: () => map.flyTo(m.coords, Math.max(map.getZoom(), 16), { animate: true, duration: 0.8 }),
+          }}
+        >
+          <Popup minWidth={220} maxWidth={280}>
+            <div style={{ fontFamily: 'inherit' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.25rem', color: '#1e293b' }}>
+                {m.title}
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.5rem' }}>
+                {m.city}, {m.province}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
+                <span style={{ color: '#64748b' }}>{m.property_type} &bull; {m.transaction_type}</span>
+                <span style={{ fontWeight: 700, color: '#6366f1' }}>{formatPrice(m.price)}</span>
+              </div>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </MarkerClusterGroup>
+  )
+}
+
 function createClusterIcon(cluster) {
   const count = cluster.getChildCount()
   const size = count > 99 ? 44 : count > 9 ? 40 : 36
@@ -72,66 +80,40 @@ function createClusterIcon(cluster) {
 export default function MapPage() {
   const [markers, setMarkers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [geocodingTotal, setGeocodingTotal] = useState(0)
-  const [geocodingDone, setGeocodingDone] = useState(0)
+  const [totalListings, setTotalListings] = useState(0)
 
   useEffect(() => {
-    let cancelled = false
-
     async function load() {
       setLoading(true)
       const { data, error } = await supabase
         .from('listings')
-        .select('id, title, price, city, district, province, property_type, transaction_type')
+        .select('id, title, price, city, district, province, property_type, transaction_type, latitude, longitude')
 
-      if (error || !data || cancelled) { setLoading(false); return }
+      if (error || !data) { setLoading(false); return }
 
-      // Group by city+province for geocoding (1 API call per city)
-      const groups = {}
-      data.forEach(l => {
-        if (!l.city) return
-        const key = `${l.city}||${l.province}`
-        if (!groups[key]) groups[key] = { city: l.city, province: l.province, listings: [] }
-        groups[key].listings.push(l)
-      })
+      setTotalListings(data.length)
 
-      const groupList = Object.values(groups)
+      const mapped = data
+        .filter(l => l.latitude != null && l.longitude != null)
+        .map(l => ({
+          id: l.id,
+          title: l.title,
+          price: l.price,
+          property_type: l.property_type,
+          transaction_type: l.transaction_type,
+          city: l.city,
+          province: l.province,
+          coords: [l.latitude, l.longitude],
+        }))
+
+      setMarkers(mapped)
       setLoading(false)
-      setGeocodingTotal(groupList.length)
-      setGeocodingDone(0)
-
-      // Geocode each city, then add all its listings as individual markers
-      for (let i = 0; i < groupList.length; i++) {
-        if (cancelled) break
-        const g = groupList[i]
-        const coords = await geocodeCity(g.city, g.province)
-        if (!cancelled && coords) {
-          // Spread listings from same city with tiny random offsets so they cluster cleanly
-          const newMarkers = g.listings.map(l => ({
-            id: l.id,
-            title: l.title,
-            price: l.price,
-            property_type: l.property_type,
-            transaction_type: l.transaction_type,
-            city: g.city,
-            province: g.province,
-            coords: [
-              coords[0] + (Math.random() - 0.5) * 0.005,
-              coords[1] + (Math.random() - 0.5) * 0.005,
-            ]
-          }))
-          setMarkers(prev => [...prev, ...newMarkers])
-        }
-        if (!cancelled) setGeocodingDone(i + 1)
-      }
     }
 
-    setMarkers([])
     load()
-    return () => { cancelled = true }
   }, [])
 
-  const isGeocoding = geocodingDone < geocodingTotal && geocodingTotal > 0
+  const withoutCoords = totalListings - markers.length
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'var(--background)', paddingTop: '75px', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -139,22 +121,24 @@ export default function MapPage() {
       <div style={{ flexShrink: 0, padding: '1.5rem 2rem 1rem', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-            Peta Properti
+            Property Map
           </h2>
           <p style={{ margin: '0.25rem 0 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-            Sebaran lokasi properti terdaftar
+            Location of all registered properties
           </p>
         </div>
         {!loading && (
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.5rem 1rem', textAlign: 'center', minWidth: '80px' }}>
               <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>{markers.length}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Properti</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Mapped</div>
             </div>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.5rem 1rem', textAlign: 'center', minWidth: '80px' }}>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>{geocodingTotal}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Kota</div>
-            </div>
+            {withoutCoords > 0 && (
+              <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '0.5rem 1rem', textAlign: 'center', minWidth: '80px' }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-secondary)' }}>{withoutCoords}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>No coordinates</div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -180,39 +164,18 @@ export default function MapPage() {
               url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
             />
-            <MarkerClusterGroup iconCreateFunction={createClusterIcon} chunkedLoading>
-              {markers.map(m => (
-                <Marker key={m.id} position={m.coords} icon={pinIcon}>
-                  <Popup minWidth={220} maxWidth={280}>
-                    <div style={{ fontFamily: 'inherit' }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.25rem', color: '#1e293b' }}>
-                        {m.title}
-                      </div>
-                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.5rem' }}>
-                        {m.city}, {m.province}
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-                        <span style={{ color: '#64748b' }}>{m.property_type} &bull; {m.transaction_type}</span>
-                        <span style={{ fontWeight: 700, color: '#6366f1' }}>{formatPrice(m.price)}</span>
-                      </div>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </MarkerClusterGroup>
+            <MarkersList markers={markers} />
           </MapContainer>
         )}
 
-        {isGeocoding && (
+        {!loading && markers.length === 0 && (
           <div style={{
-            position: 'absolute', bottom: '1rem', left: '50%', transform: 'translateX(-50%)',
-            background: 'rgba(15,23,42,0.85)', backdropFilter: 'blur(8px)',
-            border: '1px solid rgba(99,102,241,0.4)',
-            borderRadius: '999px', padding: '0.4rem 1rem',
-            color: '#a5b4fc', fontSize: '0.8rem', fontWeight: 500,
-            zIndex: 1000, whiteSpace: 'nowrap'
+            position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'var(--surface)', flexDirection: 'column', gap: '0.5rem'
           }}>
-            Memuat lokasi… {geocodingDone}/{geocodingTotal}
+            <i className="bi bi-geo-alt" style={{ fontSize: '2.5rem', color: 'var(--text-secondary)' }}></i>
+            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>No properties with coordinates yet.</p>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', margin: 0 }}>Add coordinates when creating or editing a listing.</p>
           </div>
         )}
       </div>

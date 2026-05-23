@@ -26,7 +26,7 @@ const allowedUserId = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-49
 Single shared client exported as `supabase`. URL and anon key are hardcoded directly (not from `.env`).
 
 ### Key Database Tables
-- `listings` — property listings. Key fields: `title`, `description`, `image_urls`, `lt`, `lb`, `kt`, `km`, `city`, `district`, `province`, `price`, `transaction_type`, `property_type`, `owner`, `user_id`
+- `listings` — property listings. Key fields: `title`, `description`, `image_urls`, `lt`, `lb`, `kt`, `km`, `city`, `district`, `province`, `price`, `transaction_type`, `property_type`, `owner`, `user_id`, `latitude`, `longitude`
 - `profiles` — user profiles. Key fields: `id`, `name`, `full_name`, `email`, `is_admin`
 
 ### Profile System (`src/utils/profileUtils.js`)
@@ -40,7 +40,9 @@ Accepts boolean props to control which nav buttons appear: `showDashboardButton`
 - `.glass` and `.glass-card` are custom glassmorphism classes defined in `src/index.css`
 - Bootstrap's `.text-primary` resolves to Bootstrap blue (`#0d6efd`), NOT the app's indigo `var(--primary)`. Always use `style={{ color: 'var(--primary)' }}` for the app's brand color
 - Disabled/readonly inputs must get their background from CSS — browser defaults will flash white otherwise
+- Readonly inputs also need `opacity: 1` explicitly — browsers dim readonly elements by default, which makes text appear dark even with `color: '#ffffff'`
 - `.glass-card` transition is intentionally limited to `background` and `border-color` only — do NOT change it back to `transition: all`, as that causes an oval rendering artifact on page load due to `backdrop-filter` animating from its initial state
+- All UI text must be in **English** — do not use Indonesian for labels, placeholders, headings, or helper text
 
 ### Skeleton Loading
 All loading states in admin pages use skeleton blocks, not spinners. The keyframe and utility class are global in `src/index.css`:
@@ -73,4 +75,16 @@ When adding a new admin page: add a new route + page component in `App.jsx`, add
 Admin-only page at `/user-management`. Displays all users from the `profiles` table (read-only). Shows avatar initials, full name, email, and Admin badge. No password operations — changing passwords requires a Supabase Edge Function with the service role key (not yet implemented).
 
 ### CustomDropdown (`src/components/CustomDropdown.jsx`)
-Reusable dark-themed dropdown with optional `searchable` prop. Used for location fields (Provinsi → Kota → Kecamatan) in both `PropertyForm` and `EditPropertyForm`. Options are fetched from existing listings in Supabase and cascade: selecting a province filters the city list, selecting a city filters the district list. Accepts `options` (string array or `{value, label}[]`), `value`, `onChange`, `placeholder`, `searchable`, `disabled`.
+Reusable dark-themed dropdown with optional `searchable` prop. Used for **all** dropdowns in `PropertyForm` and `EditPropertyForm` — do NOT use native `<select>` elements anywhere in these forms. Accepts `options` (string array or `{value, label}[]`), `value`, `onChange`, `placeholder`, `searchable`, `disabled`.
+
+Dropdowns in use:
+- **Property Owner** — options from `profiles` table as `{value: id, label: name}`, with `searchable`
+- **Property Type** — static options: `['Rumah', 'Kavling', 'Apartemen']`
+- **Transaction Type** — static options: `['Jual', 'Sewa']`
+- **Province → City → District** — cascading, fetched from existing listings in Supabase
+
+### Coordinates (`latitude`, `longitude`)
+Both `PropertyForm` and `EditPropertyForm` have a "Coordinates" section at the bottom. The user pastes a single string in `lat, lng` format (e.g. `-6.976224, 107.634205`) into one input. A regex parses it and populates two readonly display fields (Latitude and Longitude). The parsed values are saved to `listings.latitude` and `listings.longitude` (both `double precision`) on submit. These columns must exist in Supabase — run: `ALTER TABLE listings ADD COLUMN latitude double precision; ALTER TABLE listings ADD COLUMN longitude double precision;`
+
+### Map Page (`src/user_page/MapPage.jsx`)
+Displays listings on a Leaflet map using `react-leaflet` and `react-leaflet-cluster`. Markers are placed using `latitude`/`longitude` directly from the database — **no geocoding**. Listings without coordinates are skipped. The header shows count of mapped properties and count without coordinates. Clicking a single marker `flyTo`s to it at zoom 16. Cluster click zooms in via default `MarkerClusterGroup` behavior. All text on this page is in English.

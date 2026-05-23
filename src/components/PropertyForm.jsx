@@ -24,7 +24,9 @@ const PropertyForm = ({ user }) => {
     has_full_interior_photos: false,
     has_tiktok_video: false,
     has_youtube_video: false,
+    coordinates: '',
   });
+  const [parsedCoords, setParsedCoords] = useState({ lat: null, lng: null });
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imageFileSize, setImageFileSize] = useState(null);
   const [originalFileSize, setOriginalFileSize] = useState(null);
@@ -211,6 +213,15 @@ const PropertyForm = ({ user }) => {
       ...formData,
       [name]: value,
     };
+
+    if (name === 'coordinates') {
+      const match = value.match(/^(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)$/);
+      if (match) {
+        setParsedCoords({ lat: parseFloat(match[1]), lng: parseFloat(match[2]) });
+      } else {
+        setParsedCoords({ lat: null, lng: null });
+      }
+    }
 
     setFormData(updatedForm);
   };
@@ -522,6 +533,8 @@ Property data: ${aiPrompt}`
       lb: convertToNumberOrNull(formData.lb),
       kt: convertToNumberOrNull(formData.kt),
       km: convertToNumberOrNull(formData.km),
+      latitude: parsedCoords.lat,
+      longitude: parsedCoords.lng,
       district: formData.district,
       city: formData.city,
       province: formData.province,
@@ -567,7 +580,9 @@ Property data: ${aiPrompt}`
         has_full_interior_photos: false,
         has_tiktok_video: false,
         has_youtube_video: false,
+        coordinates: '',
       })
+      setParsedCoords({ lat: null, lng: null });
       setUploadedImage(null);
       if (isAdmin) {
         setSelectedOwnerId('');
@@ -748,36 +763,19 @@ Property data: ${aiPrompt}`
               <div className="col-md-6">
                 <label className="form-label">Property Owner</label>
                 {isAdmin ? (
-                  <select
-                    name="owner"
-                    className="form-select"
+                  <CustomDropdown
                     value={selectedOwnerId || ''}
-                    onChange={(e) => {
-                      const selectedId = e.target.value;
-                      setSelectedOwnerId(selectedId);
-                      if (!selectedId) {
-                        setOwnerName('');
-                        return;
-                      }
-                      const selectedUser = allUsers.find((userOption) => userOption.id === selectedId);
+                    onChange={(val) => {
+                      setSelectedOwnerId(val);
+                      if (!val) { setOwnerName(''); return; }
+                      const selectedUser = allUsers.find((u) => u.id === val);
                       setOwnerName(selectedUser?.name || 'Unknown User');
                     }}
+                    options={allUsers.map(u => ({ value: u.id, label: u.name }))}
+                    placeholder={usersLoading ? 'Loading users...' : 'Select Owner'}
                     disabled={usersLoading}
-                    required
-                  >
-                    {usersLoading ? (
-                      <option>Loading users...</option>
-                    ) : (
-                      <>
-                        <option value="">Select Owner</option>
-                        {allUsers.map((userOption) => (
-                          <option key={userOption.id} value={userOption.id}>
-                            {userOption.name}
-                          </option>
-                        ))}
-                      </>
-                    )}
-                  </select>
+                    searchable
+                  />
                 ) : (
                   <input
                     className="form-control"
@@ -791,39 +789,28 @@ Property data: ${aiPrompt}`
 
               <div className="col-md-6">
                 <label className="form-label">Property Type</label>
-                <select
-                  name="property_type"
-                  className="form-select"
+                <CustomDropdown
                   value={formData.property_type}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Type</option>
-                  <option value="Rumah">Rumah</option>
-                  <option value="Kavling">Kavling</option>
-                  <option value="Apartemen">Apartemen</option>
-                </select>
+                  onChange={(val) => setFormData(prev => ({ ...prev, property_type: val }))}
+                  options={['Rumah', 'Kavling', 'Apartemen']}
+                  placeholder="Select Type"
+                />
               </div>
 
               <div className="col-md-6">
                 <label className="form-label">Transaction Type</label>
-                <select
-                  name="transaction_type"
-                  className="form-select"
+                <CustomDropdown
                   value={formData.transaction_type}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Transaction</option>
-                  <option value="Jual">Jual</option>
-                  <option value="Sewa">Sewa</option>
-                </select>
+                  onChange={(val) => setFormData(prev => ({ ...prev, transaction_type: val }))}
+                  options={['Jual', 'Sewa']}
+                  placeholder="Select Transaction"
+                />
               </div>
 
               <div className="col-md-6">
                 <label className="form-label">Price (IDR)</label>
                 <div className="input-group">
-                  <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--border)', paddingRight: '0' }}>Rp</span>
+                  <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--border)' }}>Rp</span>
                   <input
                     name="price"
                     type="text"
@@ -994,6 +981,53 @@ Property data: ${aiPrompt}`
                 </div>
               </div>
 
+              <div className="col-12">
+                <hr className="my-4 opacity-10" />
+                <h6 className="fw-bold mb-4 d-flex align-items-center gap-2" style={{ color: 'var(--primary)' }}>
+                  <i className="bi bi-geo-alt-fill fs-5"></i> Koordinat Lokasi
+                </h6>
+                <div className="row g-3">
+                  <div className="col-12">
+                    <label className="form-label">Paste Koordinat</label>
+                    <input
+                      name="coordinates"
+                      type="text"
+                      className="form-control"
+                      placeholder="Tempel koordinat dari Google Maps di sini..."
+                      value={formData.coordinates}
+                      onChange={handleChange}
+                    />
+                    <small style={{ color: 'var(--text-secondary)' }}>Format: <code>latitude, longitude</code> — salin dari Google Maps</small>
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Latitude</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      readOnly
+                      value={parsedCoords.lat !== null ? parsedCoords.lat : ''}
+                      placeholder="Belum diisi"
+                      style={{ background: 'var(--surface)', color: '#ffffff', opacity: 1 }}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label">Longitude</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      readOnly
+                      value={parsedCoords.lng !== null ? parsedCoords.lng : ''}
+                      placeholder="Belum diisi"
+                      style={{ background: 'var(--surface)', color: '#ffffff', opacity: 1 }}
+                    />
+                  </div>
+                  {formData.coordinates && parsedCoords.lat === null && (
+                    <div className="col-12">
+                      <small className="text-danger">Format tidak valid. Gunakan: <code>-6.976224, 107.634205</code></small>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               <div className="col-12 pt-3">
                 <button

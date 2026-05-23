@@ -38,7 +38,9 @@ const EditPropertyForm = () => {
     has_full_interior_photos: false,
     has_tiktok_video: false,
     has_youtube_video: false,
+    coordinates: '',
   });
+  const [parsedCoords, setParsedCoords] = useState({ lat: null, lng: null });
 
   const allowedUserId = ['ae43f00b-4138-4baa-9bf2-897e5ee7abfe', '4a971da9-0c28-4943-a379-c4a29ca22136'];
 
@@ -132,6 +134,9 @@ const EditPropertyForm = () => {
       }
 
       // Autofill form with existing data
+      const coordsStr = (data.latitude != null && data.longitude != null)
+        ? `${data.latitude}, ${data.longitude}`
+        : '';
       setFormData({
         title: data.title || '',
         description: data.description || '',
@@ -148,7 +153,11 @@ const EditPropertyForm = () => {
         has_full_interior_photos: data.has_full_interior_photos || false,
         has_tiktok_video: data.has_tiktok_video || false,
         has_youtube_video: data.has_youtube_video || false,
+        coordinates: coordsStr,
       });
+      if (data.latitude != null && data.longitude != null) {
+        setParsedCoords({ lat: data.latitude, lng: data.longitude });
+      }
 
       // Set owner name from listing data if it exists, otherwise fetch from profile
       // This will be used to set the default selected value in the dropdown
@@ -225,10 +234,15 @@ const EditPropertyForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'coordinates') {
+      const match = value.match(/^(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)$/);
+      if (match) {
+        setParsedCoords({ lat: parseFloat(match[1]), lng: parseFloat(match[2]) });
+      } else {
+        setParsedCoords({ lat: null, lng: null });
+      }
+    }
   };
 
 
@@ -246,6 +260,8 @@ const EditPropertyForm = () => {
         lb: formData.lb || null,
         kt: formData.kt || null,
         km: formData.km || null,
+        latitude: parsedCoords.lat,
+        longitude: parsedCoords.lng,
         province: formData.province,
         city: formData.city,
         district: formData.district,
@@ -437,7 +453,7 @@ const EditPropertyForm = () => {
                 <div className="col-md-6">
                   <label className="form-label">Price (IDR)</label>
                   <div className="input-group">
-                    <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--border)', paddingRight: '0' }}>Rp</span>
+                    <span className="input-group-text bg-transparent border-end-0 text-muted" style={{ borderColor: 'var(--border)' }}>Rp</span>
                     <input
                       name="price"
                       type="text"
@@ -539,9 +555,56 @@ const EditPropertyForm = () => {
 
 
                 <div className="col-12 mt-5">
+                  <h6 className="fw-bold mb-4 d-flex align-items-center gap-2" style={{ color: 'var(--primary)' }}>
+                    <i className="bi bi-geo-alt-fill fs-5"></i> Koordinat Lokasi
+                  </h6>
+                  <div className="row g-3">
+                    <div className="col-12">
+                      <label className="form-label">Paste Koordinat</label>
+                      <input
+                        name="coordinates"
+                        type="text"
+                        className="form-control"
+                        placeholder="Tempel koordinat dari Google Maps di sini..."
+                        value={formData.coordinates}
+                        onChange={handleChange}
+                      />
+                      <small style={{ color: 'var(--text-secondary)' }}>Format: <code>latitude, longitude</code> — salin dari Google Maps</small>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Latitude</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        readOnly
+                        value={parsedCoords.lat !== null ? parsedCoords.lat : ''}
+                        placeholder="Belum diisi"
+                        style={{ background: 'var(--surface)', color: '#ffffff', opacity: 1 }}
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label">Longitude</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        readOnly
+                        value={parsedCoords.lng !== null ? parsedCoords.lng : ''}
+                        placeholder="Belum diisi"
+                        style={{ background: 'var(--surface)', color: '#ffffff', opacity: 1 }}
+                      />
+                    </div>
+                    {formData.coordinates && parsedCoords.lat === null && (
+                      <div className="col-12">
+                        <small className="text-danger">Format tidak valid. Gunakan: <code>-6.976224, 107.634205</code></small>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="col-12 mt-5">
                   <div className="d-flex gap-3">
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       className="btn btn-primary flex-fill py-3 shadow-lg" 
                       disabled={saving}
                       style={{ 
