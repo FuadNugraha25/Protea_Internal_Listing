@@ -1,12 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { FaBed, FaBath, FaRulerCombined, FaHome } from "react-icons/fa";
 import Navbar from "../components/Navbar";
 import FoundationWrapper from "../components/FoundationWrapper";
-import { Dialog } from 'primereact/dialog';
-import { Button } from 'primereact/button';
-import { Toast } from 'primereact/toast';
 import { getOrCreateProfile } from '../utils/profileUtils';
 
 
@@ -23,7 +20,12 @@ export default function ListingDetails() {
   const [isDeleted, setIsDeleted] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [agentName, setAgentName] = useState("");
-  const toast = useRef(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -112,37 +114,21 @@ export default function ListingDetails() {
       
       if (error) {
         console.error('Error deleting listing:', error);
-        toast.current.show({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to delete listing. Please try again.',
-          life: 3000
-        });
+        showToast('error', 'Failed to delete listing. Please try again.');
         setShowDeleteConfirm(false);
         return;
       }
 
       setIsDeleted(true);
       setShowDeleteConfirm(false);
-      
-      toast.current.show({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Listing deleted successfully!',
-        life: 3000
-      });
-      
+      showToast('success', 'Listing deleted successfully!');
+
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
     } catch (error) {
       console.error('Error during deletion:', error);
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'An error occurred while deleting the listing. Please try again.',
-        life: 3000
-      });
+      showToast('error', 'An error occurred while deleting the listing. Please try again.');
       setShowDeleteConfirm(false);
     }
   };
@@ -169,7 +155,6 @@ export default function ListingDetails() {
           100% { background-position: -200% 0; }
         }
       `}</style>
-      <Toast ref={toast} />
       <Navbar
         title="Listing Details"
         showDashboardButton={true}
@@ -472,30 +457,79 @@ export default function ListingDetails() {
         </div>
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        visible={showDeleteConfirm}
-        onHide={cancelDelete}
-        header="Wait! Are you sure?"
-        modal
-        className="glass-dialog"
-        style={{ width: '90%', maxWidth: '400px' }}
-        footer={
-          <div className="d-flex gap-2 justify-content-end p-3 pt-0">
-            <button className="btn btn-link text-white text-decoration-none px-4" onClick={cancelDelete}>Cancel</button>
-            <button className="btn btn-danger px-4 rounded-3 fw-bold" onClick={confirmDelete}>Yes, Delete</button>
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div
+          onClick={cancelDelete}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 2000,
+            background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '100%', maxWidth: '400px',
+              background: 'var(--surface)', border: '1px solid var(--border)',
+              borderRadius: '20px', padding: '2rem', boxShadow: 'var(--shadow-xl)'
+            }}
+          >
+            <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+              <i className="bi bi-exclamation-octagon" style={{ fontSize: '2.75rem', color: '#ef4444' }}></i>
+            </div>
+            <h5 style={{ color: 'var(--text-primary)', fontWeight: 700, textAlign: 'center', marginBottom: '0.75rem' }}>
+              Are you sure?
+            </h5>
+            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', fontSize: '0.95rem', marginBottom: '1.75rem' }}>
+              This action will permanently remove <strong style={{ color: 'var(--text-primary)' }}>{listing?.title}</strong>. This cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                onClick={cancelDelete}
+                style={{
+                  flex: 1, padding: '0.75rem', borderRadius: '12px',
+                  background: 'transparent', border: '1px solid var(--border)',
+                  color: 'var(--text-secondary)', fontWeight: 600, cursor: 'pointer', fontSize: '0.95rem'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                style={{
+                  flex: 1, padding: '0.75rem', borderRadius: '12px',
+                  background: '#ef4444', border: 'none',
+                  color: '#fff', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem'
+                }}
+              >
+                Yes, Delete
+              </button>
+            </div>
           </div>
-        }
-      >
-        <div className="p-3 text-center">
-          <div className="display-4 text-danger mb-3">
-             <i className="bi bi-exclamation-octagon"></i>
-          </div>
-          <p className="text-secondary" style={{ fontSize: '1.05rem' }}>
-            This action will permanently remove <strong>{listing?.title}</strong>. This cannot be undone.
-          </p>
         </div>
-      </Dialog>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <div style={{
+          position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 3000,
+          background: toast.type === 'success' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+          border: `1px solid ${toast.type === 'success' ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`,
+          borderRadius: '14px', padding: '1rem 1.5rem',
+          display: 'flex', alignItems: 'center', gap: '0.75rem',
+          backdropFilter: 'blur(12px)', boxShadow: 'var(--shadow-xl)',
+          minWidth: '260px', maxWidth: '360px'
+        }}>
+          <i
+            className={`bi ${toast.type === 'success' ? 'bi-check-circle-fill' : 'bi-x-circle-fill'}`}
+            style={{ fontSize: '1.2rem', color: toast.type === 'success' ? '#22c55e' : '#ef4444', flexShrink: 0 }}
+          />
+          <span style={{ color: 'var(--text-primary)', fontSize: '0.9rem', fontWeight: 500 }}>
+            {toast.message}
+          </span>
+        </div>
+      )}
     </>
   );
 }
